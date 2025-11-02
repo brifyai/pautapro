@@ -1,0 +1,759 @@
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './Dashboard.css';
+import { Chart as ChartJS, ArcElement, Tooltip as ChartTooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js';
+import { Pie, Bar } from 'react-chartjs-2';
+import { dashboardService } from '../../services/dashboardService';
+import { campaignService } from '../../services/campaignService';
+import { orderService } from '../../services/orderService';
+import clientScoringService from '../../services/clientScoringService';
+import {
+  Alert,
+  AlertTitle,
+  Box,
+  Chip,
+  Grid,
+  Paper,
+  Typography,
+  IconButton,
+  LinearProgress,
+  Card,
+  CardContent,
+  Tooltip,
+  Fab,
+  Zoom,
+  TextField
+} from '@mui/material';
+import {
+  TrendingUp as TrendingUpIcon,
+  TrendingDown as TrendingDownIcon,
+  Warning as WarningIcon,
+  CheckCircle as CheckCircleIcon,
+  Error as ErrorIcon,
+  Info as InfoIcon,
+  Refresh as RefreshIcon,
+  Timeline as TimelineIcon,
+  People as PeopleIcon,
+  Campaign as CampaignIcon,
+  ShoppingCart as ShoppingCartIcon,
+  AttachMoney as AttachMoneyIcon,
+  Lightbulb as LightbulbIcon,
+  Assistant as AssistantIcon,
+} from '@mui/icons-material';
+import ChatIA from '../../components/chat/ChatIA';
+
+ChartJS.register(ArcElement, ChartTooltip, Legend, CategoryScale, LinearScale, BarElement);
+
+const Dashboard = () => {
+  const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    agencias: 0,
+    clientes: 0,
+    campanas: 0,
+    medios: 0,
+    ordenesActivas: 0,
+    campañasPendientes: 0,
+    presupuestoTotal: 0,
+    crecimientoMensual: 0
+  });
+  const [pieData, setPieData] = useState({
+    labels: ['Cargando...'],
+    datasets: [{
+      data: [100],
+      backgroundColor: ['#cbd5e1'],
+      borderWidth: 0,
+    }]
+  });
+  const [barData, setBarData] = useState({
+    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+    datasets: [{
+      label: 'Campañas',
+      data: [0, 0, 0, 0, 0, 0],
+      backgroundColor: '#3b82f6',
+      borderWidth: 0,
+    }]
+  });
+  const [recentClients, setRecentClients] = useState([]);
+  const [recentMessages, setRecentMessages] = useState([]);
+  const [alerts, setAlerts] = useState([]);
+  const [kpiData, setKpiData] = useState({
+    avgCampaignDuration: 0,
+    clientRetentionRate: 0,
+    orderCompletionRate: 0,
+    topPerformingMedium: ''
+  });
+  const [loading, setLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState(new Date());
+
+  const pieOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'right',
+        labels: {
+          usePointStyle: true,
+          pointStyle: 'circle',
+          padding: 8,
+          font: {
+            size: 12
+          },
+          boxWidth: 12,
+          boxHeight: 12
+        }
+      },
+      tooltip: {
+        enabled: true,
+        backgroundColor: 'rgba(0,0,0,0.9)',
+        titleColor: '#667eea',
+        bodyColor: 'white',
+        cornerRadius: 12,
+        displayColors: true,
+        titleFont: {
+          size: 16,
+          weight: 'bold'
+        },
+        bodyFont: {
+          size: 14
+        },
+        padding: 12,
+        callbacks: {
+          title: function(context) {
+            return context[0].label;
+          },
+          label: function(context) {
+            const value = context.parsed;
+            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+            const percentage = ((value / total) * 100).toFixed(1);
+            return `Valor: ${value.toLocaleString()} (${percentage}%)`;
+          }
+        }
+      }
+    },
+    layout: {
+      padding: {
+        left: 2,
+        right: 2,
+        top: 2,
+        bottom: 2
+      }
+    }
+  };
+
+  const barOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: {
+          display: true,
+          drawBorder: false
+        }
+      },
+      x: {
+        grid: {
+          display: false
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    loadDashboardData();
+
+    // Actualización automática cada 5 minutos
+    const interval = setInterval(loadDashboardData, 300000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Memoizar datos para evitar re-renders innecesarios
+  const memoizedStats = useMemo(() => stats, [stats]);
+  const memoizedKpiData = useMemo(() => kpiData, [kpiData]);
+  const memoizedPieData = useMemo(() => pieData, [pieData]);
+  const memoizedBarData = useMemo(() => barData, [barData]);
+
+  // Lazy loading para componentes pesados (si fuera necesario)
+  // const PieChart = lazy(() => import('react-chartjs-2').then(module => ({ default: module.Pie })));
+  // const BarChart = lazy(() => import('react-chartjs-2').then(module => ({ default: module.Bar })));
+
+  useEffect(() => {
+    // Generar alertas automáticas basadas en los datos
+    generateAutomaticAlerts();
+  }, [stats]);
+
+  const loadDashboardData = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      // Cargar estadísticas básicas
+      const statsData = await dashboardService.getDashboardStats();
+
+      // Cargar estadísticas adicionales
+      const [campaignStats, orderStats, scoringStats, monthlyData] = await Promise.all([
+        campaignService.getCampaignStats(),
+        orderService.getOrderStats(),
+        clientScoringService.getScoringStats(),
+        dashboardService.getMonthlyCampaignData()
+      ]);
+
+      // Combinar todas las estadísticas
+      const enhancedStats = {
+        ...statsData,
+        ordenesActivas: orderStats.inProductionOrders || 0,
+        campañasPendientes: campaignStats.revision + campaignStats.borrador || 0,
+        presupuestoTotal: await dashboardService.getTotalBudget(),
+        crecimientoMensual: await dashboardService.getMonthlyGrowth()
+      };
+
+      setStats(enhancedStats);
+
+      // Cargar datos del gráfico de clientes
+      const chartData = await dashboardService.getClientDistribution();
+      setPieData(chartData);
+
+      // Cargar datos del gráfico de barras (mensual)
+      setBarData(monthlyData);
+
+      // Cargar clientes recientes
+      const clients = await dashboardService.getRecentClients();
+      setRecentClients(clients);
+
+      // Cargar mensajes recientes
+      const messages = await dashboardService.getRecentMessages();
+      setRecentMessages(messages);
+
+      // Cargar KPIs avanzados
+      const kpiStats = await Promise.all([
+        dashboardService.getAvgCampaignDuration(),
+        clientScoringService.getClientRetentionRate(),
+        orderService.getCompletionRate(),
+        dashboardService.getTopPerformingMedium()
+      ]);
+
+      setKpiData({
+        avgCampaignDuration: kpiStats[0] || 0,
+        clientRetentionRate: kpiStats[1] || 0,
+        orderCompletionRate: kpiStats[2] || 0,
+        topPerformingMedium: kpiStats[3] || 'N/A'
+      });
+
+      setLastUpdate(new Date());
+
+    } catch (error) {
+      console.error('Error cargando datos del dashboard:', error);
+      // No mostrar alertas de error generales, solo log en consola
+      // Los servicios individuales ya manejan sus propios errores con datos de ejemplo
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const generateAutomaticAlerts = () => {
+    const newAlerts = [];
+
+    // Alertas de campañas pendientes
+    if (stats.campañasPendientes > 5) {
+      newAlerts.push({
+        id: Date.now() + 1,
+        type: 'warning',
+        title: 'Campañas pendientes',
+        message: `Hay ${stats.campañasPendientes} campañas esperando aprobación`,
+        timestamp: new Date()
+      });
+    }
+
+    // Alertas de órdenes en producción
+    if (stats.ordenesActivas > 10) {
+      newAlerts.push({
+        id: Date.now() + 2,
+        type: 'info',
+        title: 'Alta actividad',
+        message: `Hay ${stats.ordenesActivas} órdenes en producción`,
+        timestamp: new Date()
+      });
+    }
+
+    // Alertas de crecimiento
+    if (stats.crecimientoMensual < 0) {
+      newAlerts.push({
+        id: Date.now() + 3,
+        type: 'error',
+        title: 'Crecimiento negativo',
+        message: `El crecimiento mensual es de ${stats.crecimientoMensual}%`,
+        timestamp: new Date()
+      });
+    }
+
+    // Alertas de KPIs
+    if (kpiData.orderCompletionRate < 80) {
+      newAlerts.push({
+        id: Date.now() + 4,
+        type: 'warning',
+        title: 'Tasa de completación baja',
+        message: `La tasa de completación de órdenes es del ${kpiData.orderCompletionRate}%`,
+        timestamp: new Date()
+      });
+    }
+
+    setAlerts(newAlerts.slice(0, 3)); // Máximo 3 alertas visibles
+  };
+
+  const getTrendIcon = (value) => {
+    if (value > 0) return <TrendingUpIcon sx={{ color: 'green', fontSize: 16 }} />;
+    if (value < 0) return <TrendingDownIcon sx={{ color: 'red', fontSize: 16 }} />;
+    return null;
+  };
+
+  const getAlertIcon = (type) => {
+    switch (type) {
+      case 'error': return <ErrorIcon />;
+      case 'warning': return <WarningIcon />;
+      case 'success': return <CheckCircleIcon />;
+      default: return <InfoIcon />;
+    }
+  };
+
+
+  return (
+    <div className="dashboard animate-fade-in">
+      {/* Header con última actualización */}
+      <div className="modern-header animate-slide-down">
+        <div className="modern-title">
+          📊 DASHBOARD GENERAL
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+              Última actualización:
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'white', fontWeight: 600 }}>
+              {lastUpdate.toLocaleTimeString()}
+            </Typography>
+          </Box>
+          <Tooltip title="Actualizar datos">
+            <IconButton
+              onClick={loadDashboardData}
+              size="small"
+              className="modern-btn-outline"
+              sx={{ borderRadius: '50%' }}
+            >
+              <RefreshIcon />
+            </IconButton>
+          </Tooltip>
+        </div>
+      </div>
+
+
+      {/* Grid de estadísticas mejoradas */}
+      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 3 }}>
+        <Grid item xs={12} sm={6} md={3} className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
+          <Card className="modern-card" sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}>
+                <Box sx={{ flex: 1 }}>
+                  <Typography color="textSecondary" gutterBottom variant="overline" className="text-gradient">
+                    👥 Clientes
+                  </Typography>
+                  <Typography variant="h4" component="div" className="text-gradient" sx={{ fontWeight: 700 }}>
+                    {loading ? '...' : stats.clientes.toLocaleString()}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                    {getTrendIcon(stats.crecimientoMensual)}
+                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      {stats.crecimientoMensual?.toFixed(1)}% este mes
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box sx={{
+                  width: 60,
+                  height: 60,
+                  borderRadius: '50%',
+                  background: 'var(--gradient-primary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 8px 16px rgba(102, 126, 234, 0.3)',
+                  flexShrink: 0
+                }}>
+                  <PeopleIcon sx={{ fontSize: 32, color: 'white' }} className="icon-hover animate-pulse" />
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3} className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <Card className="modern-card" sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}>
+                <Box sx={{ flex: 1 }}>
+                  <Typography color="textSecondary" gutterBottom variant="overline" className="text-gradient">
+                    🎯 Campañas
+                  </Typography>
+                  <Typography variant="h4" component="div" className="text-gradient" sx={{ fontWeight: 700 }}>
+                    {loading ? '...' : stats.campanas.toLocaleString()}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                    <Chip
+                      label={`${stats.campañasPendientes} pendientes`}
+                      size="small"
+                      color={stats.campañasPendientes > 5 ? 'warning' : 'success'}
+                      className="animate-pulse"
+                      sx={{
+                        background: stats.campañasPendientes > 5 ? 'var(--gradient-warning)' : 'var(--gradient-success)',
+                        color: 'white',
+                        fontWeight: 600
+                      }}
+                    />
+                  </Box>
+                </Box>
+                <Box sx={{
+                  width: 60,
+                  height: 60,
+                  borderRadius: '50%',
+                  background: 'var(--gradient-secondary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 8px 16px rgba(247, 107, 138, 0.3)',
+                  flexShrink: 0
+                }}>
+                  <CampaignIcon sx={{ fontSize: 32, color: 'white' }} className="icon-hover animate-pulse" />
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3} className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
+          <Card className="modern-card" sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}>
+                <Box sx={{ flex: 1 }}>
+                  <Typography color="textSecondary" gutterBottom variant="overline" className="text-gradient">
+                    📦 Órdenes Activas
+                  </Typography>
+                  <Typography variant="h4" component="div" className="text-gradient" sx={{ fontWeight: 700 }}>
+                    {loading ? '...' : stats.ordenesActivas.toLocaleString()}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      Completación: {kpiData.orderCompletionRate}%
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box sx={{
+                  width: 60,
+                  height: 60,
+                  borderRadius: '50%',
+                  background: 'var(--gradient-success)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 8px 16px rgba(79, 172, 254, 0.3)',
+                  flexShrink: 0
+                }}>
+                  <ShoppingCartIcon sx={{ fontSize: 32, color: 'white' }} className="icon-hover animate-pulse" />
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3} className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
+          <Card className="modern-card" sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}>
+                <Box sx={{ flex: 1 }}>
+                  <Typography color="textSecondary" gutterBottom variant="overline" className="text-gradient">
+                    💰 Presupuesto Total
+                  </Typography>
+                  <Typography variant="h4" component="div" className="text-gradient" sx={{ fontWeight: 700 }}>
+                    {loading ? '...' : `$${(stats.presupuestoTotal / 1000000).toFixed(1)}M`}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      Duración promedio: {kpiData.avgCampaignDuration} días
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box sx={{
+                  width: 60,
+                  height: 60,
+                  borderRadius: '50%',
+                  background: 'var(--gradient-warning)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 8px 16px rgba(250, 112, 154, 0.3)',
+                  flexShrink: 0
+                }}>
+                  <AttachMoneyIcon sx={{ fontSize: 32, color: 'white' }} className="icon-hover animate-pulse" />
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Grid de gráficos y contenido */}
+      <Grid container spacing={{ xs: 2, sm: 3 }}>
+        {/* Gráfico de distribución de clientes */}
+        <Grid item xs={12} md={6} className="animate-slide-up" style={{ animationDelay: '0.5s' }}>
+          <Card className="modern-card" sx={{ height: 'auto', maxHeight: { xs: 350, sm: 400, md: 450 } }}>
+            <CardContent sx={{ p: 2 }}>
+              <Typography variant="h6" gutterBottom className="text-gradient" sx={{ fontWeight: 600, mb: 2, fontSize: '1.1rem' }}>
+                📊 Distribución de Clientes por Inversión
+              </Typography>
+              <Box sx={{ height: { xs: 250, sm: 300, md: 330 }, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {loading ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                    <div className="modern-loading"></div>
+                  </Box>
+                ) : (
+                  <Box sx={{ width: '100%', height: '100%', maxWidth: '380px', maxHeight: '380px' }}>
+                    <Pie data={pieData} options={pieOptions} />
+                  </Box>
+                )}
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Gráfico de campañas mensuales */}
+        <Grid item xs={12} md={6} className="animate-slide-up" style={{ animationDelay: '0.6s' }}>
+          <Card className="modern-card" sx={{ height: 'auto', maxHeight: { xs: 350, sm: 400, md: 450 } }}>
+            <CardContent sx={{ p: 2 }}>
+              <Typography variant="h6" gutterBottom className="text-gradient" sx={{ fontWeight: 600, mb: 2, fontSize: '1.1rem' }}>
+                📈 Campañas por Mes (Últimos 6 meses)
+              </Typography>
+              <Box sx={{ height: { xs: 250, sm: 300, md: 330 }, position: 'relative' }}>
+                {loading ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                    <div className="modern-loading"></div>
+                  </Box>
+                ) : (
+                  <Bar data={barData} options={barOptions} />
+                )}
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+
+        {/* Cuatro cajas del mismo tamaño en cuadrícula 2x2 */}
+        <Grid item xs={12} sm={6} className="animate-slide-up" style={{ animationDelay: '0.7s' }}>
+          <Card className="modern-card" sx={{ height: '100%', minHeight: 400, display: 'flex', flexDirection: 'column' }}>
+            <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <Typography variant="h6" gutterBottom className="text-gradient" sx={{ fontWeight: 600, mb: 3 }}>
+                👥 Clientes Recientes
+              </Typography>
+              <Box sx={{ flex: 1, overflow: 'auto', '&::-webkit-scrollbar': { width: '6px' }, '&::-webkit-scrollbar-track': { background: 'rgba(0,0,0,0.05)' }, '&::-webkit-scrollbar-thumb': { background: 'var(--gradient-primary)', borderRadius: '3px' } }}>
+                {loading ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                    <div className="modern-loading"></div>
+                  </Box>
+                ) : recentClients.length > 0 ? (
+                  recentClients.map((client, index) => (
+                    <Box key={index} sx={{ py: 2, px: 1, borderRadius: 2, mb: 1, transition: 'all 0.3s ease', '&:hover': { background: 'rgba(102, 126, 234, 0.05)' } }} className="animate-slide-up" style={{ animationDelay: `${0.8 + index * 0.1}s` }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Box sx={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--gradient-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <PeopleIcon sx={{ fontSize: 20, color: 'white' }} />
+                        </Box>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="body2" fontWeight="600" sx={{ color: '#374151' }}>
+                            {client.name}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                            📍 {client.address}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Box>
+                  ))
+                ) : (
+                  <Box sx={{ textAlign: 'center', py: 4 }}>
+                    <Box sx={{ width: 60, height: 60, borderRadius: '50%', background: 'rgba(203, 213, 225, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 2 }}>
+                      <PeopleIcon sx={{ fontSize: 30, color: '#cbd5e1' }} />
+                    </Box>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      No hay clientes recientes
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* KPIs Avanzados */}
+        <Grid item xs={12} sm={6} className="animate-slide-up" style={{ animationDelay: '0.8s' }}>
+          <Card className="modern-card" sx={{ height: '100%', minHeight: 400, display: 'flex', flexDirection: 'column' }}>
+            <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <Typography variant="h6" gutterBottom className="text-gradient" sx={{ fontWeight: 600, mb: 3 }}>
+                🎯 Indicadores Clave de Rendimiento
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      👥 Tasa de Retención de Clientes
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--gradient-success)' }}>
+                      {kpiData.clientRetentionRate}%
+                    </Typography>
+                  </Box>
+                  <LinearProgress
+                    variant="determinate"
+                    value={kpiData.clientRetentionRate}
+                    sx={{
+                      height: 8,
+                      borderRadius: 4,
+                      backgroundColor: 'rgba(79, 172, 254, 0.1)',
+                      '& .MuiLinearProgress-bar': {
+                        background: 'var(--gradient-success)',
+                        borderRadius: 4
+                      }
+                    }}
+                  />
+                </Box>
+
+                <Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      📦 Tasa de Completación de Órdenes
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: kpiData.orderCompletionRate > 80 ? 'var(--gradient-success)' : 'var(--gradient-warning)' }}>
+                      {kpiData.orderCompletionRate}%
+                    </Typography>
+                  </Box>
+                  <LinearProgress
+                    variant="determinate"
+                    value={kpiData.orderCompletionRate}
+                    sx={{
+                      height: 8,
+                      borderRadius: 4,
+                      backgroundColor: 'rgba(250, 112, 154, 0.1)',
+                      '& .MuiLinearProgress-bar': {
+                        background: kpiData.orderCompletionRate > 80 ? 'var(--gradient-success)' : 'var(--gradient-warning)',
+                        borderRadius: 4
+                      }
+                    }}
+                  />
+                </Box>
+
+                <Box sx={{ p: 2, background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)', borderRadius: 2 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500, mb: 1 }}>
+                    🏆 Medio con Mejor Rendimiento
+                  </Typography>
+                  <Typography variant="h6" className="text-gradient" sx={{ fontWeight: 700 }}>
+                    {kpiData.topPerformingMedium}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ p: 2, background: 'linear-gradient(135deg, rgba(247, 107, 138, 0.1) 0%, rgba(250, 112, 154, 0.1) 100%)', borderRadius: 2 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500, mb: 1 }}>
+                    ⏱️ Duración Promedio de Campañas
+                  </Typography>
+                  <Typography variant="h6" className="text-gradient" sx={{ fontWeight: 700 }}>
+                    {kpiData.avgCampaignDuration} días
+                  </Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Chat IA Asistente */}
+        <Grid item xs={12} sm={6} className="animate-slide-up" style={{ animationDelay: '0.9s' }}>
+          <Card className="modern-card" sx={{ height: '100%', minHeight: 400, display: 'flex', flexDirection: 'column' }}>
+            <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <ChatIA userRole="gerente" />
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Mensajes recientes */}
+        <Grid item xs={12} sm={6} className="animate-slide-up" style={{ animationDelay: '1.0s' }}>
+          <Card className="modern-card" sx={{ height: '100%', minHeight: 400, display: 'flex', flexDirection: 'column' }}>
+            <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <Typography variant="h6" gutterBottom className="text-gradient" sx={{ fontWeight: 600, mb: 3 }}>
+                📋 Actividad Reciente
+              </Typography>
+              <Box sx={{ flex: 1, overflow: 'auto', '&::-webkit-scrollbar': { width: '6px' }, '&::-webkit-scrollbar-track': { background: 'rgba(0,0,0,0.05)' }, '&::-webkit-scrollbar-thumb': { background: 'var(--gradient-primary)', borderRadius: '3px' } }}>
+                {loading ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                    <div className="modern-loading"></div>
+                  </Box>
+                ) : recentMessages.length > 0 ? (
+                  recentMessages.map((message, index) => (
+                    <Box key={index} sx={{ py: 2, px: 1, borderRadius: 2, mb: 1, transition: 'all 0.3s ease', '&:hover': { background: 'rgba(102, 126, 234, 0.05)' } }} className="animate-slide-up" style={{ animationDelay: `${1.1 + index * 0.1}s` }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Box sx={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--gradient-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <TimelineIcon sx={{ fontSize: 20, color: 'white' }} />
+                        </Box>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="body2" fontWeight="600" sx={{ color: '#374151' }}>
+                            {message.title}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                            📅 {message.date}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Box>
+                  ))
+                ) : (
+                  <Box sx={{ textAlign: 'center', py: 4 }}>
+                    <Box sx={{ width: 60, height: 60, borderRadius: '50%', background: 'rgba(203, 213, 225, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 2 }}>
+                      <TimelineIcon sx={{ fontSize: 30, color: '#cbd5e1' }} />
+                    </Box>
+                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      No hay actividad reciente
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Botón flotante del Asistente */}
+      <Tooltip title="🤖 Asistente Inteligente - Guía paso a paso" placement="left">
+        <Fab
+          color="primary"
+          aria-label="asistente"
+          className="animate-float"
+          sx={{
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            width: 64,
+            height: 64,
+            background: 'var(--gradient-primary)',
+            boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
+            border: '2px solid rgba(255,255,255,0.2)',
+            '&:hover': {
+              background: 'var(--gradient-secondary)',
+              transform: 'scale(1.1)',
+              boxShadow: '0 12px 40px rgba(247, 107, 138, 0.4)',
+            },
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
+          onClick={() => navigate('/ordenes/crear')}
+        >
+          <AssistantIcon sx={{ fontSize: 28 }} />
+        </Fab>
+      </Tooltip>
+    </div>
+  );
+};
+
+export default Dashboard;

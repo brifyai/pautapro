@@ -1,0 +1,176 @@
+<svg width="800" height="240" viewBox="0 0 800 240" xmlns="http://www.w3.org/2000/svg">
+  <!-- Definiciones de gradientes y efectos de alta calidad -->
+  <defs>
+    <!-- Gradiente principal ultra premium -->
+    <linearGradient id="ultraBlueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3a8a;stop-opacity:1" />
+      <stop offset="20%" style="stop-color:#1e40af;stop-opacity:1" />
+      <stop offset="40%" style="stop-color:#2563eb;stop-opacity:1" />
+      <stop offset="60%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="80%" style="stop-color:#60a5fa;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#93c5fd;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Gradiente de fondo -->
+    <radialGradient id="bgGradient">
+      <stop offset="0%" style="stop-color:#f0f9ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:1" />
+    </radialGradient>
+    
+    <!-- Filtro de sombra profesional -->
+    <filter id="proShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+      <feOffset dx="0" dy="6" result="offsetblur"/>
+      <feFlood flood-color="#1e40af" flood-opacity="0.3"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Filtro de brillo metálico -->
+    <filter id="metallicShine" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" result="blur" stdDeviation="3"/>
+      <feSpecularLighting result="specOut" in="blur" specularConstant="4" specularExponent="30" lighting-color="white">
+        <fePointLight x="-50" y="30" z="200"/>
+      </feSpecularLighting>
+      <feComposite in="specOut" in2="SourceAlpha" operator="in" result="specOut2"/>
+      <feComposite in="SourceGraphic" in2="specOut2" operator="arithmetic" k1="0" k2="1" k3="1" k4="0"/>
+    </filter>
+    
+    <!-- Patrón de textura sutil -->
+    <pattern id="subtleTexture" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="0.5" fill="#3b82f6" opacity="0.05"/>
+      <circle cx="3" cy="3" r="0.5" fill="#2563eb" opacity="0.05"/>
+    </pattern>
+  </defs>
+  
+  <!-- Fondo premium -->
+  <rect width="800" height="240" rx="20" fill="url(#bgGradient)"/>
+  <rect width="800" height="240" rx="20" fill="url(#subtleTexture)"/>
+  
+  <!-- Marco elegante -->
+  <rect x="4" y="4" width="792" height="232" rx="16" fill="none" stroke="url(#ultraBlueGradient)" stroke-width="2" opacity="0.3"/>
+  
+  <!-- Contenedor principal del logo -->
+  <g transform="translate(60, 50)">
+    <!-- Círculos de fondo con múltiples capas -->
+    <circle cx="70" cy="70" r="64" fill="url(#ultraBlueGradient)" opacity="0.1"/>
+    <circle cx="70" cy="70" r="56" fill="url(#ultraBlueGradient)" opacity="0.15"/>
+    <circle cx="70" cy="70" r="48" fill="url(#ultraBlueGradient)" opacity="0.2"/>
+    <circle cx="70" cy="70" r="40" fill="url(#ultraBlueGradient)" opacity="0.25"/>
+    <circle cx="70" cy="70" r="32" fill="url(#ultraBlueGradient)" opacity="0.3"/>
+    
+    <!-- Letra P ultra detallada -->
+    <g filter="url(#proShadow)">
+      <!-- Sombra múltiple capas -->
+      <path d="M 36 24 L 36 116 L 60 116 L 60 84 L 84 84 C 96 84 104 76 104 60 C 104 44 96 24 84 24 Z M 60 44 L 72 44 C 77 44 80 47 80 52 C 80 57 77 60 72 60 L 60 60 Z" 
+            fill="#1e3a8a" 
+            opacity="0.3" 
+            transform="translate(4, 6)"/>
+      
+      <!-- Letra principal con efecto metálico -->
+      <path d="M 36 24 L 36 116 L 60 116 L 60 84 L 84 84 C 96 84 104 76 104 60 C 104 44 96 24 84 24 Z M 60 44 L 72 44 C 77 44 80 47 80 52 C 80 57 77 60 72 60 L 60 60 Z" 
+            fill="url(#ultraBlueGradient)" 
+            filter="url(#metallicShine)"/>
+      
+      <!-- Detalle de luz -->
+      <path d="M 40 28 L 40 48 L 56 48 C 64 48 68 44 68 36 C 68 28 64 28 56 28 Z" 
+            fill="#ffffff" 
+            opacity="0.4"/>
+      
+      <!-- Contorno fino -->
+      <path d="M 36 24 L 36 116 L 60 116 L 60 84 L 84 84 C 96 84 104 76 104 60 C 104 44 96 24 84 24 Z M 60 44 L 72 44 C 77 44 80 47 80 52 C 80 57 77 60 72 60 L 60 60 Z" 
+            fill="none" 
+            stroke="#ffffff" 
+            stroke-width="1" 
+            opacity="0.5"/>
+    </g>
+    
+    <!-- Elementos de media ultra detallados -->
+    <g filter="url(#proShadow)">
+      <!-- Barra 1 -->
+      <rect x="120" y="40" width="12" height="60" rx="6" fill="url(#ultraBlueGradient)" opacity="0.9"/>
+      <rect x="120" y="40" width="12" height="16" rx="6" fill="#ffffff" opacity="0.5"/>
+      <rect x="120" y="40" width="12" height="8" rx="4" fill="#ffffff" opacity="0.7"/>
+      
+      <!-- Barra 2 -->
+      <rect x="140" y="28" width="12" height="84" rx="6" fill="url(#ultraBlueGradient)" opacity="0.85"/>
+      <rect x="140" y="28" width="12" height="20" rx="6" fill="#ffffff" opacity="0.4"/>
+      <rect x="140" y="28" width="12" height="10" rx="5" fill="#ffffff" opacity="0.6"/>
+      
+      <!-- Barra 3 -->
+      <rect x="160" y="48" width="12" height="44" rx="6" fill="url(#ultraBlueGradient)" opacity="0.8"/>
+      <rect x="160" y="48" width="12" height="12" rx="6" fill="#ffffff" opacity="0.6"/>
+      <rect x="160" y="48" width="12" height="6" rx="3" fill="#ffffff" opacity="0.8"/>
+      
+      <!-- Barra 4 -->
+      <rect x="180" y="36" width="12" height="68" rx="6" fill="url(#ultraBlueGradient)" opacity="0.75"/>
+      <rect x="180" y="36" width="12" height="16" rx="6" fill="#ffffff" opacity="0.5"/>
+      <rect x="180" y="36" width="12" height="8" rx="4" fill="#ffffff" opacity="0.7"/>
+      
+      <!-- Barra 5 -->
+      <rect x="200" y="44" width="12" height="52" rx="6" fill="url(#ultraBlueGradient)" opacity="0.7"/>
+      <rect x="200" y="44" width="12" height="12" rx="6" fill="#ffffff" opacity="0.6"/>
+      <rect x="200" y="44" width="12" height="6" rx="3" fill="#ffffff" opacity="0.8"/>
+      
+      <!-- Barra 6 -->
+      <rect x="220" y="32" width="12" height="76" rx="6" fill="url(#ultraBlueGradient)" opacity="0.65"/>
+      <rect x="220" y="32" width="12" height="18" rx="6" fill="#ffffff" opacity="0.5"/>
+      <rect x="220" y="32" width="12" height="9" rx="4" fill="#ffffff" opacity="0.7"/>
+    </g>
+    
+    <!-- Elementos decorativos -->
+    <g opacity="0.8">
+      <circle cx="250" cy="50" r="4" fill="url(#ultraBlueGradient)"/>
+      <circle cx="260" cy="60" r="3" fill="#60a5fa"/>
+      <circle cx="254" cy="70" r="2" fill="#93c5fd"/>
+      <circle cx="265" cy="55" r="1.5" fill="#dbeafe"/>
+      <circle cx="248" cy="65" r="1" fill="#ffffff" opacity="0.8"/>
+    </g>
+  </g>
+  
+  <!-- Texto "PautaPro" ultra premium -->
+  <g transform="translate(320, 90)">
+    <!-- Sombra de texto -->
+    <text x="4" y="4" font-family="'Segoe UI', 'Trebuchet MS', Arial, sans-serif" font-size="84" font-weight="300" fill="#1e3a8a" opacity="0.2">Pauta</text>
+    <text x="204" y="4" font-family="'Segoe UI', 'Trebuchet MS', Arial, sans-serif" font-size="84" font-weight="300" fill="#1e3a8a" opacity="0.2">Pro</text>
+    
+    <!-- Texto principal -->
+    <text font-family="'Segoe UI', 'Trebuchet MS', Arial, sans-serif" font-size="84" font-weight="300" fill="url(#ultraBlueGradient)" filter="url(#proShadow)">Pauta</text>
+    <text x="200" font-family="'Segoe UI', 'Trebuchet MS', Arial, sans-serif" font-size="84" font-weight="300" fill="url(#ultraBlueGradient)" filter="url(#proShadow)">Pro</text>
+    
+    <!-- Detalle de luz -->
+    <text font-family="'Segoe UI', 'Trebuchet MS', Arial, sans-serif" font-size="84" font-weight="300" fill="#ffffff" opacity="0.15">Pauta</text>
+    <text x="200" font-family="'Segoe UI', 'Trebuchet MS', Arial, sans-serif" font-size="84" font-weight="300" fill="#ffffff" opacity="0.15">Pro</text>
+    
+    <!-- Contorno sutil -->
+    <text font-family="'Segoe UI', 'Trebuchet MS', Arial, sans-serif" font-size="84" font-weight="300" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.3">Pauta</text>
+    <text x="200" font-family="'Segoe UI', 'Trebuchet MS', Arial, sans-serif" font-size="84" font-weight="300" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.3">Pro</text>
+  </g>
+  
+  <!-- Tagline ultra refinado -->
+  <text x="320" y="150" font-family="'Segoe UI', Arial, sans-serif" font-size="28" font-weight="400" fill="#64748b" letter-spacing="2" opacity="0.9">Publicidad Inteligente</text>
+  
+  <!-- Línea decorativa premium -->
+  <line x1="320" y1="170" x2="560" y2="170" stroke="url(#ultraBlueGradient)" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+  <line x1="320" y1="170" x2="560" y2="170" stroke="#ffffff" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+  
+  <!-- Elementos decorativos adicionales -->
+  <g transform="translate(640, 70)" opacity="0.9">
+    <circle cx="0" cy="0" r="8" fill="url(#ultraBlueGradient)" filter="url(#metallicShine)"/>
+    <circle cx="30" cy="10" r="6" fill="#60a5fa" opacity="0.9"/>
+    <circle cx="16" cy="24" r="4" fill="#93c5fd"/>
+    <circle cx="40" cy="30" r="3" fill="#dbeafe"/>
+    <circle cx="8" cy="32" r="2" fill="#ffffff" opacity="0.8"/>
+    <circle cx="35" cy="5" r="1.5" fill="#ffffff" opacity="0.6"/>
+  </g>
+  
+  <!-- Firma o sello de calidad -->
+  <g transform="translate(680, 180)" opacity="0.6">
+    <circle cx="0" cy="0" r="15" fill="none" stroke="url(#ultraBlueGradient)" stroke-width="1"/>
+    <path d="M -8,-8 L 8,8 M -8,8 L 8,-8" stroke="url(#ultraBlueGradient)" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="0" cy="0" r="3" fill="url(#ultraBlueGradient)"/>
+  </g>
+</svg>

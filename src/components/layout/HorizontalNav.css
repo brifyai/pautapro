@@ -1,0 +1,287 @@
+/* Horizontal Navigation - Modern Design Standards */
+
+.horizontal-nav {
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0;
+  position: sticky;
+  top: 72px;
+  z-index: 99;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 767px) {
+  .horizontal-nav {
+    top: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .horizontal-nav {
+    top: 56px;
+  }
+}
+
+@media (max-width: 360px) {
+  .horizontal-nav {
+    top: 52px;
+  }
+}
+
+.nav-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  padding: 0 16px;
+  gap: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #f3f4f6;
+  position: relative;
+}
+
+.nav-container::-webkit-scrollbar {
+  height: 4px;
+}
+
+.nav-container::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+.nav-container::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 2px;
+}
+
+.nav-container::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+.nav-item-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  height: 100%;
+  color: #4b5563;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+}
+
+.nav-link:hover {
+  color: #2563eb;
+  background-color: #f9fafb;
+}
+
+.nav-link.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+}
+
+.nav-link i {
+  font-size: 14px;
+  width: 16px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+}
+
+.dropdown-toggle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  height: 100%;
+  color: #4b5563;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+}
+
+.dropdown-toggle:hover {
+  color: #2563eb;
+  background-color: #f9fafb;
+}
+
+.dropdown-toggle.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+}
+
+.dropdown-toggle i:first-child {
+  color: #2563eb;
+}
+
+.dropdown-toggle i:last-child {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+  margin-left: 2px;
+}
+
+.dropdown-toggle.active i:last-child {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0px);
+  left: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-top: 1px solid #e5e7eb;
+  min-width: 220px;
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-menu.show {
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-link {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 10px 16px;
+  color: #4b5563;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 13px;
+  white-space: nowrap;
+  border: none;
+  background: none;
+}
+
+.dropdown-link:first-child {
+  padding-top: 8px;
+}
+
+.dropdown-link:last-child {
+  padding-bottom: 8px;
+}
+
+.dropdown-link:hover {
+  color: #2563eb;
+  background-color: #f9fafb;
+}
+
+.dropdown-link:active {
+  background-color: #f3f4f6;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .nav-container {
+    padding: 0 12px;
+  }
+
+  .nav-link,
+  .dropdown-toggle {
+    padding: 0 12px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .nav-container {
+    height: 48px;
+    padding: 0 8px;
+  }
+
+  .nav-link,
+  .dropdown-toggle {
+    padding: 0 10px;
+    font-size: 11px;
+  }
+
+  .nav-link i,
+  .dropdown-toggle i:first-child {
+    font-size: 12px;
+  }
+
+  .dropdown-menu {
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 768px) {
+  .horizontal-nav {
+    display: none;
+  }
+}
+
+/* Media queries para mantener el centrado en diferentes tamaños */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .nav-container {
+    justify-content: center;
+    /* Mantener centrado en tablets */
+  }
+}
+
+@media (min-width: 1025px) {
+  .nav-container {
+    justify-content: center;
+    /* Mantener centrado en desktop */
+  }
+}
+
+/* Mejoras para tablets en modo retrato */
+@media (max-width: 896px) and (orientation: portrait) {
+  .nav-container {
+    height: 44px;
+  }
+
+  .nav-link,
+  .dropdown-toggle {
+    padding: 0 8px;
+    font-size: 10px;
+    gap: 4px;
+  }
+
+  .nav-link i,
+  .dropdown-toggle i:first-child {
+    font-size: 11px;
+  }
+}

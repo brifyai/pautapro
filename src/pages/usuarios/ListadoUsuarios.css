@@ -1,0 +1,17 @@
+/* Estilos para los botones de acción */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.view-button {
+    color: #4F46E5 !important;
+}
+
+.edit-button {
+    color: #059669 !important;
+}
+
+.delete-button {
+    color: #DC2626 !important;
+}

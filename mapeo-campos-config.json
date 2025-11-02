@@ -1,0 +1,109 @@
+{
+  "version": "1.0.0",
+  "descripcion": "Mapeo de campos entre frontend y backend",
+  "generado": "2025-11-01T13:05:14.959Z",
+  "tablas": {
+    "clientes": {
+      "tabla_real": "clientes",
+      "mapeo_campos": {
+        "id": "id_cliente",
+        "nombre": "nombrecliente",
+        "rut": "rut",
+        "direccion": "direccion",
+        "telefono": "telefono",
+        "email": "email"
+      },
+      "consulta_estandar": "id_cliente, nombrecliente, rut, direccion, telefono, email"
+    },
+    "campania": {
+      "tabla_real": "campania",
+      "mapeo_campos": {
+        "id": "id_campania",
+        "nombre": "nombrecampania",
+        "cliente_id": "id_cliente",
+        "descripcion": "descripcion",
+        "fecha_inicio": "fecha_inicio",
+        "fecha_termino": "fecha_fin"
+      },
+      "consulta_estandar": "id_campania, nombrecampania, id_cliente, descripcion, fecha_inicio, fecha_fin"
+    },
+    "medios": {
+      "tabla_real": "medios",
+      "mapeo_campos": {
+        "id": "id",
+        "nombre": "nombre_medio",
+        "tipo": "tipo_medio",
+        "descripcion": "descripcion",
+        "costo_por_unidad": null
+      },
+      "consulta_estandar": "id, nombre_medio, tipo_medio, descripcion"
+    },
+    "proveedores": {
+      "tabla_real": "proveedores",
+      "mapeo_campos": {
+        "id": "id_proveedor",
+        "nombre": "nombreproveedor",
+        "rut": "rut",
+        "direccion": "direccion",
+        "telefono": "telefono",
+        "email": "email",
+        "tipo": null
+      },
+      "consulta_estandar": "id_proveedor, nombreproveedor, rut, direccion, telefono, email"
+    },
+    "contratos": {
+      "tabla_real": "contratos",
+      "mapeo_campos": {
+        "id": "id",
+        "numero_contrato": "numero_contrato",
+        "proveedor_id": "id_proveedor",
+        "idmedios": "idmedios",
+        "tipo": null,
+        "fecha_inicio": "fecha_inicio",
+        "fecha_termino": "fecha_fin",
+        "monto_total": "monto"
+      },
+      "consulta_estandar": "id, numero_contrato, id_proveedor, idmedios, fecha_inicio, fecha_fin, monto"
+    },
+    "plan": {
+      "tabla_real": "plan",
+      "mapeo_campos": {
+        "id": "id",
+        "nombre": "nombre_plan",
+        "campana_id": "id_campania",
+        "descripcion": "descripcion",
+        "estado": "estado"
+      },
+      "consulta_estandar": "id, nombre_plan, id_campania, descripcion, estado"
+    },
+    "alternativa": {
+      "tabla_real": "alternativa",
+      "mapeo_campos": {
+        "id": "id",
+        "nombre": null,
+        "plan_id": "id_plan",
+        "medio_id": "id_medios",
+        "descripcion": "descripcion",
+        "cantidad": null,
+        "costo_unitario": "costo",
+        "costo_total": null
+      },
+      "consulta_estandar": "id, id_plan, id_medios, descripcion, costo"
+    },
+    "ordenesdepublicidad": {
+      "tabla_real": "ordenesdepublicidad",
+      "mapeo_campos": {
+        "id": "id_ordenes_de_comprar",
+        "numero_orden": "numero_correlativo",
+        "cliente_id": "id_cliente",
+        "campana_id": "id_campania",
+        "plan_id": "id_plan",
+        "proveedor_id": null,
+        "contrato_id": null,
+        "estado": "estado",
+        "monto_total": "monto_total"
+      },
+      "consulta_estandar": "id_ordenes_de_comprar, numero_correlativo, id_cliente, id_campania, id_plan, estado, monto_total"
+    }
+  }
+}

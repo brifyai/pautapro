@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico de Clientes</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .error { color: red; }
+        .success { color: green; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Diagnóstico de Tabla Clientes</h1>
+    <div id="output"></div>
+
+    <script>
+        const supabaseUrl = 'https://rfjbsoxkgmuehrgteljq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmamJzb3hrZ211aHJndGVsanEiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczODAwNjQzNSwiZXhwIjoyMDUzNTgyMDM1fQ.qR5sP5mYZJJJqiQYvNqF8yWJrVH1W8m7oE_5j9Q2x0Y';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        const output = document.getElementById('output');
+
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = message;
+            output.appendChild(div);
+        }
+
+        function logObject(obj, title) {
+            log(`<h3>${title}</h3>`);
+            log(`<pre>${JSON.stringify(obj, null, 2)}</pre>`);
+        }
+
+        async function diagnosticar() {
+            try {
+                log('🔍 Iniciando diagnóstico de tabla clientes...', 'info');
+
+                // 1. Obtener estructura de la tabla
+                log('<h3>1. Obteniendo estructura de la tabla clientes...</h3>');
+                const { data: clientes, error: clientesError } = await supabase
+                    .from('clientes')
+                    .select('*')
+                    .limit(3);
+
+                if (clientesError) {
+                    log(`❌ Error obteniendo clientes: ${clientesError.message}`, 'error');
+                    return;
+                }
+
+                if (clientes && clientes.length > 0) {
+                    logObject(Object.keys(clientes[0]), 'Columnas encontradas:');
+                    
+                    // Mostrar primer cliente completo
+                    logObject(clientes[0], 'Primer cliente (todos los campos):');
+                }
+
+                // 2. Verificar cliente ID 1 específicamente
+                log('<h3>2. Verificando cliente ID 1...</h3>');
+                const { data: cliente1, error: cliente1Error } = await supabase
+                    .from('clientes')
+                    .select('*')
+                    .eq('id_cliente', 1)
+                    .single();
+
+                if (cliente1Error) {
+                    log(`❌ Error obteniendo cliente ID 1: ${cliente1Error.message}`, 'error');
+                } else {
+                    logObject(cliente1, 'Cliente ID 1 encontrado:');
+                }
+
+                // 3. Comparar campos esperados vs reales
+                log('<h3>3. Análisis de mapeo de campos...</h3>');
+                const camposEsperados = [
+                    'id_cliente', 'nombrecliente', 'nombrefantasia', 'id_grupo', 'razonsocial',
+                    'id_tipo_cliente', 'rut', 'id_region', 'id_comuna', 'estado', 'id_tablaformato',
+                    'id_moneda', 'valor', 'giro', 'direccion', 'nombrerepresentantelegal',
+                    'apellidorepresentante', 'rut_representante', 'telcelular', 'telfijo',
+                    'email', 'web_cliente', 'created_at', 'updated_at'
+                ];
+
+                if (clientes.length > 0) {
+                    const camposReales = Object.keys(clientes[0]);
+                    log('<h4>Campos esperados vs reales:</h4>');
+                    
+                    camposEsperados.forEach(campo => {
+                        const existe = camposReales.includes(campo);
+                        log(`${existe ? '✅' : '❌'} ${campo}: ${existe ? 'EXISTE' : 'FALTA'}`);
+                        
+                        if (!existe) {
+                            // Buscar similares
+                            const similares = camposReales.filter(real => 
+                                real.toLowerCase().includes(campo.toLowerCase()) || 
+                                campo.toLowerCase().includes(real.toLowerCase())
+                            );
+                            if (similares.length > 0) {
+                                log(`   → Campos similares: ${similares.join(', ')}`, 'info');
+                            }
+                        }
+                    });
+                    
+                    log('<h4>Campos adicionales no esperados:</h4>');
+                    camposReales.forEach(campo => {
+                        if (!camposEsperados.includes(campo)) {
+                            log(`   ${campo}: ${clientes[0][campo]} (${typeof clientes[0][campo]})`, 'info');
+                        }
+                    });
+                }
+
+                // 4. Mostrar todos los clientes disponibles
+                log('<h3>4. Todos los clientes disponibles:</h3>');
+                const { data: todosClientes, error: todosError } = await supabase
+                    .from('clientes')
+                    .select('id_cliente, nombrecliente, razonsocial, rut')
+                    .order('id_cliente');
+
+                if (todosError) {
+                    log(`❌ Error obteniendo todos los clientes: ${todosError.message}`, 'error');
+                } else {
+                    logObject(todosClientes, 'Lista de clientes:');
+                }
+
+                log('✅ Diagnóstico completado', 'success');
+
+            } catch (error) {
+                log(`❌ Error general: ${error.message}`, 'error');
+            }
+        }
+
+        // Ejecutar diagnóstico al cargar la página
+        diagnosticar();
+    </script>
+</body>
+</html>

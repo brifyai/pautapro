@@ -1,0 +1,1091 @@
+/**
+ * Estilos para CrearOrden con Rentabilidad Inteligente
+ * Diseño moderno y funcional con análisis de rentabilidad en tiempo real
+ */
+
+/* ========================================
+   ESTILOS GENERALES
+   ======================================== */
+
+.crear-orden-rentabilidad {
+    padding: 20px;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.crear-orden-rentabilidad.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-spinner {
+    text-align: center;
+    color: white;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ========================================
+   HEADER
+   ======================================== */
+
+.header-orden {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    text-align: center;
+}
+
+.header-orden h1 {
+    color: #2d3748;
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.header-orden p {
+    color: #718096;
+    font-size: 1.1rem;
+    margin-bottom: 0;
+}
+
+/* ========================================
+   INDICADOR DE STEPS
+   ======================================== */
+
+.steps-indicator {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+    gap: 60px;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.step::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 60px;
+    width: 60px;
+    height: 2px;
+    background: #e2e8f0;
+}
+
+.step:last-child::after {
+    display: none;
+}
+
+.step.completado::after {
+    background: #48bb78;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: #718096;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.step.activo .step-number {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.step.completado .step-number {
+    background: #48bb78;
+    color: white;
+}
+
+.step-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #718096;
+    text-align: center;
+}
+
+.step.activo .step-label {
+    color: #2d3748;
+}
+
+.step.completado .step-label {
+    color: #48bb78;
+}
+
+/* ========================================
+   PANEL DE RENTABILIDAD EN TIEMPO REAL
+   ======================================== */
+
+.rentabilidad-panel {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border-left: 4px solid #667eea;
+}
+
+.rentabilidad-panel h3 {
+    color: #2d3748;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.rentabilidad-metricas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.metrica-rt {
+    background: #f8fafc;
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.metrica-rt:hover {
+    background: #edf2f7;
+    transform: translateY(-2px);
+}
+
+.metrica-rt.total {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    grid-column: span 2;
+}
+
+.metrica-rt .label {
+    font-weight: 500;
+    color: #4a5568;
+    font-size: 0.9rem;
+}
+
+.metrica-rt.total .label {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.metrica-rt .valor {
+    font-weight: 700;
+    color: #2d3748;
+    font-size: 1rem;
+}
+
+.metrica-rt .valor.positivo {
+    color: #48bb78;
+}
+
+.metrica-rt .valor.negativo {
+    color: #f56565;
+}
+
+.metrica-rt.total .valor {
+    color: white;
+    font-size: 1.1rem;
+}
+
+/* ========================================
+   CONTENEDOR DEL FORMULARIO
+   ======================================== */
+
+.form-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.step-content {
+    min-height: 500px;
+}
+
+.step-content h2 {
+    color: #2d3748;
+    margin-bottom: 30px;
+    font-size: 1.8rem;
+    font-weight: 600;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+/* ========================================
+   FORMULARIO - STEP 1
+   ======================================== */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: span 2;
+}
+
+.form-group label {
+    color: #4a5568;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.form-control {
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-control:disabled {
+    background: #f7fafc;
+    color: #a0aec0;
+    cursor: not-allowed;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* ========================================
+   ALTERNATIVAS - STEP 2
+   ======================================== */
+
+.no-alternativas {
+    text-align: center;
+    padding: 60px 20px;
+    color: #718096;
+}
+
+.no-alternativas p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.alternativas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.alternativa-card {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.alternativa-card:hover {
+    border-color: #667eea;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.alternativa-card.seleccionada {
+    border-color: #48bb78;
+    background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+    box-shadow: 0 8px 25px rgba(72, 187, 120, 0.2);
+}
+
+.alternativa-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.alternativa-header h4 {
+    color: #2d3748;
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    flex: 1;
+    line-height: 1.4;
+}
+
+.check-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #48bb78;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    margin-left: 10px;
+    flex-shrink: 0;
+}
+
+.alternativa-detalles {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.detalle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.detalle span:first-child {
+    color: #718096;
+    font-weight: 500;
+}
+
+.detalle span:last-child {
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.detalle.bonificacion {
+    background: #edf2f7;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-top: 8px;
+}
+
+.detalle.bonificacion span:last-child {
+    color: #48bb78;
+    font-weight: 700;
+}
+
+/* ========================================
+   ANÁLISIS DE RENTABILIDAD - STEP 3
+   ======================================== */
+
+.rentabilidad-analisis {
+    margin-bottom: 40px;
+}
+
+.analisis-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.analisis-header h3 {
+    color: #2d3748;
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.btn-analisis {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-analisis:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn-analisis:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.rentabilidad-resumen {
+    margin-bottom: 40px;
+}
+
+.resumen-card.principal {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 16px;
+    text-align: center;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+}
+
+.resumen-card.principal h4 {
+    margin: 0 0 15px 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    opacity: 0.9;
+}
+
+.valor-grande {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    line-height: 1;
+}
+
+.valor-grande.positivo {
+    color: #68d391;
+}
+
+.valor-grande.negativo {
+    color: #fc8181;
+}
+
+.valor-detalle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+.resumen-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.resumen-card {
+    background: #f8fafc;
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.resumen-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.resumen-card h4 {
+    color: #4a5568;
+    margin: 0 0 15px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.resumen-card .valor {
+    color: #2d3748;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+/* ========================================
+   OPORTUNIDADES DETECTADAS
+   ======================================== */
+
+.oportunidades-section {
+    margin-top: 40px;
+}
+
+.oportunidades-section h4 {
+    color: #2d3748;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.oportunidades-lista {
+    display: grid;
+    gap: 20px;
+}
+
+.oportunidad-item {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    border-left: 4px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.oportunidad-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.oportunidad-item.alta {
+    border-left-color: #f56565;
+}
+
+.oportunidad-item.media {
+    border-left-color: #ecc94b;
+}
+
+.oportunidad-item.baja {
+    border-left-color: #48bb78;
+}
+
+.oportunidad-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.oportunidad-header strong {
+    color: #2d3748;
+    font-size: 1.1rem;
+}
+
+.impacto {
+    color: #48bb78;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.oportunidad-item p {
+    color: #4a5568;
+    margin: 0 0 15px 0;
+    line-height: 1.6;
+}
+
+.oportunidad-meta {
+    display: flex;
+    gap: 20px;
+    font-size: 0.9rem;
+    color: #718096;
+}
+
+.oportunidad-meta span {
+    background: #f7fafc;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+/* ========================================
+   ACCIONES DE STEPS
+   ======================================== */
+
+.step-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding-top: 30px;
+    border-top: 2px solid #e2e8f0;
+}
+
+.step-actions .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.btn-secondary:hover {
+    background: #cbd5e0;
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(72, 187, 120, 0.3);
+}
+
+.btn-large {
+    padding: 16px 32px;
+    font-size: 1.1rem;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* ========================================
+   ESTILOS PARA SWEETAL2 PERSONALIZADO
+   ======================================== */
+
+.rentabilidad-orden-popup {
+    border-radius: 16px !important;
+}
+
+.rentabilidad-resumen-orden {
+    text-align: left;
+}
+
+.metrica-principal-orden {
+    text-align: center;
+    margin-bottom: 25px;
+    padding: 20px;
+    background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+    border-radius: 12px;
+}
+
+.metrica-principal-orden h4 {
+    color: #4a5568;
+    margin-bottom: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.valor-destacado-orden {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.valor-destacado-orden.positivo {
+    color: #48bb78;
+}
+
+.valor-destacado-orden.negativo {
+    color: #f56565;
+}
+
+.detalle-valor-orden {
+    color: #718096;
+    font-size: 1rem;
+}
+
+.desglose-fuentes {
+    margin-bottom: 25px;
+}
+
+.desglose-fuentes h5 {
+    color: #2d3748;
+    margin-bottom: 15px;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.fuente-ingreso {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.fuente-ingreso:last-child {
+    border-bottom: none;
+}
+
+.oportunidades-orden {
+    margin-top: 20px;
+}
+
+.oportunidades-orden h5 {
+    color: #2d3748;
+    margin-bottom: 15px;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.oportunidad-breve {
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border-left: 3px solid #667eea;
+}
+
+.oportunidad-breve strong {
+    color: #2d3748;
+}
+
+.oportunidad-breve small {
+    color: #718096;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 1200px) {
+    .form-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+    
+    .alternativas-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+    
+    .resumen-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .crear-orden-rentabilidad {
+        padding: 15px;
+    }
+    
+    .header-orden {
+        padding: 20px;
+    }
+    
+    .header-orden h1 {
+        font-size: 2rem;
+    }
+    
+    .steps-indicator {
+        gap: 30px;
+    }
+    
+    .step::after {
+        left: 40px;
+        width: 30px;
+    }
+    
+    .step-label {
+        font-size: 0.8rem;
+    }
+    
+    .form-container {
+        padding: 20px;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .form-group.full-width {
+        grid-column: span 1;
+    }
+    
+    .alternativas-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .rentabilidad-metricas {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .metrica-rt.total {
+        grid-column: span 1;
+    }
+    
+    .analisis-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+    
+    .btn-analisis {
+        justify-content: center;
+    }
+    
+    .valor-grande {
+        font-size: 2.5rem;
+    }
+    
+    .resumen-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .step-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .step-actions .btn {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-orden h1 {
+        font-size: 1.5rem;
+    }
+    
+    .steps-indicator {
+        gap: 20px;
+    }
+    
+    .step::after {
+        left: 30px;
+        width: 20px;
+    }
+    
+    .step-number {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+    }
+    
+    .step-label {
+        font-size: 0.75rem;
+    }
+    
+    .form-control {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+    
+    .alternativa-card {
+        padding: 15px;
+    }
+    
+    .alternativa-header h4 {
+        font-size: 1rem;
+    }
+    
+    .valor-grande {
+        font-size: 2rem;
+    }
+    
+    .resumen-card {
+        padding: 20px;
+    }
+    
+    .resumen-card .valor {
+        font-size: 1.1rem;
+    }
+    
+    .oportunidad-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .oportunidad-meta {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn-large {
+        padding: 14px 24px;
+        font-size: 1rem;
+    }
+}
+
+/* ========================================
+   ANIMACIONES Y TRANSICIONES
+   ======================================== */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.step-content {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.alternativa-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.alternativa-card:nth-child(1) { animation-delay: 0.1s; }
+.alternativa-card:nth-child(2) { animation-delay: 0.2s; }
+.alternativa-card:nth-child(3) { animation-delay: 0.3s; }
+.alternativa-card:nth-child(4) { animation-delay: 0.4s; }
+.alternativa-card:nth-child(5) { animation-delay: 0.5s; }
+.alternativa-card:nth-child(6) { animation-delay: 0.6s; }
+
+.resumen-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.resumen-card:nth-child(1) { animation-delay: 0.1s; }
+.resumen-card:nth-child(2) { animation-delay: 0.2s; }
+.resumen-card:nth-child(3) { animation-delay: 0.3s; }
+.resumen-card:nth-child(4) { animation-delay: 0.4s; }
+
+.oportunidad-item {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.oportunidad-item:nth-child(1) { animation-delay: 0.1s; }
+.oportunidad-item:nth-child(2) { animation-delay: 0.2s; }
+.oportunidad-item:nth-child(3) { animation-delay: 0.3s; }
+.oportunidad-item:nth-child(4) { animation-delay: 0.4s; }
+.oportunidad-item:nth-child(5) { animation-delay: 0.5s; }
+
+/* ========================================
+   UTILIDADES
+   ======================================== */
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.font-weight-bold {
+    font-weight: 700;
+}
+
+.font-weight-normal {
+    font-weight: 400;
+}
+
+.text-muted {
+    color: #718096;
+}
+
+.text-success {
+    color: #48bb78;
+}
+
+.text-danger {
+    color: #f56565;
+}
+
+.text-warning {
+    color: #ecc94b;
+}
+
+.text-info {
+    color: #4299e1;
+}
+
+.bg-light {
+    background: #f8fafc;
+}
+
+.bg-white {
+    background: white;
+}
+
+.shadow-sm {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.shadow {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-lg {
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.rounded {
+    border-radius: 8px;
+}
+
+.rounded-lg {
+    border-radius: 12px;
+}
+
+.rounded-xl {
+    border-radius: 16px;
+}
+
+.p-2 { padding: 8px; }
+.p-3 { padding: 12px; }
+.p-4 { padding: 16px; }
+.p-5 { padding: 20px; }
+
+.m-2 { margin: 8px; }
+.m-3 { margin: 12px; }
+.m-4 { margin: 16px; }
+.m-5 { margin: 20px; }
+
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+.mb-4 { margin-bottom: 16px; }
+.mb-5 { margin-bottom: 20px; }
+
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 12px; }
+.mt-4 { margin-top: 16px; }
+.mt-5 { margin-top: 20px; }

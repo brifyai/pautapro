@@ -1,0 +1,979 @@
+:root {
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --gradient-warning: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  --gradient-error: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-heavy: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --border-radius: 16px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.campanas-container {
+    padding: 24px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  .campanas-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23ffffff" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="%23ffffff" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="%23ffffff" opacity="0.05"/><circle cx="10" cy="50" r="0.5" fill="%23ffffff" opacity="0.05"/><circle cx="90" cy="30" r="0.5" fill="%23ffffff" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    pointer-events: none;
+  }
+  
+  .modern-header {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 2px 12px;
+    border-radius: var(--border-radius);
+    margin-bottom: 12px;
+    box-shadow: var(--shadow-medium);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    height: 50px;
+    min-height: 50px;
+  }
+
+  .modern-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .modern-title {
+    font-size: 1rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    z-index: 1;
+    position: relative;
+    line-height: 1;
+    margin-top: 14px;
+  }
+
+  .modern-btn-outline {
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.3);
+    color: white;
+    backdrop-filter: blur(10px);
+    transition: var(--transition);
+  }
+
+  .modern-btn-outline:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.5);
+    transform: translateY(-2px);
+  }
+
+  .modern-card {
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(20px);
+    border-radius: var(--border-radius);
+    padding: 24px;
+    box-shadow: var(--shadow-medium);
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .modern-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .modern-card:hover {
+    box-shadow: var(--shadow-heavy);
+  }
+
+  .modern-card:hover::before {
+    opacity: 1;
+  }
+
+  .text-gradient {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 600;
+  }
+
+  .modern-loading {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(102, 126, 234, 0.3);
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  .btn-agregar {
+    background: var(--gradient-primary) !important;
+    text-transform: none !important;
+    padding: 12px 24px !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+    transition: var(--transition) !important;
+    color: white !important;
+  }
+
+  .btn-agregar:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4) !important;
+  }
+
+  
+  .filtros-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .filtros-container .MuiTextField-root {
+    width: 340px;
+    background-color: white;
+    border-radius: 4px;
+  }
+
+  .filtros-container .MuiOutlinedInput-root {
+    background-color: white;
+  }
+
+  .filtros-container .MuiInputBase-root {
+    height: 40px;
+  }
+
+  .filtros-container .btn-exportar {
+    height: 40px;
+    min-width: 180px;
+    margin: 0 0 0 15px;
+    align-self: center;
+  }
+
+  /* Ajustes específicos para los campos de fecha */
+  .filtros-container .MuiTextField-root[type="date"] {
+    width: 340px;
+  }
+
+  @media (max-width: 1200px) {
+    .filtros-container {
+      flex-wrap: wrap;
+    }
+
+    .filtros-container .MuiTextField-root,
+    .filtros-container .MuiTextField-root[type="date"] {
+      width: 100%;
+    }
+
+    .filtros-container .btn-exportar {
+      width: 100%;
+      margin-left: 0;
+    }
+  }
+
+  .filtros-container > * {
+    margin-right: 16px;
+  }
+
+  .filtros-container > *:last-child {
+    margin-right: 0;
+  }
+
+  .filtros-container .MuiButton-root {
+    height: 40px;
+    margin-top: 0;
+    white-space: nowrap;
+  }
+
+  /* Estilo específico para el botón exportar */
+  .btn-exportar {
+    background-color: #22c55e !important;
+    color: white !important;
+    text-transform: none !important;
+  
+    height: 40px !important;
+    margin-left: 0px !important;
+    margin-top: -15px !important;
+  }
+
+  .btn-exportar:hover {
+    background-color: #16a34a !important;
+  }
+
+  /* Ajustes para los inputs de fecha */
+  .campanas-container .MuiInputBase-root {
+    height: 40px !important;
+  }
+
+  .campanas-container .MuiOutlinedInput-input {
+    padding: 8px 14px !important;
+  }
+
+  /* Prevenir duplicación de labels en campos de fecha */
+  .campanas-container .MuiTextField-root .MuiInputLabel-root {
+    z-index: 1 !important;
+  }
+
+  .campanas-container .MuiTextField-root .MuiOutlinedInput-root .MuiInputLabel-shrink {
+    transform: translate(14px, -9px) scale(0.75) !important;
+  }
+  
+  .search-input {
+    background-color: white;
+    width: 300px !important;
+    min-width: unset !important;
+    flex: unset;
+  }
+  
+  .search-input .MuiOutlinedInput-root {
+    background-color: white;
+  }
+  
+  .date-input {
+    background-color: white;
+    width: 180px !important;
+  }
+  
+  .date-input .MuiOutlinedInput-root {
+    background-color: white;
+  }
+  
+  .btn-reportes {
+    background-color: #22C55E !important;
+    text-transform: none !important;
+    padding: 8px 16px !important;
+    font-weight: 500 !important;
+    white-space: nowrap !important;
+  }
+  
+  .data-grid-container {
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(20px);
+    padding: 24px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-medium);
+    border: 1px solid rgba(255,255,255,0.2);
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    transition: var(--transition);
+  }
+
+  .data-grid-container:hover {
+    box-shadow: var(--shadow-heavy);
+  }
+  
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 32px;
+    height: 16px;
+  }
+  
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 12px;
+    width: 12px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  
+  input:checked + .slider {
+    background-color: #22C55E;
+  }
+  
+  input:checked + .slider:before {
+    transform: translateX(16px);
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    padding-left: 0px;
+  }
+  
+  .action-buttons .MuiIconButton-root {
+    padding: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .action-buttons .fas {
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* BLOQUEO PERMANENTE: Color de fondo #4d559a para el encabezado de la tabla de campañas - NO MODIFICAR */
+
+  /* Variable interna que MUI usa para el head */
+  .campanas-container .MuiDataGrid-root {
+    --unstable_DataGrid-headBackground: #4d559a !important;
+  }
+
+  /* BLOQUEO DEFINITIVO - Reglas con máxima prioridad para evitar cambios futuros */
+  .campanas-container .MuiDataGrid-root .MuiDataGrid-columnHeaders,
+  .campanas-container .MuiDataGrid-root .MuiDataGrid-columnHeaders div,
+  .campanas-container .MuiDataGrid-root .MuiDataGrid-columnHeaders .MuiDataGrid-columnHeaderRow,
+  .campanas-container .MuiDataGrid-root .MuiDataGrid-columnHeaders .MuiDataGrid-columnHeaderRow div,
+  div.campanas-container div.MuiDataGrid-root div.MuiDataGrid-columnHeaders,
+  div.campanas-container div.MuiDataGrid-root div.MuiDataGrid-columnHeaders div,
+  div.campanas-container div.MuiDataGrid-root div.MuiDataGrid-columnHeaders div.MuiDataGrid-columnHeaderRow,
+  div.campanas-container div.MuiDataGrid-root div.MuiDataGrid-columnHeaders div.MuiDataGrid-columnHeaderRow div {
+    background: #4d559a !important;
+    background-color: #4d559a !important;
+    background-image: none !important;
+  }
+
+  /* BLOQUEO ANTICAMBIO - Prevenir cualquier modificación del color */
+  .campanas-container .MuiDataGrid-root .MuiDataGrid-columnHeaders {
+    background: #4d559a !important;
+    background-color: #4d559a !important;
+    background-image: none !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: auto !important;
+  }
+
+  /* REGLA DE EMERGENCIA - Si todo lo demás falla */
+  .campanas-container .MuiDataGrid-root .MuiDataGrid-columnHeaders::before,
+  .campanas-container .MuiDataGrid-root .MuiDataGrid-columnHeaders::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: #4d559a !important;
+    z-index: -1 !important;
+    pointer-events: none !important;
+  }
+
+  /* Asegurar color blanco en el texto e iconos del header */
+  .campanas-container .MuiDataGrid-root .MuiDataGrid-columnHeader,
+  .campanas-container .MuiDataGrid-root .MuiDataGrid-columnHeaderTitle,
+  .campanas-container .MuiDataGrid-root .MuiDataGrid-columnHeader * {
+    color: #ffffff !important;
+  }
+
+  /* Iconos del header (separador, sort, svg) */
+  .campanas-container .MuiDataGrid-root .MuiDataGrid-iconSeparator,
+  .campanas-container .MuiDataGrid-root .MuiDataGrid-columnHeader svg,
+  .campanas-container .MuiDataGrid-root .MuiDataGrid-columnHeader .MuiSvgIcon-root {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+  }
+
+  /* Redondear borde superior del header */
+  .campanas-container .MuiDataGrid-root .MuiDataGrid-columnHeaders {
+    border-radius: 12px 12px 0 0 !important;
+  }
+
+  /* PROTECCIÓN ADICIONAL - Evitar que estilos externos sobreescriban */
+  div[class*="DataGrid"] div[class*="columnHeaders"],
+  div[class*="DataGrid"] div[class*="columnHeaders"] div,
+  div[class*="DataGrid"] div[class*="columnHeaders"] div[class*="columnHeaderRow"],
+  div[class*="DataGrid"] div[class*="columnHeaders"] div[class*="columnHeaderRow"] div {
+    background: #4d559a !important;
+    background-color: #4d559a !important;
+  }
+
+  /* ÚLTIMA LÍNEA DE DEFENSA - Selectores de atributo */
+  .campanas-container [class*="MuiDataGrid-columnHeaders"],
+  .campanas-container [class*="MuiDataGrid-columnHeaders"] [class*="MuiDataGrid-columnHeaderRow"],
+  .campanas-container [class*="MuiDataGrid-columnHeaders"] [class*="MuiDataGrid-columnHeaderRow"] [class*="MuiDataGrid-columnHeader"] {
+    background: #4d559a !important;
+    background-color: #4d559a !important;
+  }
+  
+  /* Estilos para los iconos en los botones */
+  .btn-agregar .fas,
+  .btn-reportes .fas {
+    margin-right: 8px;
+  }
+  
+  /* Animaciones */
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slide-down {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(5deg); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.6s ease-out;
+  }
+
+  .animate-slide-down {
+    animation: slide-down 0.5s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.6s ease-out;
+    animation-fill-mode: both;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-pulse {
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+
+  /* Ajustes para el responsive mejorado */
+  @media (max-width: 768px) {
+    .campanas-container {
+      margin-left: 0;
+      max-width: 100%;
+      padding: 16px;
+    }
+
+    .modern-header {
+      padding: 20px 16px;
+      flex-direction: column;
+      gap: 16px;
+      text-align: center;
+    }
+
+    .modern-title {
+      font-size: 1.5rem;
+    }
+
+    .filtros-container {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .search-input,
+    .date-input {
+      width: 100% !important;
+    }
+
+    .data-grid-container {
+      padding: 16px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .campanas-container {
+      padding: 12px;
+    }
+
+    .modern-header {
+      padding: 16px 12px;
+    }
+
+    .modern-title {
+      font-size: 1.25rem;
+    }
+
+    .modern-card {
+      padding: 12px;
+      border-radius: 12px;
+    }
+  }
+  
+  .loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .not-found {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 1.5rem;
+    color: #666;
+  }
+  
+  /* Estilos para el contenedor principal */
+  .MuiContainer-root {
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+    padding: 24px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Estilos para los títulos de campos */
+  .MuiTypography-subtitle2 {
+    font-size: 0.875rem !important;
+    color: #666 !important;
+    margin-bottom: 4px !important;
+  }
+  
+  /* Estilos para los valores de los campos */
+  .MuiTypography-body1 {
+    font-size: 1rem !important;
+    color: #333 !important;
+    font-weight: 500 !important;
+  }
+  
+  /* Estilos para los botones */
+  .MuiButton-contained {
+    text-transform: uppercase !important;
+    font-weight: 500 !important;
+    padding: 8px 16px !important;
+  }
+
+  /* Override específico para btn-agregar */
+  .btn-agregar.MuiButton-contained {
+    text-transform: none !important;
+    color: white !important;
+  }
+
+  .btn-agregar.MuiButton-contained * {
+    color: white !important;
+  }
+
+  .btn-agregar.MuiButton-contained .MuiButton-label {
+    color: white !important;
+  }
+
+  .btn-agregar.MuiButton-contained span {
+    color: white !important;
+  }
+  
+  /* Estilos para las tabs */
+  .MuiTab-root {
+    text-transform: none !important;
+    font-weight: 500 !important;
+    color: #6B7280 !important;
+    padding: 12px 16px !important;
+    min-width: auto !important;
+  }
+  .MuiTab-root.Mui-selected {
+    color: red !important;
+    border-bottom: 2px solid red !important;
+  }
+  .MuiTabs-indicator {
+    background-color: red !important;
+  }
+  .detail-label {
+    color: #666;
+    font-size: 0.875rem;
+    margin-bottom: 4px;
+  }
+  
+  .detail-value {
+    color: #333;
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+  
+  
+  /* Estilos para las tablas */
+  .table-container {
+    margin-top: 16px;
+  }
+  
+  .table-header {
+    background-color: #f5f5f5;
+  }
+  
+  .table-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  
+  /* Estilos para los modales */
+  .modal-content {
+    padding: 16px;
+  }
+  
+  .modal-actions {
+    padding: 16px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  
+  /* Breadcrumbs */
+  .breadcrumbs {
+    margin-bottom: 24px;
+    color: #666;
+  }
+  
+  /* Campaña header */
+  .campaña-header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  
+  .campaña-header h1 {
+    margin-bottom: 8px;
+  }
+  
+  .campaña-header .subtitle {
+    color: #666;
+  }
+  
+  /* Detalles de la campaña */
+  .detalles-campaña {
+    margin-bottom: 24px;
+  }
+  
+  .detalles-campaña .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  
+  /* Tabs personalizados */
+  .custom-tabs {
+    margin-bottom: 24px;
+  }
+  
+  .custom-tab {
+    padding: 12px 24px;
+    border-radius: 4px 4px 0 0;
+  }
+  
+  .custom-tab.active {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  /* Contenido de las pestañas */
+  .tab-content {
+    padding: 24px;
+  }
+  
+  .datos-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  
+  .dato-item label {
+    color: #666;
+    font-size: 0.875rem;
+    margin-bottom: 4px;
+    display: block;
+  }
+  .MuiTypography-root.MuiTypography-h4.css-1w6yvp3-MuiTypography-root {
+    font-size: 16px !important;
+    color: #6777ef !important;
+    font-weight: bold;
+  }
+  .MuiTab-root.Mui-selected {
+    color: red !important;
+    border-bottom: 2px solid red !important;
+  }
+ 
+  .MuiTabs-root {
+    border-bottom: 1px solid #E5E7EB;
+  }
+  .MuiTab-root {
+    text-transform: none !important;
+    font-weight: 500 !important;
+    color: #6B7280 !important;
+    padding: 12px 16px !important;
+    min-width: auto !important;
+  }
+  .css-y2ff7i-MuiPaper-root-MuiTableContainer-root {
+    box-shadow: none !important;
+  }
+
+  /* Estilos para los detalles de la campaña */
+  .detail-label {
+    color: #6B7280;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+  }
+
+  .detail-value {
+    color: #111827;
+    font-size: 1rem;
+  }
+
+  .detail-grid {
+    margin-top: 1rem;
+  }
+
+  .detail-item {
+    margin-bottom: 1.5rem;
+  }
+  #detalles-campaña {
+    display: none;
+  }
+  .header-campaña {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e2e2e2;
+    padding-bottom: 20px;
+  }
+
+  .titulo-campaña {
+    color: #333;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .btn-editar {
+    background-color: #f44336 !important;
+    color: white !important;
+    text-transform: none !important;
+    font-size: 14px !important;
+    padding: 6px 16px !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    font-weight: normal !important;
+  }
+
+  .btn-editar:hover {
+    background-color: #d32f2f !important;
+  }
+
+  .btn-editar .MuiButton-startIcon {
+    margin-right: 4px !important;
+  }
+
+  .MuiDialog-paper {
+    border-radius: 8px !important;
+  }
+
+  .MuiDialogTitle-root {
+    background-color: #fff !important;
+    color: #333 !important;
+    font-weight: 600 !important;
+    padding: 16px 24px !important;
+  }
+
+  .MuiDialogContent-root {
+    padding: 24px !important;
+  }
+
+  .MuiDialogActions-root {
+    padding: 16px 24px !important;
+    background-color: #f9fafb !important;
+  }
+
+  .MuiTextField-root {
+    margin-bottom: 16px !important;
+  }
+
+  /* Contenedor del título y botón */
+  .flex {
+    display: flex;
+  }
+
+  .justify-between {
+    justify-content: space-between;
+  }
+
+  .items-center {
+    align-items: center;
+  }
+
+  .w-full {
+    width: 100%;
+  }
+  .MuiSwitch-root.MuiSwitch-sizeSmall.css-1bxcm4x-MuiSwitch-root {
+    border-radius: 20px !important;
+  }
+  
+  /* Estilos para el switch de estado */
+  .MuiSwitch-switchBase.Mui-checked {
+    color: #206e43 !important;
+  }
+  
+  .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track {
+    background-color: #206e43 !important;
+  }
+  
+  .MuiSwitch-switchBase:not(.Mui-checked) {
+    color: #dc3545 !important;
+  }
+  
+  .MuiSwitch-switchBase:not(.Mui-checked) + .MuiSwitch-track {
+    background-color: #dc3545 !important;
+  }
+  .css-16xl4zq-MuiTypography-root {
+    margin: 0;
+    font-family: "Roboto Condensed","Helvetica","Arial",sans-serif;
+    font-weight: 400;
+    font-size: 17px !important;
+    line-height: 1.334;
+    letter-spacing: 0em;
+  }
+  .css-1lt5qva-MuiCardContent-root .css-1kw3y0a {
+    border-bottom: 1px solid #e2e2e2 !important;
+    padding-bottom: 15px !important;
+  }
+
+  /* Estilos para SweetAlert2 */
+  .swal-container-class {
+    z-index: 9999 !important;
+  }
+
+  .swal2-container {
+    z-index: 9999 !important;
+  }
+
+  .swal2-popup {
+    z-index: 10000 !important;
+  }
+
+  /* Estilos para los botones de acción */
+  .view-button {
+    color: #4F46E5 !important;
+  }
+
+  .view-button:hover {
+    color: #1976d2;
+  }
+
+  .edit-button {
+    background-color: transparent !important;
+  }
+
+  .edit-button i,
+  .edit-button svg {
+    color: #206e43 !important;
+  }
+
+  .edit-button:hover {
+    background-color: rgba(32, 110, 67, 0.1) !important;
+  }
+
+  .delete-button {
+    color: #DC2626 !important;
+  }
+
+  .delete-button:hover {
+    color: #d32f2f;
+  }
+
+  /* Estilos adicionales para DataGrid */
+  .MuiDataGrid-root {
+    border: none !important;
+  }
+
+  .MuiDataGrid-cell {
+    border-bottom: 1px solid rgba(102, 126, 234, 0.1) !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 12px 16px !important;
+    min-height: 56px !important;
+    transition: background-color 0.2s ease !important;
+  }
+
+  .MuiDataGrid-row {
+    min-height: 56px !important;
+    transition: background-color 0.2s ease !important;
+  }
+
+  .MuiDataGrid-row:nth-of-type(even) {
+    background-color: rgba(102, 126, 234, 0.02) !important;
+  }
+
+  .MuiDataGrid-row:hover {
+    background-color: rgba(102, 126, 234, 0.08) !important;
+    transform: scale(1.01);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+
+  .MuiDataGrid-footerContainer {
+    border-top: 1px solid rgba(102, 126, 234, 0.1) !important;
+    background: rgba(255,255,255,0.8) !important;
+  }
+
+  .MuiDataGrid-virtualScroller {
+    overflow-x: hidden !important;
+  }

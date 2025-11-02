@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualizar Datos de Clientes</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background-color: #f5f5f5;
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .section { 
+            margin: 20px 0; 
+            padding: 15px; 
+            border: 1px solid #ddd; 
+            border-radius: 5px;
+        }
+        .error { color: red; }
+        .success { color: green; }
+        .warning { color: orange; }
+        .info { color: blue; }
+        pre { 
+            background: #f5f5f5; 
+            padding: 10px; 
+            overflow-x: auto; 
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #28a745);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Actualizar Datos de Clientes</h1>
+        <p>Esta herramienta actualizará todos los clientes existentes con datos completos en los campos que faltan.</p>
+        
+        <div class="section">
+            <h3>📊 Estado Actual</h3>
+            <button onclick="verificarEstadoActual()">Verificar Clientes Existentes</button>
+            <div id="estadoActual"></div>
+        </div>
+
+        <div class="section">
+            <h3>🚀 Proceso de Actualización</h3>
+            <button onclick="iniciarActualizacion()" id="btnActualizar">Iniciar Actualización</button>
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div id="progreso"></div>
+        </div>
+
+        <div class="section">
+            <h3>✅ Resultados</h3>
+            <div id="resultados"></div>
+        </div>
+    </div>
+
+    <script>
+        const supabaseUrl = 'https://rfjbsoxkgmuehrgteljq.supabase.co';
+        const supabaseKey = 'sb_publishable_Z1GylJpX_JTd056Yr5-Icw_Wa83_W4C';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Base de datos para generar datos aleatorios
+        const nombresFantasia = [
+            'TechCorp Solutions', 'RetailMax', 'ConstruyeAndo', 'FoodExpress', 'EduLearn',
+            'LogisticsPro', 'GreenEnergy', 'FashionStyle', 'SaludPlus', 'AutoMotive',
+            'FinanceHub', 'MediaGroup', 'SportLife', 'HomeDecor', 'TravelPlus',
+            'FoodMarket', 'TechInnovate', 'BuildMaster', 'CarePlus', 'EduPro'
+        ];
+
+        const giros = [
+            'Tecnología y Servicios Informáticos',
+            'Comercio Minorista y Ventas al por Mayor',
+            'Construcción y Obras Civiles',
+            'Restaurantes y Servicios de Alimentación',
+            'Educación y Capacitación',
+            'Transporte y Logística',
+            'Energías Renovables',
+            'Textil y Moda',
+            'Servicios Médicos y Salud',
+            'Venta y Reparación de Vehículos',
+            'Servicios Financieros',
+            'Medios y Comunicación',
+            'Deporte y Entretenimiento',
+            'Decoración y Hogar',
+            'Turismo y Hotelería',
+            'Supermercados y Alimentos',
+            'Consultoría Tecnológica',
+            'Inmobiliaria',
+            'Salud y Bienestar',
+            'Formación Profesional'
+        ];
+
+        const nombresRepresentantes = [
+            'Juan Carlos', 'María Alejandra', 'Pedro Antonio', 'Catalina Isabel', 'Roberto Carlos',
+            'Luis Alberto', 'Patricia Alejandra', 'Jorge Eduardo', 'Claudia Andrea', 'Miguel Ángel',
+            'Ana María', 'Carlos Andrés', 'Sofía Beatriz', 'Diego Martín', 'Valentina Paz',
+            'Francisco Javier', 'Camila Ignacia', 'Nicolás Esteban', 'Isidora Victoria', 'Benjamín Tomás'
+        ];
+
+        const apellidosRepresentantes = [
+            'Rodríguez Pérez', 'González Muñoz', 'Silva Torres', 'Morales Fuentes', 'Díaz Rojas',
+            'Martínez Vargas', 'Ramírez Castro', 'Fernández Bravo', 'Soto Navarro', 'López Soto',
+            'Herrera González', 'Pérez Morales', 'Sánchez Silva', 'Ramírez Fernández', 'Torres Díaz',
+            'Gómez Herrera', 'Martínez Pérez', 'Soto Ramírez', 'Fuentes López', 'Castro Sánchez'
+        ];
+
+        const comunasRegionMetropolitana = [
+            { id: 341, nombre: 'Santiago' },
+            { id: 322, nombre: 'Santiago' },
+            { id: 289, nombre: 'Vitacura' },
+            { id: 261, nombre: 'Las Condes' },
+            { id: 335, nombre: 'Santiago' },
+            { id: 274, nombre: 'Providencia' },
+            { id: 309, nombre: 'La Florida' },
+            { id: 298, nombre: 'Puente Alto' },
+            { id: 320, nombre: 'Maipú' },
+            { id: 285, nombre: 'La Reina' }
+        ];
+
+        // Función para generar datos aleatorios para un cliente
+        function generarDatosParaCliente(idCliente, nombreCliente) {
+            const randomIndex = (idCliente - 1) % nombresFantasia.length;
+            const comuna = comunasRegionMetropolitana[randomIndex];
+            
+            return {
+                id_cliente: idCliente,
+                nombrefantasia: nombresFantasia[randomIndex],
+                giro: giros[randomIndex],
+                id_grupo: (randomIndex % 3) + 1,
+                nombrerepresentantelegal: nombresRepresentantes[randomIndex],
+                apellidorepresentante: apellidosRepresentantes[randomIndex],
+                rut_representante: generarRutChileno(),
+                telcelular: generarTelefonoCelular(),
+                telfijo: generarTelefonoFijo(),
+                id_region: 7, // Región Metropolitana
+                id_comuna: comuna.id,
+                direccion: generarDireccion(comuna.nombre),
+                email: generarEmail(nombreCliente),
+                web_cliente: generarWebSite(nombresFantasia[randomIndex])
+            };
+        }
+
+        // Funciones auxiliares para generar datos realistas
+        function generarRutChileno() {
+            const numeros = Math.floor(Math.random() * 20000000) + 10000000;
+            const dv = calcularDigitoVerificador(numeros);
+            return `${numeros.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}-${dv}`;
+        }
+
+        function calcularDigitoVerificador(rut) {
+            let suma = 0;
+            let multiplo = 2;
+            while (rut > 0) {
+                suma += (rut % 10) * multiplo;
+                rut = Math.floor(rut / 10);
+                multiplo = multiplo === 7 ? 2 : multiplo + 1;
+            }
+            const dv = 11 - (suma % 11);
+            return dv === 11 ? '0' : dv === 10 ? 'K' : dv.toString();
+        }
+
+        function generarTelefonoCelular() {
+            const numero = Math.floor(Math.random() * 90000000) + 10000000;
+            return `+569${numero}`;
+        }
+
+        function generarTelefonoFijo() {
+            const numero = Math.floor(Math.random() * 90000000) + 10000000;
+            return `+562${numero}`;
+        }
+
+        function generarDireccion(comuna) {
+            const calles = ['Av. Providencia', 'Ahumada', 'Vitacura', 'Las Condes', 'Moneda', 'Marcoleta', 'El Bosque Norte', 'Américo Vespucio'];
+            const numeros = Math.floor(Math.random() * 4000) + 100;
+            const calle = calles[Math.floor(Math.random() * calles.length)];
+            return `${calle} ${numeros}, ${Math.random() > 0.5 ? 'Oficina ' + (Math.floor(Math.random() * 20) + 1) : 'Local ' + (Math.floor(Math.random() * 50) + 1)}`;
+        }
+
+        function generarEmail(nombreCliente) {
+            const dominios = ['gmail.com', 'outlook.com', 'yahoo.com', 'hotmail.com'];
+            const dominio = dominios[Math.floor(Math.random() * dominios.length)];
+            const nombreLimpio = nombreCliente.toLowerCase().replace(/\s+/g, '.');
+            return `contacto.${nombreLimpio}@${dominio}`;
+        }
+
+        function generarWebSite(nombreFantasia) {
+            const extensiones = ['.cl', '.com'];
+            const extension = extensiones[Math.floor(Math.random() * extensiones.length)];
+            return `www.${nombreFantasia.toLowerCase().replace(/\s+/g, '')}${extension}`;
+        }
+
+        function log(message, type = 'info', containerId = null) {
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = message;
+            const target = containerId ? document.getElementById(containerId) : document.body;
+            target.appendChild(div);
+        }
+
+        function updateProgress(percent) {
+            document.getElementById('progressBar').style.width = percent + '%';
+        }
+
+        async function verificarEstadoActual() {
+            const container = document.getElementById('estadoActual');
+            container.innerHTML = '';
+            
+            log('🔍 Verificando estado actual de los clientes...', 'info', 'estadoActual');
+
+            try {
+                const { data: clientes, error } = await supabase
+                    .from('clientes')
+                    .select('id_cliente, nombrecliente, nombrefantasia, giro, nombrerepresentantelegal, telcelular, id_region, id_comuna')
+                    .order('id_cliente');
+
+                if (error) {
+                    log(`❌ Error: ${error.message}`, 'error', 'estadoActual');
+                    return;
+                }
+
+                log(`📊 Se encontraron ${clientes.length} clientes:`, 'success', 'estadoActual');
+                
+                let html = '<table border="1" style="width:100%; border-collapse: collapse; margin-top: 10px;">';
+                html += '<tr style="background: #f0f0f0;"><th>ID</th><th>Nombre</th><th>Fantasía</th><th>Giro</th><th>Representante</th><th>Teléfono</th><th>Región</th><th>Comuna</th><th>Estado</th></tr>';
+                
+                clientes.forEach(cliente => {
+                    const camposCompletos = cliente.nombrefantasia && cliente.giro && cliente.nombrerepresentantelegal && cliente.telcelular && cliente.id_region && cliente.id_comuna;
+                    const estadoColor = camposCompletos ? 'green' : 'orange';
+                    const estadoTexto = camposCompletos ? '✅ Completo' : '⚠️ Incompleto';
+                    
+                    html += `<tr>
+                        <td>${cliente.id_cliente}</td>
+                        <td>${cliente.nombrecliente || '-'}</td>
+                        <td>${cliente.nombrefantasia || '-'}</td>
+                        <td>${cliente.giro || '-'}</td>
+                        <td>${cliente.nombrerepresentantelegal || '-'}</td>
+                        <td>${cliente.telcelular || '-'}</td>
+                        <td>${cliente.id_region || '-'}</td>
+                        <td>${cliente.id_comuna || '-'}</td>
+                        <td style="color: ${estadoColor}; font-weight: bold;">${estadoTexto}</td>
+                    </tr>`;
+                });
+                
+                html += '</table>';
+                container.innerHTML += html;
+
+            } catch (error) {
+                log(`❌ Error general: ${error.message}`, 'error', 'estadoActual');
+            }
+        }
+
+        async function iniciarActualizacion() {
+            const btnActualizar = document.getElementById('btnActualizar');
+            const containerProgreso = document.getElementById('progreso');
+            const containerResultados = document.getElementById('resultados');
+            
+            btnActualizar.disabled = true;
+            containerProgreso.innerHTML = '';
+            containerResultados.innerHTML = '';
+            
+            log('🚀 Iniciando actualización de datos de clientes...', 'info', 'progreso');
+            updateProgress(10);
+
+            try {
+                // Obtener clientes existentes
+                const { data: clientesExistentes, error: errorClientes } = await supabase
+                    .from('clientes')
+                    .select('id_cliente, nombrecliente')
+                    .order('id_cliente');
+
+                if (errorClientes) {
+                    log(`❌ Error obteniendo clientes: ${errorClientes.message}`, 'error', 'progreso');
+                    btnActualizar.disabled = false;
+                    return;
+                }
+
+                log(`📊 Se encontraron ${clientesExistentes.length} clientes para actualizar`, 'info', 'progreso');
+                updateProgress(20);
+
+                let actualizados = 0;
+                let errores = 0;
+
+                // Actualizar cada cliente
+                for (let i = 0; i < datosClientes.length; i++) {
+                    const datos = datosClientes[i];
+                    const progresoPercent = 20 + (i / datosClientes.length) * 60;
+                    
+                    log(`🔄 Actualizando cliente ID ${datos.id_cliente}...`, 'info', 'progreso');
+                    updateProgress(progresoPercent);
+
+                    try {
+                        const { data, error } = await supabase
+                            .from('clientes')
+                            .update(datos)
+                            .eq('id_cliente', datos.id_cliente)
+                            .select();
+
+                        if (error) {
+                            log(`❌ Error actualizando cliente ${datos.id_cliente}: ${error.message}`, 'error', 'progreso');
+                            errores++;
+                        } else {
+                            log(`✅ Cliente ${datos.id_cliente} actualizado exitosamente`, 'success', 'progreso');
+                            actualizados++;
+                        }
+                    } catch (error) {
+                        log(`❌ Error en cliente ${datos.id_cliente}: ${error.message}`, 'error', 'progreso');
+                        errores++;
+                    }
+                }
+
+                updateProgress(90);
+
+                // Verificar resultados finales
+                log('🔍 Verificando resultados finales...', 'info', 'progreso');
+                
+                const { data: clientesFinales, error: errorFinales } = await supabase
+                    .from('clientes')
+                    .select('id_cliente, nombrecliente, nombrefantasia, giro, nombrerepresentantelegal, telcelular, id_region, id_comuna')
+                    .order('id_cliente');
+
+                if (!errorFinales) {
+                    updateProgress(100);
+                    
+                    let html = `<h3>📋 Resumen de Actualización</h3>`;
+                    html += `<p><strong>Clientes actualizados:</strong> ${actualizados}</p>`;
+                    html += `<p><strong>Errores:</strong> ${errores}</p>`;
+                    html += `<h4>Estado final de los clientes:</h4>`;
+                    html += '<table border="1" style="width:100%; border-collapse: collapse; margin-top: 10px;">';
+                    html += '<tr style="background: #f0f0f0;"><th>ID</th><th>Nombre</th><th>Fantasía</th><th>Giro</th><th>Representante</th><th>Teléfono</th><th>Estado</th></tr>';
+                    
+                    clientesFinales.forEach(cliente => {
+                        const camposCompletos = cliente.nombrefantasia && cliente.giro && cliente.nombrerepresentantelegal && cliente.telcelular;
+                        const estadoColor = camposCompletos ? 'green' : 'orange';
+                        const estadoTexto = camposCompletos ? '✅ Completo' : '⚠️ Incompleto';
+                        
+                        html += `<tr>
+                            <td>${cliente.id_cliente}</td>
+                            <td>${cliente.nombrecliente || '-'}</td>
+                            <td>${cliente.nombrefantasia || '-'}</td>
+                            <td>${cliente.giro || '-'}</td>
+                            <td>${cliente.nombrerepresentantelegal || '-'}</td>
+                            <td>${cliente.telcelular || '-'}</td>
+                            <td style="color: ${estadoColor}; font-weight: bold;">${estadoTexto}</td>
+                        </tr>`;
+                    });
+                    
+                    html += '</table>';
+                    containerResultados.innerHTML = html;
+                    
+                    log('🎉 Proceso de actualización completado', 'success', 'progreso');
+                }
+
+            } catch (error) {
+                log(`❌ Error general: ${error.message}`, 'error', 'progreso');
+            } finally {
+                btnActualizar.disabled = false;
+            }
+        }
+
+        // Verificar estado al cargar la página
+        window.onload = function() {
+            verificarEstadoActual();
+        };
+    </script>
+</body>
+</html>

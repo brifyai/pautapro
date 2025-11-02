@@ -1,0 +1,394 @@
+/* CSS Global de Responsividad para PautaPro */
+
+/* ======== VARIABLES DE RESPONSIVIDAD ======== */
+:root {
+  --header-height-desktop: 72px;
+  --header-height-tablet: 60px;
+  --header-height-mobile: 56px;
+  --header-height-small: 52px;
+  
+  --sidebar-width-desktop: 280px;
+  --sidebar-width-tablet: 260px;
+  --sidebar-width-mobile: 85%;
+  
+  --container-padding-desktop: 32px;
+  --container-padding-tablet: 20px;
+  --container-padding-mobile: 12px;
+  --container-padding-small: 8px;
+}
+
+/* ======== AJUSTES GENERALES ======== */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+/* ======== CONTENEDORES PRINCIPALES ======== */
+.container-responsive {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--container-padding-desktop);
+}
+
+@media (max-width: 1024px) {
+  .container-responsive {
+    padding: 0 var(--container-padding-tablet);
+  }
+}
+
+@media (max-width: 768px) {
+  .container-responsive {
+    padding: 0 var(--container-padding-mobile);
+  }
+}
+
+@media (max-width: 480px) {
+  .container-responsive {
+    padding: 0 var(--container-padding-small);
+  }
+}
+
+/* ======== GRID RESPONSIVO ======== */
+.grid-responsive {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+@media (max-width: 768px) {
+  .grid-responsive {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid-responsive {
+    gap: 12px;
+  }
+}
+
+/* ======== TABLAS RESPONSIVAS ======== */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive table {
+  min-width: 600px;
+}
+
+@media (max-width: 768px) {
+  .table-responsive table {
+    min-width: 100%;
+  }
+  
+  .table-responsive thead {
+    display: none;
+  }
+  
+  .table-responsive tbody,
+  .table-responsive tr,
+  .table-responsive td {
+    display: block;
+    width: 100%;
+  }
+  
+  .table-responsive tr {
+    margin-bottom: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px;
+  }
+  
+  .table-responsive td {
+    text-align: right;
+    padding: 8px 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  
+  .table-responsive td:before {
+    content: attr(data-label);
+    float: left;
+    font-weight: 600;
+    color: #374151;
+  }
+}
+
+/* ======== TARJETAS RESPONSIVAS ======== */
+.card-responsive {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  margin-bottom: 24px;
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .card-responsive {
+    padding: 16px;
+    margin-bottom: 16px;
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-responsive {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+}
+
+/* ======== BOTONES RESPONSIVOS ======== */
+.btn-responsive {
+  padding: 12px 24px;
+  font-size: 14px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+@media (max-width: 768px) {
+  .btn-responsive {
+    padding: 10px 20px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-responsive {
+    padding: 8px 16px;
+    font-size: 12px;
+    min-height: 36px;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  
+  .btn-responsive:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* ======== FORMULARIOS RESPONSIVOS ======== */
+.form-responsive {
+  display: grid;
+  gap: 20px;
+}
+
+.form-group-responsive {
+  display: grid;
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .form-responsive {
+    gap: 16px;
+  }
+  
+  .form-group-responsive {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-responsive {
+    gap: 12px;
+  }
+  
+  .form-group-responsive {
+    gap: 4px;
+  }
+}
+
+/* ======== MODALES RESPONSIVOS ======== */
+.modal-responsive {
+  max-width: 90vw;
+  max-height: 90vh;
+  margin: 5vh auto;
+}
+
+@media (max-width: 768px) {
+  .modal-responsive {
+    max-width: 95vw;
+    max-height: 95vh;
+    margin: 2.5vh auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-responsive {
+    max-width: 100vw;
+    max-height: 100vh;
+    margin: 0;
+    border-radius: 0;
+  }
+}
+
+/* ======== TIPOGRAFÍA RESPONSIVA ======== */
+.text-responsive-h1 {
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+.text-responsive-h2 {
+  font-size: 24px;
+  line-height: 1.3;
+}
+
+.text-responsive-h3 {
+  font-size: 20px;
+  line-height: 1.4;
+}
+
+.text-responsive-body {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.text-responsive-small {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .text-responsive-h1 {
+    font-size: 24px;
+  }
+  
+  .text-responsive-h2 {
+    font-size: 20px;
+  }
+  
+  .text-responsive-h3 {
+    font-size: 18px;
+  }
+  
+  .text-responsive-body {
+    font-size: 14px;
+  }
+  
+  .text-responsive-small {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .text-responsive-h1 {
+    font-size: 20px;
+  }
+  
+  .text-responsive-h2 {
+    font-size: 18px;
+  }
+  
+  .text-responsive-h3 {
+    font-size: 16px;
+  }
+  
+  .text-responsive-body {
+    font-size: 13px;
+  }
+  
+  .text-responsive-small {
+    font-size: 11px;
+  }
+}
+
+/* ======== UTILIDADES RESPONSIVAS ======== */
+.hide-mobile {
+  display: block;
+}
+
+.show-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none;
+  }
+  
+  .show-mobile {
+    display: block;
+  }
+}
+
+.text-center-mobile {
+  text-align: left;
+}
+
+@media (max-width: 768px) {
+  .text-center-mobile {
+    text-align: center;
+  }
+}
+
+.full-width-mobile {
+  width: auto;
+}
+
+@media (max-width: 768px) {
+  .full-width-mobile {
+    width: 100%;
+  }
+}
+
+/* ======== AJUSTES ESPECÍFICOS PARA MATERIAL-UI ======== */
+@media (max-width: 768px) {
+  .MuiPaper-root {
+    border-radius: 8px !important;
+  }
+  
+  .MuiDialog-paper {
+    margin: 16px !important;
+    max-height: calc(100vh - 32px) !important;
+  }
+  
+  .MuiTableCell-root {
+    padding: 8px 4px !important;
+    font-size: 12px !important;
+  }
+  
+  .MuiButton-root {
+    min-height: 40px !important;
+  }
+  
+  .MuiInputBase-root {
+    font-size: 14px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .MuiDialog-paper {
+    margin: 8px !important;
+    max-height: calc(100vh - 16px) !important;
+  }
+  
+  .MuiTableCell-root {
+    padding: 6px 2px !important;
+    font-size: 11px !important;
+  }
+  
+  .MuiButton-root {
+    min-height: 36px !important;
+    font-size: 12px !important;
+  }
+  
+  .MuiInputBase-root {
+    font-size: 13px !important;
+  }
+  
+  .MuiTypography-root {
+    font-size: 0.875rem !important;
+  }
+}
