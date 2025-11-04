@@ -392,3 +392,65 @@ html, body {
     font-size: 0.875rem !important;
   }
 }
+/* ======== MODO MÓVIL (activado por body.mobile-mode) ======== */
+@media (max-width: 600px) {
+  body.mobile-mode {
+    overflow-x: hidden;
+    background: #f5f7fa;
+  }
+
+  /* Oculta elementos pesados del layout de escritorio */
+  body.mobile-mode .navbar,
+  body.mobile-mode .main-sidebar,
+  body.mobile-mode .main-footer {
+    display: none !important;
+  }
+
+  /* Ajusta el lienzo principal cuando está activo el AppBar móvil */
+  body.mobile-mode .main-content {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-top: 56px !important; /* altura del AppBar de MobileLayout */
+  }
+
+  /* Encabezados compactos y sin breadcrumb */
+  body.mobile-mode .section .section-header {
+    padding: 8px 12px !important;
+    margin-bottom: 8px !important;
+  }
+  body.mobile-mode .section .section-header .section-header-breadcrumb,
+  body.mobile-mode .section .float-right {
+    display: none !important;
+  }
+
+  /* Tarjetas más limpias y con menos sombra en móvil */
+  body.mobile-mode .card {
+    margin: 8px 12px !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06) !important;
+  }
+
+  /* Contenedor fluido al 100% con padding lateral mínimo */
+  body.mobile-mode .container-responsive {
+    padding: 0 8px !important;
+    max-width: 100% !important;
+  }
+
+  /* Tablas: margen lateral mínimo */
+  body.mobile-mode .table-responsive {
+    margin: 0 8px;
+  }
+
+  /* Botones táctiles cómodos */
+  body.mobile-mode .btn {
+    min-height: 40px;
+    border-radius: 10px;
+  }
+}
+
+/* Soporte para safe-area en dispositivos con notch */
+@supports (padding: max(0px)) {
+  body.mobile-mode .with-safe-area-bottom {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}

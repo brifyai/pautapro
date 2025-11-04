@@ -16,7 +16,12 @@ import {
   DialogContent,
   DialogActions,
   IconButton,
-  Grid
+  Grid,
+  useMediaQuery,
+  useTheme,
+  Card,
+  CardContent,
+  Avatar
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
@@ -32,6 +37,8 @@ import './Soportes.css';
 
 const Soportes = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [pageSize, setPageSize] = useState(5);
   const [rows, setRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
@@ -437,56 +444,48 @@ const Soportes = () => {
   };
 
   return (
-    <div className="soportes-container">
-      <div className="header">
-        <Breadcrumbs 
-          separator={<NavigateNextIcon fontSize="small" />} 
-          aria-label="breadcrumb"
-          className="breadcrumb"
-        >
-          <Link component={RouterLink} to="/dashboard">
-            Home
-          </Link>
-          <Typography color="text.primary">Soportes</Typography>
-        </Breadcrumbs>
-
-        <div className="header-content">
-          <Typography variant="h5" component="h1">
-            Listado de Soportes
-          </Typography>
-        
+    <div className="soportes-container animate-fade-in">
+      {/* Header moderno con gradiente - Oculto en móvil */}
+      {!isMobile && (
+        <div className="modern-header animate-slide-down">
+          <div className="modern-title" style={{ fontSize: '1rem', marginTop: '14px', lineHeight: '1' }}>
+            📋 LISTADO DE SOPORTES
+          </div>
         </div>
+      )}
 
-        <Grid container spacing={3} style={{ marginBottom: '20px' }}>
-          <Grid item xs={12} sm={4}>
+      {/* Contenedor único para todos los elementos en una línea */}
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: 2,
+        mb: 3
+      }}>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
           <TextField
-            fullWidth
             variant="outlined"
-            placeholder="Buscar soporte..."
+            placeholder="🔍 Buscar soporte..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-              <SearchIcon sx={{ color: '#6777ef' }}/>
-              </InputAdornment>
-            ),
-            }}
+            className="search-input"
             sx={{
-            '& .MuiOutlinedInput-root': {
-              '&:hover fieldset': {
-              borderColor: '#6777ef',
-              },
-              '&.Mui-focused fieldset': {
-              borderColor: '#6777ef',
-              },
-            }
+              background: 'rgba(255,255,255,0.9)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '12px',
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '12px',
+                '&:hover fieldset': {
+                  borderColor: 'var(--gradient-primary)',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'var(--gradient-primary)',
+                },
+              }
             }}
           />
-          </Grid>
-          <Grid item xs={12} sm={2}>
           <TextField
-            fullWidth
             type="date"
             variant="outlined"
             value={startDate}
@@ -495,17 +494,14 @@ const Soportes = () => {
             InputLabelProps={{ shrink: true }}
             className="date-input"
             sx={{
-            '& .MuiOutlinedInput-root': {
-              background: 'rgba(255,255,255,0.9)',
-              backdropFilter: 'blur(10px)',
-              borderRadius: '12px',
-            }
+              '& .MuiOutlinedInput-root': {
+                background: 'rgba(255,255,255,0.9)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '12px',
+              }
             }}
           />
-          </Grid>
-          <Grid item xs={12} sm={2}>
           <TextField
-            fullWidth
             type="date"
             variant="outlined"
             value={endDate}
@@ -514,101 +510,266 @@ const Soportes = () => {
             InputLabelProps={{ shrink: true }}
             className="date-input"
             sx={{
-            '& .MuiOutlinedInput-root': {
-              background: 'rgba(255,255,255,0.9)',
-              backdropFilter: 'blur(10px)',
-              borderRadius: '12px',
-            }
+              '& .MuiOutlinedInput-root': {
+                background: 'rgba(255,255,255,0.9)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '12px',
+              }
             }}
           />
-          </Grid>
-          <Grid item xs={12} sm={2}>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
           <Button
             variant="contained"
             onClick={handleExportToExcel}
-            startIcon={<FileDownloadIcon sx={{ color: '#fff' }} />}
-            sx={{
-            backgroundColor: '#206e43',
-            color: '#fff',
-            height: '72%',
-            width: '70%',
-            '&:hover': {
-              backgroundColor: '#185735',
-            },
-            }}
+            startIcon={<FileDownloadIcon sx={{ color: 'white' }} />}
+            className="btn-agregar"
           >
-            Exportar Soportes
+            📊 Exportar Excel
           </Button>
-          </Grid>
-        </Grid>
+        </Box>
+      </Box>
 
-      </div>
+      {/* Versión móvil - Cards creativos */}
+      {isMobile && (
+        <Box sx={{ p: 2 }}>
+          {filteredRows.slice(0, 10).map((soporte, index) => (
+            <Card
+              key={soporte.id}
+              sx={{
+                background: `linear-gradient(135deg, ${
+                  index % 4 === 0 ? '#667eea 0%, #764ba2 100%' :
+                  index % 4 === 1 ? '#f093fb 0%, #f5576c 100%' :
+                  index % 4 === 2 ? '#4facfe 0%, #00f2fe 100%' :
+                  '#43e97b 0%, #38f9d7 100%'
+                })`,
+                borderRadius: '16px',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                overflow: 'hidden',
+                position: 'relative',
+                mb: 2
+              }}
+            >
+              <CardContent sx={{ p: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                  <Avatar
+                    sx={{
+                      width: 48,
+                      height: 48,
+                      background: 'rgba(255,255,255,0.2)',
+                      color: 'white',
+                      fontWeight: 'bold',
+                      fontSize: '1.2rem',
+                      mr: 2
+                    }}
+                  >
+                    {soporte.nombreidentficiador?.charAt(0)?.toUpperCase() || 'S'}
+                  </Avatar>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                      {soporte.nombreidentficiador || 'Sin identificador'}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                      {soporte.fechaCreacion || 'Sin fecha'}
+                    </Typography>
+                  </Box>
+                  <Switch
+                    checked={soporte.estado}
+                    onChange={(e) => handleEstadoChange(e, soporte.id)}
+                    size="small"
+                    sx={{
+                      '& .MuiSwitch-switchBase.Mui-checked': {
+                        color: '#4caf50 !important',
+                      },
+                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                        backgroundColor: '#4caf50 !important',
+                      },
+                      '& .MuiSwitch-switchBase': {
+                        color: 'rgba(255,255,255,0.5)',
+                      },
+                      '& .MuiSwitch-switchBase + .MuiSwitch-track': {
+                        backgroundColor: 'rgba(255,255,255,0.3)',
+                      },
+                    }}
+                  />
+                </Box>
+                
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                      🏢 {soporte.nombreproveedor || 'Sin Proveedor'}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                      📺 {soporte.medios || 'Sin medios'}
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                      💰 Bonificación: ${soporte.bonificacionano?.toLocaleString('es-CL') || 0}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                      📏 Escala: {soporte.escala || 0}
+                    </Typography>
+                  </Box>
+                </Box>
+                
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1.5, gap: 1 }}>
+                  <IconButton
+                    size="small"
+                    sx={{
+                      background: 'rgba(255,255,255,0.2)',
+                      color: 'white',
+                      '&:hover': { background: 'rgba(255,255,255,0.3)' }
+                    }}
+                    onClick={() => {
+                      if (soporte.id_proveedor) {
+                        navigate(`/proveedores/view/${soporte.id_proveedor}`);
+                      } else {
+                        Swal.fire({
+                          icon: 'warning',
+                          title: 'Sin proveedor',
+                          text: 'Este soporte no tiene un proveedor asignado'
+                        });
+                      }
+                    }}
+                  >
+                    <VisibilityIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    sx={{
+                      background: 'rgba(255,255,255,0.2)',
+                      color: 'white',
+                      '&:hover': { background: 'rgba(255,255,255,0.3)' }
+                    }}
+                    onClick={() => {
+                      setEditMode(true);
+                      setFormData(soporte);
+                      setOpenModal(true);
+                    }}
+                  >
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    sx={{
+                      background: 'rgba(255,255,255,0.2)',
+                      color: 'white',
+                      '&:hover': { background: 'rgba(255,255,255,0.3)' }
+                    }}
+                    onClick={() => {
+                      // Aquí iría la lógica para eliminar el soporte
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              </CardContent>
+            </Card>
+          ))}
+          
+          {filteredRows.length === 0 && (
+            <Box sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '200px',
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              p: 2
+            }}>
+              <Typography variant="h6" color="textSecondary" align="center">
+                {loading ? 'Cargando datos...' : 'No hay soportes para mostrar'}
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      )}
 
-      <div className="data-grid-container">
-        {filteredRows && filteredRows.length > 0 ? (
-          <DataGrid
-            getRowId={(row) => row.id}
-            rows={filteredRows}
-            columns={columns}
-            pageSize={pageSize}
-            onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-            rowsPerPageOptions={[5, 10, 25]}
-            disableSelectionOnClick
-            loading={loading}
-            autoHeight
-            localeText={{
-              noRowsLabel: 'No hay datos para mostrar',
-              footerRowSelected: count => `${count} fila${count !== 1 ? 's' : ''} seleccionada${count !== 1 ? 's' : ''}`,
-              footerTotalRows: 'Filas totales:',
-              footerTotalVisibleRows: (visibleCount, totalCount) =>
-                `${visibleCount.toLocaleString()} de ${totalCount.toLocaleString()}`,
-              footerPaginationRowsPerPage: 'Filas por página:',
-              columnMenuLabel: 'Menú',
-              columnMenuShowColumns: 'Mostrar columnas',
-              columnMenuFilter: 'Filtrar',
-              columnMenuHideColumn: 'Ocultar',
-              columnMenuUnsort: 'Desordenar',
-              columnMenuSortAsc: 'Ordenar ASC',
-              columnMenuSortDesc: 'Ordenar DESC',
-              columnHeaderSortIconLabel: 'Ordenar',
-              MuiTablePagination: {
-                labelRowsPerPage: 'Filas por página:',
-                labelDisplayedRows: ({ from, to, count }) =>
-                  `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`,
-              },
-            }}
-            initialState={{
-              pagination: {
-                paginationModel: { pageSize: 10 }
-              },
-            }}
-            pageSizeOptions={[5, 10, 25]}
-            sx={{
-              '& .MuiDataGrid-cell:focus': {
-                outline: 'none',
-              },
-              '& .MuiDataGrid-row:hover': {
-                backgroundColor: '#f5f5f5',
-              },
-            }}
-          />
-        ) : (
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '200px',
-            backgroundColor: 'white',
-            borderRadius: '8px',
-            boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-            padding: '16px'
-          }}>
-            <Typography variant="h6" color="textSecondary">
-              {loading ? 'Cargando datos...' : 'No hay datos para mostrar'}
-            </Typography>
-          </div>
-        )}
-      </div>
+      {/* DataGrid Container - Solo visible en escritorio */}
+      {!isMobile && (
+        <Box sx={{ p: 3, pt: 0 }}>
+          {filteredRows && filteredRows.length > 0 ? (
+            <DataGrid
+              getRowId={(row) => row.id}
+              rows={filteredRows}
+              columns={columns}
+              pageSize={10}
+              rowsPerPageOptions={[10]}
+              disableSelectionOnClick
+              loading={loading}
+              autoHeight
+              rowHeight={56}
+              columnHeaderHeight={56}
+              localeText={{
+                noRowsLabel: 'No hay datos para mostrar',
+                footerRowSelected: count => `${count} fila${count !== 1 ? 's' : ''} seleccionada${count !== 1 ? 's' : ''}`,
+                footerTotalRows: 'Filas totales:',
+                footerTotalVisibleRows: (visibleCount, totalCount) =>
+                  `${visibleCount.toLocaleString()} de ${totalCount.toLocaleString()}`,
+                footerPaginationRowsPerPage: 'Filas por página:',
+                columnMenuLabel: 'Menú',
+                columnMenuShowColumns: 'Mostrar columnas',
+                columnMenuFilter: 'Filtrar',
+                columnMenuHideColumn: 'Ocultar',
+                columnMenuUnsort: 'Desordenar',
+                columnMenuSortAsc: 'Ordenar ASC',
+                columnMenuSortDesc: 'Ordenar DESC',
+                columnHeaderSortIconLabel: 'Ordenar',
+                MuiTablePagination: {
+                  labelRowsPerPage: 'Filas por página:',
+                  labelDisplayedRows: ({ from, to, count }) =>
+                    `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`,
+                },
+              }}
+              initialState={{
+                pagination: {
+                  paginationModel: { pageSize: 10 }
+                },
+              }}
+              pageSizeOptions={[10]}
+              sx={{
+                '& .MuiDataGrid-footerContainer': {
+                  borderTop: '1px solid rgba(102, 126, 234, 0.1) !important',
+                  background: 'rgba(255,255,255,0.8) !important',
+                },
+                '& .MuiDataGrid-footerContainer .MuiTablePagination-root .MuiTablePagination-selectLabel': {
+                  display: 'none'
+                },
+                '& .MuiDataGrid-footerContainer .MuiTablePagination-root .MuiTablePagination-select': {
+                  display: 'none'
+                },
+                '& .MuiDataGrid-footerContainer .MuiTablePagination-root .MuiTablePagination-selectIcon': {
+                  display: 'none'
+                },
+                '& .MuiDataGrid-cell:focus': {
+                  outline: 'none',
+                },
+                '& .MuiDataGrid-row:hover': {
+                  backgroundColor: '#f5f5f5',
+                },
+              }}
+            />
+          ) : (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '200px',
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+              padding: '16px'
+            }}>
+              <Typography variant="h6" color="textSecondary">
+                {loading ? 'Cargando datos...' : 'No hay datos para mostrar'}
+              </Typography>
+            </div>
+          )}
+        </Box>
+      )}
 
       {/* Modal de Nuevo/Editar Soporte */}
       <Dialog 

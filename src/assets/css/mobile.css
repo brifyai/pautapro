@@ -1,0 +1,403 @@
+/* CSS Móvil Específico para PautaPro */
+
+/* Variables específicas para móvil */
+:root {
+  --mobile-header-height: 56px;
+  --mobile-bottom-nav-height: 60px;
+  --mobile-drawer-width: 280px;
+  --mobile-card-radius: 16px;
+  --mobile-touch-target: 44px;
+  --mobile-spacing-xs: 8px;
+  --mobile-spacing-sm: 12px;
+  --mobile-spacing-md: 16px;
+  --mobile-spacing-lg: 24px;
+  --mobile-spacing-xl: 32px;
+}
+
+/* Reset y optimizaciones para móvil */
+* {
+  -webkit-tap-highlight-color: rgba(102, 126, 234, 0.1);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Permitir selección en inputs y textareas */
+input, textarea, [contenteditable] {
+  -webkit-user-select: text;
+  -khtml-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Optimizaciones de rendimiento */
+.mobile-optimized {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-perspective: 1000px;
+  perspective: 1000px;
+}
+
+/* Layout principal móvil */
+.mobile-layout {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* App Bar móvil */
+.mobile-app-bar {
+  height: var(--mobile-header-height) !important;
+  min-height: var(--mobile-header-height) !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3) !important;
+}
+
+.mobile-app-bar .MuiToolbar-root {
+  height: var(--mobile-header-height) !important;
+  min-height: var(--mobile-header-height) !important;
+  padding-left: var(--mobile-spacing-sm) !important;
+  padding-right: var(--mobile-spacing-sm) !important;
+}
+
+/* Bottom Navigation */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--mobile-bottom-nav-height);
+  background: white;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  z-index: 1000;
+}
+
+.mobile-bottom-nav .MuiIconButton-root {
+  min-width: var(--mobile-touch-target);
+  min-height: var(--mobile-touch-target);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.mobile-bottom-nav .MuiIconButton-root:hover {
+  background-color: rgba(102, 126, 234, 0.1);
+  transform: scale(1.1);
+}
+
+/* Drawer móvil */
+.mobile-drawer {
+  width: var(--mobile-drawer-width) !important;
+}
+
+.mobile-drawer .MuiDrawer-paper {
+  width: var(--mobile-drawer-width) !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+}
+
+/* Cards móviles */
+.mobile-card {
+  border-radius: var(--mobile-card-radius) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+  margin-bottom: var(--mobile-spacing-md) !important;
+  overflow: visible !important;
+  transition: all 0.3s ease !important;
+}
+
+.mobile-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+}
+
+.mobile-card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  padding: var(--mobile-spacing-md) !important;
+  border-radius: var(--mobile-card-radius) var(--mobile-card-radius) 0 0 !important;
+}
+
+/* Tablas móviles */
+.mobile-table-container {
+  border-radius: var(--mobile-card-radius) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+  overflow: hidden !important;
+}
+
+.mobile-table-row {
+  padding: var(--mobile-spacing-md) !important;
+  border-bottom: 1px solid #e0e0e0 !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+.mobile-table-row:hover {
+  background-color: rgba(102, 126, 234, 0.04) !important;
+}
+
+.mobile-table-expanded {
+  background-color: rgba(102, 126, 234, 0.02) !important;
+  border-top: 1px solid #e0e0e0 !important;
+  padding: var(--mobile-spacing-md) !important;
+}
+
+/* Botones móviles */
+.mobile-btn {
+  min-height: var(--mobile-touch-target) !important;
+  min-width: var(--mobile-touch-target) !important;
+  border-radius: 12px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.mobile-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3) !important;
+}
+
+.mobile-btn-primary:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+}
+
+/* FAB móvil */
+.mobile-fab {
+  width: 64px !important;
+  height: 64px !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.mobile-fab:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%) !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4) !important;
+}
+
+/* Formularios móviles */
+.mobile-form {
+  gap: var(--mobile-spacing-md) !important;
+}
+
+.mobile-form-group {
+  margin-bottom: var(--mobile-spacing-md) !important;
+}
+
+.mobile-text-field .MuiOutlinedInput-root {
+  border-radius: 12px !important;
+  background: rgba(255,255,255,0.9) !important;
+  backdrop-filter: blur(10px) !important;
+  transition: all 0.3s ease !important;
+}
+
+.mobile-text-field .MuiOutlinedInput-root:hover {
+  background: white !important;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1) !important;
+}
+
+.mobile-text-field .MuiOutlinedInput-root.Mui-focused {
+  background: white !important;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2) !important;
+}
+
+/* Modales móviles */
+.mobile-dialog .MuiDialog-paper {
+  margin: var(--mobile-spacing-md) !important;
+  border-radius: var(--mobile-card-radius) !important;
+  max-height: calc(100vh - 32px) !important;
+}
+
+.mobile-dialog .MuiDialogTitle-root {
+  padding: var(--mobile-spacing-lg) var(--mobile-spacing-lg) var(--mobile-spacing-md) !important;
+}
+
+.mobile-dialog .MuiDialogContent-root {
+  padding: 0 var(--mobile-spacing-lg) !important;
+}
+
+.mobile-dialog .MuiDialogActions-root {
+  padding: var(--mobile-spacing-lg) !important;
+  gap: var(--mobile-spacing-sm) !important;
+}
+
+/* Listas móviles */
+.mobile-list-item {
+  border-radius: 12px !important;
+  margin-bottom: var(--mobile-spacing-xs) !important;
+  transition: all 0.2s ease !important;
+}
+
+.mobile-list-item:hover {
+  background-color: rgba(255,255,255,0.1) !important;
+  transform: translateX(4px) !important;
+}
+
+/* Chips móviles */
+.mobile-chip {
+  border-radius: 20px !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
+}
+
+/* Progress bars móviles */
+.mobile-progress {
+  height: 8px !important;
+  border-radius: 4px !important;
+}
+
+/* Animaciones móviles */
+@keyframes mobile-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mobile-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes mobile-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.mobile-animate-slide-up {
+  animation: mobile-slide-up 0.5s ease-out;
+}
+
+.mobile-animate-fade-in {
+  animation: mobile-fade-in 0.3s ease-out;
+}
+
+.mobile-animate-scale-in {
+  animation: mobile-scale-in 0.4s ease-out;
+}
+
+/* Swipe gestures (para futuras implementaciones) */
+.swipe-container {
+  touch-action: pan-y;
+  overflow-x: hidden;
+}
+
+/* Pull to refresh (para futuras implementaciones) */
+.pull-refresh-indicator {
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: transform 0.3s ease;
+}
+
+.pull-refresh-indicator.active {
+  transform: translateX(-50%) translateY(60px);
+}
+
+/* Safe areas para dispositivos con notch */
+@supports (padding: max(0px)) {
+  .mobile-layout {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .mobile-app-bar {
+    padding-top: env(safe-area-inset-top) !important;
+  }
+
+  .mobile-bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom) !important;
+  }
+}
+
+/* Media queries específicas para móvil */
+@media (max-width: 480px) {
+  :root {
+    --mobile-spacing-xs: 6px;
+    --mobile-spacing-sm: 10px;
+    --mobile-spacing-md: 14px;
+    --mobile-spacing-lg: 20px;
+    --mobile-spacing-xl: 24px;
+  }
+
+  .mobile-card {
+    margin-bottom: var(--mobile-spacing-sm) !important;
+  }
+
+  .mobile-dialog .MuiDialog-paper {
+    margin: var(--mobile-spacing-xs) !important;
+    max-height: calc(100vh - 12px) !important;
+  }
+}
+
+/* Tema oscuro para móvil (opcional) */
+@media (prefers-color-scheme: dark) {
+  .mobile-layout {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  }
+
+  .mobile-card {
+    background: rgba(255,255,255,0.05) !important;
+    backdrop-filter: blur(10px) !important;
+  }
+
+  .mobile-text-field .MuiOutlinedInput-root {
+    background: rgba(255,255,255,0.05) !important;
+  }
+}
+
+/* Optimizaciones de accesibilidad móvil */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-card,
+  .mobile-btn,
+  .mobile-fab,
+  .mobile-list-item {
+    transition: none !important;
+  }
+
+  .mobile-animate-slide-up,
+  .mobile-animate-fade-in,
+  .mobile-animate-scale-in {
+    animation: none !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .mobile-card {
+    border: 2px solid #000 !important;
+  }
+
+  .mobile-btn-primary {
+    border: 2px solid #fff !important;
+  }
+}

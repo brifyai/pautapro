@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import './Dashboard.css';
 import { Chart as ChartJS, ArcElement, Tooltip as ChartTooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
@@ -7,6 +9,8 @@ import { dashboardService } from '../../services/dashboardService';
 import { campaignService } from '../../services/campaignService';
 import { orderService } from '../../services/orderService';
 import clientScoringService from '../../services/clientScoringService';
+import MobileLayout from '../../components/mobile/MobileLayout';
+import MobileCard from '../../components/mobile/MobileCard';
 import {
   Alert,
   AlertTitle,
@@ -46,6 +50,8 @@ ChartJS.register(ArcElement, ChartTooltip, Legend, CategoryScale, LinearScale, B
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [stats, setStats] = useState({
     agencias: 0,
     clientes: 0,
@@ -167,6 +173,9 @@ const Dashboard = () => {
   useEffect(() => {
     loadDashboardData();
 
+    // Scroll automático al cargar
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
     // Actualización automática cada 5 minutos
     const interval = setInterval(loadDashboardData, 300000);
     return () => clearInterval(interval);
@@ -177,10 +186,6 @@ const Dashboard = () => {
   const memoizedKpiData = useMemo(() => kpiData, [kpiData]);
   const memoizedPieData = useMemo(() => pieData, [pieData]);
   const memoizedBarData = useMemo(() => barData, [barData]);
-
-  // Lazy loading para componentes pesados (si fuera necesario)
-  // const PieChart = lazy(() => import('react-chartjs-2').then(module => ({ default: module.Pie })));
-  // const BarChart = lazy(() => import('react-chartjs-2').then(module => ({ default: module.Bar })));
 
   useEffect(() => {
     // Generar alertas automáticas basadas en los datos
@@ -248,7 +253,6 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Error cargando datos del dashboard:', error);
       // No mostrar alertas de error generales, solo log en consola
-      // Los servicios individuales ya manejan sus propios errores con datos de ejemplo
     } finally {
       setLoading(false);
     }
@@ -319,13 +323,189 @@ const Dashboard = () => {
     }
   };
 
+  // VERSIÓN MÓVIL: early return seguro (no toca el JSX de escritorio)
+  if (isMobile) {
+    return (
+      <>
+        {/* Header */}
+        <Box sx={{ p: 2, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', borderRadius: '0 0 16px 16px', mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box>
+              <Typography component="div" variant="h6" sx={{ fontWeight: 'bold' }} style={{ color: '#fff' }}>
+                Dashboard General
+              </Typography>
+              <Typography component="div" variant="caption" sx={{ opacity: 0.8 }} style={{ color: '#fff' }}>
+                Última actualización: {lastUpdate.toLocaleTimeString()}
+              </Typography>
+            </Box>
+            <Tooltip title="Actualizar datos">
+              <IconButton
+                onClick={loadDashboardData}
+                sx={{ color: 'white', background: 'rgba(255,255,255,0.1)' }}
+              >
+                <RefreshIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Box>
 
+        {/* Cards KPI principales */}
+        <Box sx={{ p: 2, pt: 0 }}>
+          <MobileCard
+          title="Clientes"
+          value={loading ? '...' : stats.clientes.toLocaleString()}
+          titleColor="white"
+            subtitle={`${stats.crecimientoMensual?.toFixed(1)}% este mes`}
+            trend={stats.crecimientoMensual > 0 ? 'up' : stats.crecimientoMensual < 0 ? 'down' : null}
+            trendValue={`${Math.abs(stats.crecimientoMensual || 0).toFixed(1)}%`}
+            icon={<PeopleIcon sx={{ fontSize: 28, color: 'white' }} />}
+            color="primary"
+          />
+          <MobileCard
+            title="Campañas"
+            value={loading ? '...' : stats.campanas.toLocaleString()}
+            titleColor="white"
+            subtitle={`${stats.campañasPendientes} pendientes`}
+            icon={<CampaignIcon sx={{ fontSize: 28, color: 'white' }} />}
+            color="secondary"
+            chips={[{ label: `${stats.campañasPendientes} pendientes`, color: stats.campañasPendientes > 5 ? 'warning' : 'success' }]}
+          />
+          <MobileCard
+            title="Órdenes Activas"
+            value={loading ? '...' : stats.ordenesActivas.toLocaleString()}
+            titleColor="white"
+            subtitle={`Completación: ${kpiData.orderCompletionRate}%`}
+            icon={<ShoppingCartIcon sx={{ fontSize: 28, color: 'white' }} />}
+            color="success"
+            progress="Tasa de Completación"
+            progressValue={kpiData.orderCompletionRate}
+          />
+          <MobileCard
+            title="Presupuesto Total"
+            value={loading ? '...' : `$${stats.presupuestoTotal ? Math.round(stats.presupuestoTotal / 1000000).toLocaleString('es-CL') : '0'}M`}
+            titleColor="white"
+            subtitle={`Duración promedio: ${kpiData.avgCampaignDuration} días`}
+            icon={<AttachMoneyIcon sx={{ fontSize: 28, color: 'white' }} />}
+            color="warning"
+          />
+
+          {/* Gráficos */}
+          <MobileCard
+            title="Distribución de Clientes"
+            subtitle="Por inversión"
+            titleColor="white"
+            icon={<PeopleIcon sx={{ fontSize: 28, color: 'white' }} />}
+            color="info"
+          >
+            <Box sx={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {loading ? (
+                <div className="modern-loading"></div>
+              ) : (
+                <Box sx={{ width: '100%', height: '100%', maxWidth: '300px' }}>
+                  <Pie data={pieData} options={pieOptions} />
+                </Box>
+              )}
+            </Box>
+          </MobileCard>
+
+          <MobileCard
+            title="Campañas por Mes"
+            subtitle="Últimos 6 meses"
+            titleColor="white"
+            icon={<CampaignIcon sx={{ fontSize: 28, color: 'white' }} />}
+            color="secondary"
+          >
+            <Box sx={{ height: 200, mt: 2 }}>
+              {loading ? (
+                <div className="modern-loading"></div>
+              ) : (
+                <Bar data={barData} options={barOptions} />
+              )}
+            </Box>
+          </MobileCard>
+
+          {/* Actividad / KPIs */}
+          <MobileCard
+            title="KPIs de Rendimiento"
+            icon={<LightbulbIcon sx={{ fontSize: 28, color: 'white' }} />}
+            titleColor="white"
+            color="warning"
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="body2">Retención de Clientes</Typography>
+                  <Typography variant="body2" fontWeight="600">{kpiData.clientRetentionRate}%</Typography>
+                </Box>
+                <LinearProgress variant="determinate" value={kpiData.clientRetentionRate} />
+              </Box>
+              <Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="body2">Completación de Órdenes</Typography>
+                  <Typography variant="body2" fontWeight="600">{kpiData.orderCompletionRate}%</Typography>
+                </Box>
+                <LinearProgress variant="determinate" value={kpiData.orderCompletionRate} />
+              </Box>
+              <Box sx={{ p: 1.5, background: 'rgba(102, 126, 234, 0.1)', borderRadius: 1 }}>
+                <Typography variant="body2" fontWeight="600">
+                  🏆 Mejor Medio: {kpiData.topPerformingMedium}
+                </Typography>
+                <Typography variant="caption">
+                  ⏱️ Duración promedio: {kpiData.avgCampaignDuration} días
+                </Typography>
+              </Box>
+            </Box>
+          </MobileCard>
+
+          <MobileCard
+            title="Actividad Reciente"
+            icon={<TimelineIcon sx={{ fontSize: 28, color: 'white' }} />}
+            titleColor="white"
+            color="success"
+          >
+            <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
+              {loading ? (
+                <div className="modern-loading"></div>
+              ) : recentMessages.length > 0 ? (
+                recentMessages.map((message, index) => (
+                  <Box key={index} sx={{ py: 1.5, borderBottom: '1px solid #e0e0e0' }}>
+                    <Typography variant="body2" fontWeight="600">
+                      {message.title}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      📅 {message.date}
+                    </Typography>
+                  </Box>
+                ))
+              ) : (
+                <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 2 }}>
+                  No hay actividad reciente
+                </Typography>
+              )}
+            </Box>
+          </MobileCard>
+
+          <MobileCard
+            title="Asistente IA"
+            icon={<AssistantIcon sx={{ fontSize: 28, color: 'white' }} />}
+            titleColor="white"
+            color="secondary"
+          >
+            <ChatIA userRole="gerente" />
+          </MobileCard>
+        </Box>
+
+      </>
+    );
+  }
+
+  // VERSIÓN ESCRITORIO (original)
   return (
     <div className="dashboard animate-fade-in">
       {/* Header con última actualización */}
       <div className="modern-header animate-slide-down">
         <div className="modern-title">
-          📊 DASHBOARD GENERAL
+          DASHBOARD GENERAL
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -349,7 +529,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-
       {/* Grid de estadísticas mejoradas */}
       <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3} className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
@@ -358,7 +537,7 @@ const Dashboard = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}>
                 <Box sx={{ flex: 1 }}>
                   <Typography color="textSecondary" gutterBottom variant="overline" className="text-gradient">
-                    👥 Clientes
+                    Clientes
                   </Typography>
                   <Typography variant="h4" component="div" className="text-gradient" sx={{ fontWeight: 700 }}>
                     {loading ? '...' : stats.clientes.toLocaleString()}
@@ -394,7 +573,7 @@ const Dashboard = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}>
                 <Box sx={{ flex: 1 }}>
                   <Typography color="textSecondary" gutterBottom variant="overline" className="text-gradient">
-                    🎯 Campañas
+                    Campañas
                   </Typography>
                   <Typography variant="h4" component="div" className="text-gradient" sx={{ fontWeight: 700 }}>
                     {loading ? '...' : stats.campanas.toLocaleString()}
@@ -437,7 +616,7 @@ const Dashboard = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}>
                 <Box sx={{ flex: 1 }}>
                   <Typography color="textSecondary" gutterBottom variant="overline" className="text-gradient">
-                    📦 Órdenes Activas
+                    Órdenes Activas
                   </Typography>
                   <Typography variant="h4" component="div" className="text-gradient" sx={{ fontWeight: 700 }}>
                     {loading ? '...' : stats.ordenesActivas.toLocaleString()}
@@ -472,10 +651,10 @@ const Dashboard = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}>
                 <Box sx={{ flex: 1 }}>
                   <Typography color="textSecondary" gutterBottom variant="overline" className="text-gradient">
-                    💰 Presupuesto Total
+                    Presupuesto Total
                   </Typography>
                   <Typography variant="h4" component="div" className="text-gradient" sx={{ fontWeight: 700 }}>
-                    {loading ? '...' : `$${(stats.presupuestoTotal / 1000000).toFixed(1)}M`}
+                    {loading ? '...' : `$${stats.presupuestoTotal ? Math.round(stats.presupuestoTotal / 1000000).toLocaleString('es-CL') : '0'}M`}
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
                     <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
@@ -509,7 +688,7 @@ const Dashboard = () => {
           <Card className="modern-card" sx={{ height: 'auto', maxHeight: { xs: 350, sm: 400, md: 450 } }}>
             <CardContent sx={{ p: 2 }}>
               <Typography variant="h6" gutterBottom className="text-gradient" sx={{ fontWeight: 600, mb: 2, fontSize: '1.1rem' }}>
-                📊 Distribución de Clientes por Inversión
+                Distribución de Clientes por Inversión
               </Typography>
               <Box sx={{ height: { xs: 250, sm: 300, md: 330 }, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {loading ? (
@@ -531,7 +710,7 @@ const Dashboard = () => {
           <Card className="modern-card" sx={{ height: 'auto', maxHeight: { xs: 350, sm: 400, md: 450 } }}>
             <CardContent sx={{ p: 2 }}>
               <Typography variant="h6" gutterBottom className="text-gradient" sx={{ fontWeight: 600, mb: 2, fontSize: '1.1rem' }}>
-                📈 Campañas por Mes (Últimos 6 meses)
+                Campañas por Mes (Últimos 6 meses)
               </Typography>
               <Box sx={{ height: { xs: 250, sm: 300, md: 330 }, position: 'relative' }}>
                 {loading ? (
@@ -552,7 +731,7 @@ const Dashboard = () => {
           <Card className="modern-card" sx={{ height: '100%', minHeight: 400, display: 'flex', flexDirection: 'column' }}>
             <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
               <Typography variant="h6" gutterBottom className="text-gradient" sx={{ fontWeight: 600, mb: 3 }}>
-                👥 Clientes Recientes
+                Clientes Recientes
               </Typography>
               <Box sx={{ flex: 1, overflow: 'auto', '&::-webkit-scrollbar': { width: '6px' }, '&::-webkit-scrollbar-track': { background: 'rgba(0,0,0,0.05)' }, '&::-webkit-scrollbar-thumb': { background: 'var(--gradient-primary)', borderRadius: '3px' } }}>
                 {loading ? (
@@ -572,6 +751,13 @@ const Dashboard = () => {
                           </Typography>
                           <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
                             📍 {client.address}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                            📅 {client.created_at ? new Date(client.created_at).toLocaleDateString('es-CL', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric'
+                            }) : 'Fecha no disponible'}
                           </Typography>
                         </Box>
                       </Box>
@@ -597,13 +783,13 @@ const Dashboard = () => {
           <Card className="modern-card" sx={{ height: '100%', minHeight: 400, display: 'flex', flexDirection: 'column' }}>
             <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
               <Typography variant="h6" gutterBottom className="text-gradient" sx={{ fontWeight: 600, mb: 3 }}>
-                🎯 Indicadores Clave de Rendimiento
+                Indicadores Clave de Rendimiento
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                 <Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                     <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                      👥 Tasa de Retención de Clientes
+                      Tasa de Retención de Clientes
                     </Typography>
                     <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--gradient-success)' }}>
                       {kpiData.clientRetentionRate}%
@@ -627,7 +813,7 @@ const Dashboard = () => {
                 <Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                     <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                      📦 Tasa de Completación de Órdenes
+                      Tasa de Completación de Órdenes
                     </Typography>
                     <Typography variant="body2" sx={{ fontWeight: 600, color: kpiData.orderCompletionRate > 80 ? 'var(--gradient-success)' : 'var(--gradient-warning)' }}>
                       {kpiData.orderCompletionRate}%
@@ -684,7 +870,7 @@ const Dashboard = () => {
           <Card className="modern-card" sx={{ height: '100%', minHeight: 400, display: 'flex', flexDirection: 'column' }}>
             <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
               <Typography variant="h6" gutterBottom className="text-gradient" sx={{ fontWeight: 600, mb: 3 }}>
-                📋 Actividad Reciente
+                Actividad Reciente
               </Typography>
               <Box sx={{ flex: 1, overflow: 'auto', '&::-webkit-scrollbar': { width: '6px' }, '&::-webkit-scrollbar-track': { background: 'rgba(0,0,0,0.05)' }, '&::-webkit-scrollbar-thumb': { background: 'var(--gradient-primary)', borderRadius: '3px' } }}>
                 {loading ? (
@@ -725,33 +911,6 @@ const Dashboard = () => {
         </Grid>
       </Grid>
 
-      {/* Botón flotante del Asistente */}
-      <Tooltip title="🤖 Asistente Inteligente - Guía paso a paso" placement="left">
-        <Fab
-          color="primary"
-          aria-label="asistente"
-          className="animate-float"
-          sx={{
-            position: 'fixed',
-            bottom: 24,
-            right: 24,
-            width: 64,
-            height: 64,
-            background: 'var(--gradient-primary)',
-            boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
-            border: '2px solid rgba(255,255,255,0.2)',
-            '&:hover': {
-              background: 'var(--gradient-secondary)',
-              transform: 'scale(1.1)',
-              boxShadow: '0 12px 40px rgba(247, 107, 138, 0.4)',
-            },
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-          }}
-          onClick={() => navigate('/ordenes/crear')}
-        >
-          <AssistantIcon sx={{ fontSize: 28 }} />
-        </Fab>
-      </Tooltip>
     </div>
   );
 };

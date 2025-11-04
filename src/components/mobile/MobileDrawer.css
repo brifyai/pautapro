@@ -1,0 +1,67 @@
+/* Estilos específicos para MobileDrawer */
+/* MÁXIMA PRIORIDAD: Sobrescribir light-theme.css */
+
+/* Drawer - Forzar TODOS los textos en blanco */
+.mobile-drawer-paper {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+}
+
+/* Sobrescribir TODOS los selectores genéricos de light-theme.css */
+.mobile-drawer-paper *,
+.mobile-drawer-paper p,
+.mobile-drawer-paper span,
+.mobile-drawer-paper label,
+.mobile-drawer-paper h1,
+.mobile-drawer-paper h2,
+.mobile-drawer-paper h3,
+.mobile-drawer-paper h4,
+.mobile-drawer-paper h5,
+.mobile-drawer-paper h6,
+.mobile-drawer-paper a {
+  color: white !important;
+}
+
+/* Items del menú */
+.mobile-drawer-paper .MuiListItemText-primary,
+.mobile-drawer-paper .MuiListItemText-secondary,
+.mobile-drawer-paper .MuiTypography-root {
+  color: white !important;
+}
+
+/* Iconos */
+.mobile-drawer-paper .MuiListItemIcon-root,
+.mobile-drawer-paper .MuiSvgIcon-root {
+  color: white !important;
+}
+
+/* Botones */
+.mobile-drawer-paper .MuiIconButton-root {
+  color: white !important;
+}
+
+/* Estados hover y selected */
+.mobile-drawer-paper .MuiListItemButton-root:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.mobile-drawer-paper .MuiListItemButton-root.Mui-selected {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Dividers */
+.mobile-drawer-paper .MuiDivider-root {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Avatar */
+.mobile-drawer-paper .MuiAvatar-root {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Asegurar textos específicos */
+.mobile-drawer-paper .MuiTypography-body2,
+.mobile-drawer-paper .MuiTypography-caption,
+.mobile-drawer-paper .MuiTypography-h6 {
+  color: white !important;
+}

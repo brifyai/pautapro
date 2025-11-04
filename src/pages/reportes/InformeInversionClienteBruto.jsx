@@ -40,6 +40,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { es } from 'date-fns/locale';
 import { Pagination } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import './InformeInversionClienteBruto.css';
 
 const InformeInversionClienteBruto = () => {
   const navigate = useNavigate();
@@ -313,18 +314,33 @@ const InformeInversionClienteBruto = () => {
   };
 
   return (
-    <div className="dashboard animate-fade-in">
+    <div className="agencias-container animate-fade-in">
       {/* Header moderno con gradiente */}
-      <div className="modern-header animate-slide-down">
-        <div className="modern-title">
+      <Box
+        className="modern-header animate-slide-down"
+        sx={{
+          '@media (max-width: 768px)': {
+            padding: '16px 12px',
+            height: 'auto',
+            minHeight: '60px',
+          },
+        }}
+      >
+        <Box
+          className="modern-title"
+          sx={{
+            fontSize: '1rem',
+            marginTop: '14px',
+            lineHeight: '1',
+            '@media (max-width: 768px)': {
+              fontSize: '0.9rem',
+              marginTop: '8px',
+            },
+          }}
+        >
           📊 INFORME DE INVERSIÓN CLIENTE BRUTO
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-            Análisis detallado de inversiones por cliente
-          </Typography>
-        </div>
-      </div>
+        </Box>
+      </Box>
 
       {/* Breadcrumbs */}
       <Box sx={{ p: 3, pb: 0 }}>
@@ -338,13 +354,18 @@ const InformeInversionClienteBruto = () => {
       </Box>
 
       {/* Contenedor principal */}
-      <Box sx={{ p: 3, pt: 0 }}>
-        <Paper elevation={0} className="modern-card hover-lift" sx={{ p: 3, mb: 3 }}>
+      <Box sx={{ p: 0, pt: 0 }}>
+        <Paper elevation={0} className="modern-card hover-lift" sx={{ p: 3, mb: 3, mt: 3 }}>
           <Typography variant="h6" gutterBottom className="text-gradient" sx={{ fontWeight: 600, mb: 3 }}>
             📈 Filtros de Búsqueda
           </Typography>
         
-          <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 3 }}>
+          <Grid container spacing={{ xs: 2, sm: 3 }} sx={{
+            mb: 3,
+            '@media (max-width: 768px)': {
+              spacing: 1,
+            },
+          }}>
             <Grid item xs={12} sm={6} md={3}>
               <FormControl fullWidth>
                 <InputLabel>👥 Cliente</InputLabel>
@@ -461,7 +482,20 @@ const InformeInversionClienteBruto = () => {
             </Grid>
           </Grid>
 
-          <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+          <Box sx={{
+            display: 'flex',
+            gap: 2,
+            mb: 3,
+            flexWrap: 'wrap',
+            '@media (max-width: 768px)': {
+              gap: 1,
+              '& .MuiButton-root': {
+                fontSize: '0.75rem',
+                padding: '6px 12px',
+                minWidth: 'auto',
+              },
+            },
+          }}>
             <Button
               variant="contained"
               onClick={buscarOrdenes}
@@ -582,7 +616,7 @@ const InformeInversionClienteBruto = () => {
             </Box>
           ) : (
             <>
-              <Paper elevation={0} className="modern-card hover-lift" sx={{ p: 3, mb: 3 }}>
+              <Paper elevation={0} className="modern-card hover-lift" sx={{ p: 3, mb: 3, mt: 3 }}>
                 <Typography variant="h6" gutterBottom className="text-gradient" sx={{ fontWeight: 600, mb: 3 }}>
                   📋 Resultados de la Búsqueda ({ordenes.length} registros)
                 </Typography>
@@ -591,6 +625,7 @@ const InformeInversionClienteBruto = () => {
                   borderRadius: '12px',
                   overflow: 'hidden',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  overflowX: 'auto', // Scroll horizontal para móviles
                   '&::-webkit-scrollbar': {
                     width: '8px',
                     height: '8px',
@@ -603,8 +638,19 @@ const InformeInversionClienteBruto = () => {
                     background: 'var(--gradient-primary)',
                     borderRadius: '4px',
                   },
+                  '@media (max-width: 768px)': {
+                    '&::-webkit-scrollbar': {
+                      height: '6px',
+                    },
+                  },
                 }}>
-                  <Table sx={{ minWidth: 650 }} size="small">
+                  <Table sx={{
+                    minWidth: 1200, // Aumentado para mejor scroll en móviles
+                    '@media (max-width: 768px)': {
+                      minWidth: 'auto',
+                      fontSize: '0.75rem',
+                    },
+                  }} size="small">
                     <TableHead sx={{
                       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                       '& .MuiTableCell-head': {
@@ -612,6 +658,12 @@ const InformeInversionClienteBruto = () => {
                         fontWeight: 600,
                         fontSize: '0.875rem',
                         borderBottom: 'none',
+                        whiteSpace: 'nowrap', // Evitar que los headers se rompan
+                        '@media (max-width: 768px)': {
+                          fontSize: '0.7rem',
+                          padding: '8px 4px',
+                          minWidth: '80px',
+                        },
                       }
                     }}>
                       <TableRow>
@@ -652,12 +704,20 @@ const InformeInversionClienteBruto = () => {
                               },
                               '&:hover': {
                                 backgroundColor: 'rgba(102, 126, 234, 0.08)',
-                                transform: 'scale(1.01)',
+                                transform: { xs: 'none', sm: 'scale(1.01)' }, // Sin transform en móviles
                                 transition: 'all 0.2s ease',
                               },
                               '& .MuiTableCell-body': {
                                 borderBottom: '1px solid rgba(0,0,0,0.06)',
                                 fontSize: '0.875rem',
+                                whiteSpace: 'nowrap', // Evitar que el texto se rompa
+                                '@media (max-width: 768px)': {
+                                  fontSize: '0.7rem',
+                                  padding: '8px 4px',
+                                  maxWidth: '80px',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                },
                               }
                             }}
                           >
@@ -731,12 +791,23 @@ const InformeInversionClienteBruto = () => {
                   </Table>
                 </TableContainer>
   
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                <Box sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  mt: 3,
+                  '@media (max-width: 768px)': {
+                    mt: 2,
+                    '& .MuiPagination-root': {
+                      transform: 'scale(0.8)',
+                    },
+                  },
+                }}>
                   <Pagination
                     count={Math.ceil(ordenes.length / rowsPerPage)}
                     page={page}
                     onChange={handleChangePage}
                     color="primary"
+                    size="small" // Más pequeño en móviles
                     sx={{
                       '& .MuiPaginationItem-root': {
                         borderRadius: '8px',
@@ -748,6 +819,13 @@ const InformeInversionClienteBruto = () => {
                           },
                         },
                       },
+                      '@media (max-width: 768px)': {
+                        '& .MuiPaginationItem-root': {
+                          minWidth: '32px',
+                          height: '32px',
+                          fontSize: '0.75rem',
+                        },
+                      },
                     }}
                   />
                 </Box>
@@ -755,33 +833,6 @@ const InformeInversionClienteBruto = () => {
             </>
           )}
 
-        {/* Botón flotante del Asistente */}
-        <Tooltip title="🤖 Asistente Inteligente - Reportes de Inversión" placement="left">
-          <Fab
-            color="primary"
-            aria-label="asistente"
-            className="animate-float"
-            sx={{
-              position: 'fixed',
-              bottom: 24,
-              right: 24,
-              width: 64,
-              height: 64,
-              background: 'var(--gradient-primary)',
-              boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
-              border: '2px solid rgba(255,255,255,0.2)',
-              '&:hover': {
-                background: 'var(--gradient-secondary)',
-                transform: 'scale(1.1)',
-                boxShadow: '0 12px 40px rgba(247, 107, 138, 0.4)',
-              },
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-            }}
-            onClick={() => window.open('/asistente', '_blank')}
-          >
-            <AssistantIcon sx={{ fontSize: 28 }} />
-          </Fab>
-        </Tooltip>
       </Box>
     </div>
   );

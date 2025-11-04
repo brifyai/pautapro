@@ -1,0 +1,60 @@
+/* Estilos específicos para MobileLayout */
+/* MÁXIMA PRIORIDAD: Sobrescribir light-theme.css */
+
+/* Bottom Navigation - Forzar letras blancas con máxima especificidad */
+.mobile-bottom-navigation {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+/* Sobrescribir estilos globales de light-theme.css */
+.mobile-bottom-navigation .MuiBottomNavigationAction-root,
+.mobile-bottom-navigation .MuiBottomNavigationAction-root *,
+.mobile-bottom-navigation .MuiBottomNavigationAction-root span,
+.mobile-bottom-navigation .MuiBottomNavigationAction-root label {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.mobile-bottom-navigation .MuiBottomNavigationAction-root.Mui-selected,
+.mobile-bottom-navigation .MuiBottomNavigationAction-root.Mui-selected *,
+.mobile-bottom-navigation .MuiBottomNavigationAction-root.Mui-selected span,
+.mobile-bottom-navigation .MuiBottomNavigationAction-root.Mui-selected label {
+  color: white !important;
+}
+
+.mobile-bottom-navigation .MuiBottomNavigationAction-label,
+.mobile-bottom-navigation span.MuiBottomNavigationAction-label {
+  font-size: 0.75rem !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.mobile-bottom-navigation .MuiBottomNavigationAction-root.Mui-selected .MuiBottomNavigationAction-label,
+.mobile-bottom-navigation .MuiBottomNavigationAction-root.Mui-selected span.MuiBottomNavigationAction-label {
+  font-size: 0.75rem !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+.mobile-bottom-navigation .MuiSvgIcon-root {
+  color: inherit !important;
+}
+
+.mobile-bottom-navigation .MuiBottomNavigationAction-root {
+  min-width: 60px !important;
+}
+
+/* AppBar - Asegurar textos blancos */
+.mobile-app-bar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.mobile-app-bar * {
+  color: white !important;
+}
+
+.mobile-app-bar .MuiIconButton-root {
+  color: white !important;
+}
+
+.mobile-app-bar .MuiTypography-root {
+  color: white !important;
+}

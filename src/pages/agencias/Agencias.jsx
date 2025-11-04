@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { DataGrid } from '@mui/x-data-grid';
-import { 
-  Button, 
+import { useTheme } from '@mui/material/styles';
+import {
+  Button,
   Container,
   IconButton,
   TextField,
@@ -11,7 +12,7 @@ import {
   DialogContent,
   DialogActions,
   Grid,
-  MenuItem, 
+  MenuItem,
   InputAdornment,
   Breadcrumbs,
   Link,
@@ -23,7 +24,14 @@ import {
   Box,
   Paper,
   FormControlLabel,
-  CircularProgress
+  CircularProgress,
+  useMediaQuery,
+  Fab,
+  Avatar,
+  Card,
+  CardContent,
+  Pagination,
+  Chip
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
@@ -44,8 +52,11 @@ import Swal from 'sweetalert2';
 import './Agencias.css';
 
 const Agencias = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
   const [pageSize, setPageSize] = useState(10);
+  const [mobilePage, setMobilePage] = useState(1);
   const [rows, setRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -734,76 +745,430 @@ const Agencias = () => {
   };
 
   return (
-    <div className="agencias-container">
-      <div className="header">
-        <div className="header-content">
-          <Typography variant="h5" component="h1">
-            Listado de Agencias
-          </Typography>
-          <Button
-            variant="contained"
-            className="btn-agregar"
-            onClick={() => {
-              setSelectedAgencia(null);
-              setNewAgencia({
-                NombreIdentificador: '',
-                RazonSocial: '',
-                NombreDeFantasia: '',
-                RutAgencia: '',
-                Giro: '',
-                NombreRepresentanteLegal: '',
-                rutRepresentante: '',
-                DireccionAgencia: '',
-                Region: '',
-                Comuna: '',
-                telCelular: '',
-                telFijo: '',
-                Email: '',
-                codigo_megatime: '',
-                estado: true
-              });
-              setOpenModal(true);
-            }}
-          >
-            Agregar Agencia
-          </Button>
+    <div className="agencias-container animate-fade-in">
+      {/* Header moderno con gradiente - Oculto en móvil */}
+      {!isMobile && (
+        <div className="modern-header animate-slide-down">
+          <div className="modern-title" style={{ fontSize: '1rem', marginTop: '14px', lineHeight: '1' }}>
+            🏢 LISTADO DE AGENCIAS
+          </div>
         </div>
+      )}
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', mb: 3 }}>
-          {/* Campos de búsqueda y fechas - lado izquierdo */}
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-            <TextField
-              className="search-input"
-              variant="outlined"
-              placeholder="Buscar agencia..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon sx={{ color: '#6777ef' }}/>
-                  </InputAdornment>
-                ),
+      {/* Versión móvil */}
+      {isMobile ? (
+        <>
+          <Box sx={{ p: 2 }}>
+            {/* Barra de búsqueda móvil */}
+            <Box sx={{ mb: 2 }}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                placeholder="🔍 Buscar agencia..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                size="small"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '12px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                  }
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  )
+                }}
+              />
+            </Box>
+
+            {/* Filtros de fechas */}
+            <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
+              <TextField
+                type="date"
+                size="small"
+                label="Desde"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                sx={{ flex: 1 }}
+              />
+              <TextField
+                type="date"
+                size="small"
+                label="Hasta"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                sx={{ flex: 1 }}
+              />
+            </Box>
+
+            {/* Botones de acción */}
+            <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
+              <Button
+                variant="contained"
+                className="btn-agregar"
+                onClick={handleExportToExcel}
+                startIcon={<FileDownloadIcon sx={{ color: 'white' }} />}
+                sx={{ borderRadius: '12px', flex: 1 }}
+              >
+                📊 Exportar Excel
+              </Button>
+              <Button
+                variant="contained"
+                className="btn-agregar"
+                startIcon={<AddIcon sx={{ color: 'white' }} />}
+                onClick={() => {
+                  setSelectedAgencia(null);
+                  setNewAgencia({
+                    NombreIdentificador: '',
+                    RazonSocial: '',
+                    NombreDeFantasia: '',
+                    RutAgencia: '',
+                    Giro: '',
+                    NombreRepresentanteLegal: '',
+                    rutRepresentante: '',
+                    DireccionAgencia: '',
+                    Region: '',
+                    Comuna: '',
+                    telCelular: '',
+                    telFijo: '',
+                    Email: '',
+                    codigo_megatime: '',
+                    estado: true
+                  });
+                  setOpenModal(true);
+                }}
+                sx={{ borderRadius: '12px', flex: 1 }}
+              >
+                Agregar
+              </Button>
+            </Box>
+
+            {/* Cards creativos para agencias */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+              {filteredRows.slice((mobilePage - 1) * 10, mobilePage * 10).map((agencia, index) => (
+                <Card
+                  key={agencia.id}
+                  sx={{
+                    background: `linear-gradient(135deg, ${
+                      index % 4 === 0 ? '#667eea 0%, #764ba2 100%' :
+                      index % 4 === 1 ? '#f093fb 0%, #f5576c 100%' :
+                      index % 4 === 2 ? '#4facfe 0%, #00f2fe 100%' :
+                      '#43e97b 0%, #38f9d7 100%'
+                    })`,
+                    borderRadius: '16px',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                    overflow: 'hidden',
+                    position: 'relative'
+                  }}
+                >
+                  {/* Header del Card */}
+                  <Box sx={{
+                    background: 'rgba(255,255,255,0.95)',
+                    p: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2
+                  }}>
+                    {/* Avatar con iniciales */}
+                    <Avatar
+                      sx={{
+                        width: 56,
+                        height: 56,
+                        background: `linear-gradient(135deg, ${
+                          index % 4 === 0 ? '#667eea 0%, #764ba2 100%' :
+                          index % 4 === 1 ? '#f093fb 0%, #f5576c 100%' :
+                          index % 4 === 2 ? '#4facfe 0%, #00f2fe 100%' :
+                          '#43e97b 0%, #38f9d7 100%'
+                        })`,
+                        fontSize: '1.5rem',
+                        fontWeight: 'bold',
+                        color: 'white'
+                      }}
+                    >
+                      {agencia.nombreidentificador?.charAt(0) || '?'}
+                    </Avatar>
+
+                    {/* Información principal */}
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontWeight: 'bold',
+                          fontSize: '1rem',
+                          color: '#1e293b',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {agencia.nombreidentificador}
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mt: 0.5 }}>
+                        <Chip
+                          label={agencia.RutAgencia || 'Sin RUT'}
+                          size="small"
+                          icon={<BadgeIcon />}
+                          sx={{
+                            height: '24px',
+                            fontSize: '0.75rem',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            color: '#667eea',
+                            fontWeight: 600
+                          }}
+                        />
+                        <Chip
+                          label={agencia.estado ? '✓ Activa' : '✗ Inactiva'}
+                          size="small"
+                          sx={{
+                            height: '24px',
+                            fontSize: '0.75rem',
+                            backgroundColor: agencia.estado ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                            color: agencia.estado ? '#16a34a' : '#dc2626',
+                            fontWeight: 600
+                          }}
+                        />
+                      </Box>
+                    </Box>
+
+                    {/* Botones de acción */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                      <IconButton
+                        size="small"
+                        onClick={() => navigate(`/agencias/view/${agencia.id}`)}
+                        sx={{
+                          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                          '&:hover': { backgroundColor: 'rgba(59, 130, 246, 0.2)' }
+                        }}
+                      >
+                        <VisibilityIcon fontSize="small" sx={{ color: '#3b82f6' }} />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          setSelectedAgencia(agencia);
+                          setNewAgencia({
+                            NombreIdentificador: agencia.nombreidentificador || '',
+                            RazonSocial: agencia.razonsocial || '',
+                            NombreDeFantasia: agencia.NombreDeFantasia || '',
+                            RutAgencia: agencia.RutAgencia || '',
+                            Giro: agencia.Giro || '',
+                            NombreRepresentanteLegal: agencia.NombreRepresentanteLegal || '',
+                            rutRepresentante: agencia.rutRepresentante || '',
+                            DireccionAgencia: agencia.DireccionAgencia || '',
+                            Region: agencia.Region || '',
+                            Comuna: agencia.Comuna || '',
+                            telCelular: agencia.telCelular || '',
+                            telFijo: agencia.telFijo || '',
+                            Email: agencia.Email || '',
+                            codigo_megatime: agencia.codigo_megatime || '',
+                            estado: agencia.estado ?? true
+                          });
+                          setOpenModal(true);
+                        }}
+                        sx={{
+                          backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                          '&:hover': { backgroundColor: 'rgba(34, 197, 94, 0.2)' }
+                        }}
+                      >
+                        <EditIcon fontSize="small" sx={{ color: '#22c55e' }} />
+                      </IconButton>
+                    </Box>
+                  </Box>
+
+                  {/* Detalles adicionales */}
+                  <Box sx={{
+                    background: 'rgba(255,255,255,0.85)',
+                    p: 2,
+                    pt: 1
+                  }}>
+                    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
+                      <Box>
+                        <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                          Razón Social
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                          {agencia.razonsocial || 'No especificada'}
+                        </Typography>
+                      </Box>
+                      <Box>
+                        <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                          📍 Región
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                          {agencia.region}
+                        </Typography>
+                      </Box>
+                      <Box>
+                        <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                          🏙️ Comuna
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                          {agencia.comuna}
+                        </Typography>
+                      </Box>
+                      <Box>
+                        <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                          📞 Teléfono
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                          {agencia.telCelular || agencia.telFijo || 'No especificado'}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+
+                  {/* Badge de fecha */}
+                  <Box sx={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    background: 'rgba(255,255,255,0.95)',
+                    borderRadius: '8px',
+                    px: 1,
+                    py: 0.5
+                  }}>
+                    <Typography variant="caption" sx={{ fontWeight: 600, color: '#64748b' }}>
+                      📅 {agencia.fechaCreacion}
+                    </Typography>
+                  </Box>
+                </Card>
+              ))}
+
+              {/* Mensaje si no hay agencias */}
+              {filteredRows.length === 0 && (
+                <Box sx={{ textAlign: 'center', py: 8 }}>
+                  <Typography variant="body1" color="text.secondary">
+                    No se encontraron agencias
+                  </Typography>
+                </Box>
+              )}
+
+            </Box>
+
+            {/* Paginación móvil */}
+            {filteredRows.length > 10 && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 2 }}>
+                <Pagination
+                  count={Math.ceil(filteredRows.length / 10)}
+                  page={mobilePage}
+                  onChange={(event, value) => {
+                    setMobilePage(value);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  color="primary"
+                  size="large"
+                  sx={{
+                    '& .MuiPaginationItem-root': {
+                      borderRadius: '12px',
+                      fontWeight: 600,
+                      minWidth: '40px',
+                      height: '40px',
+                      '&.Mui-selected': {
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        color: 'white',
+                        fontWeight: 700,
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                        }
+                      }
+                    }
+                  }}
+                />
+              </Box>
+            )}
+
+            {/* Contador de resultados */}
+            <Box sx={{ textAlign: 'center', mb: 10 }}>
+              <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                Mostrando {Math.min((mobilePage - 1) * 10 + 1, filteredRows.length)}-{Math.min(mobilePage * 10, filteredRows.length)} de {filteredRows.length} agencia{filteredRows.length !== 1 ? 's' : ''}
+              </Typography>
+            </Box>
+
+            {/* FAB para agregar agencia */}
+            <Fab
+              color="primary"
+              aria-label="add"
+              onClick={() => {
+                setSelectedAgencia(null);
+                setNewAgencia({
+                  NombreIdentificador: '',
+                  RazonSocial: '',
+                  NombreDeFantasia: '',
+                  RutAgencia: '',
+                  Giro: '',
+                  NombreRepresentanteLegal: '',
+                  rutRepresentante: '',
+                  DireccionAgencia: '',
+                  Region: '',
+                  Comuna: '',
+                  telCelular: '',
+                  telFijo: '',
+                  Email: '',
+                  codigo_megatime: '',
+                  estado: true
+                });
+                setOpenModal(true);
               }}
               sx={{
+                position: 'fixed',
+                bottom: 80,
+                right: 16,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                }
+              }}
+            >
+              <AddIcon />
+            </Fab>
+          </Box>
+        </>
+      ) : (
+        /* Versión escritorio */
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 2,
+          mb: 2,
+          mt: 3
+        }}>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <TextField
+              variant="outlined"
+              placeholder="🔍 Buscar agencia..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+              sx={{
+                background: 'rgba(255,255,255,0.9)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '12px',
                 '& .MuiOutlinedInput-root': {
+                  borderRadius: '12px',
                   '&:hover fieldset': {
-                    borderColor: '#6777ef',
+                    borderColor: 'var(--gradient-primary)',
                   },
                   '&.Mui-focused fieldset': {
-                    borderColor: '#6777ef',
+                    borderColor: 'var(--gradient-primary)',
                   },
                 }
               }}
             />
             <TextField
-              className="date-input"
               type="date"
               variant="outlined"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
               label="📅 Desde"
               InputLabelProps={{ shrink: true }}
+              className="date-input"
               sx={{
                 '& .MuiOutlinedInput-root': {
                   background: 'rgba(255,255,255,0.9)',
@@ -813,13 +1178,13 @@ const Agencias = () => {
               }}
             />
             <TextField
-              className="date-input"
               type="date"
               variant="outlined"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               label="📅 Hasta"
               InputLabelProps={{ shrink: true }}
+              className="date-input"
               sx={{
                 '& .MuiOutlinedInput-root': {
                   background: 'rgba(255,255,255,0.9)',
@@ -829,75 +1194,110 @@ const Agencias = () => {
               }}
             />
           </Box>
-
-          {/* Botones de acción - lado derecho */}
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <Button
+              variant="contained"
+              className="btn-agregar"
+              startIcon={<AddIcon sx={{ color: 'white' }} />}
+              onClick={() => {
+                setSelectedAgencia(null);
+                setNewAgencia({
+                  NombreIdentificador: '',
+                  RazonSocial: '',
+                  NombreDeFantasia: '',
+                  RutAgencia: '',
+                  Giro: '',
+                  NombreRepresentanteLegal: '',
+                  rutRepresentante: '',
+                  DireccionAgencia: '',
+                  Region: '',
+                  Comuna: '',
+                  telCelular: '',
+                  telFijo: '',
+                  Email: '',
+                  codigo_megatime: '',
+                  estado: true
+                });
+                setOpenModal(true);
+              }}
+            >
+              Agregar Nueva Agencia
+            </Button>
             <Button
               variant="contained"
               onClick={handleExportToExcel}
               startIcon={<FileDownloadIcon sx={{ color: 'white' }} />}
-              sx={{
-                backgroundColor: '#206e43',
-                color: '#fff',
-                '&:hover': {
-                  backgroundColor: '#185735',
-                },
-              }}
+              className="btn-agregar"
             >
-              Exportar Agencias
+              📊 Exportar Excel
             </Button>
           </Box>
         </Box>
+      )}
 
-      </div>
-
-      <div className="data-grid-container">
-        <DataGrid
-          rows={filteredRows}
-          columns={columns}
-          pageSize={pageSize}
-          onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-          rowsPerPageOptions={[5, 10, 25]}
-          disableSelectionOnClick
-          loading={loading}
-          autoHeight
-          localeText={{
-            noRowsLabel: 'No hay datos para mostrar',
-            footerRowSelected: count => `${count} fila${count !== 1 ? 's' : ''} seleccionada${count !== 1 ? 's' : ''}`,
-            footerTotalRows: 'Filas totales:',
-            footerTotalVisibleRows: (visibleCount, totalCount) => 
-              `${visibleCount.toLocaleString()} de ${totalCount.toLocaleString()}`,
-            footerPaginationRowsPerPage: 'Filas por página:',
-            columnMenuLabel: 'Menú',
-            columnMenuShowColumns: 'Mostrar columnas',
-            columnMenuFilter: 'Filtrar',
-            columnMenuHideColumn: 'Ocultar',
-            columnMenuUnsort: 'Desordenar',
-            columnMenuSortAsc: 'Ordenar ASC',
-            columnMenuSortDesc: 'Ordenar DESC',
-            columnHeaderSortIconLabel: 'Ordenar',
-            MuiTablePagination: {
-              labelRowsPerPage: 'Filas por página:',
-              labelDisplayedRows: ({ from, to, count }) =>
-                `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`,
-            },
-          }}
-          initialState={{
-            pagination: {
-              paginationModel: { pageSize: 10 }
-            },
-          }}
-          pageSizeOptions={[5, 10, 25]}
-          sx={{
-            '& .MuiDataGrid-cell:focus': {
-              outline: 'none',
-            },
-            '& .MuiDataGrid-row:hover': {
-              backgroundColor: '#f5f5f5',
-            },
-          }}
-        />
-      </div>
+      {/* DataGrid solo visible en escritorio */}
+      {!isMobile && (
+        <div className="data-grid-container">
+          <DataGrid
+            rows={filteredRows}
+            columns={columns}
+            pageSize={10}
+            rowsPerPageOptions={[10]}
+            disableSelectionOnClick
+            loading={loading}
+            autoHeight
+            rowHeight={56}
+            columnHeaderHeight={56}
+            localeText={{
+              noRowsLabel: 'No hay datos para mostrar',
+              footerRowSelected: count => `${count} fila${count !== 1 ? 's' : ''} seleccionada${count !== 1 ? 's' : ''}`,
+              footerTotalRows: 'Filas totales:',
+              footerTotalVisibleRows: (visibleCount, totalCount) =>
+                `${visibleCount.toLocaleString()} de ${totalCount.toLocaleString()}`,
+              footerPaginationRowsPerPage: 'Filas por página:',
+              columnMenuLabel: 'Menú',
+              columnMenuShowColumns: 'Mostrar columnas',
+              columnMenuFilter: 'Filtrar',
+              columnMenuHideColumn: 'Ocultar',
+              columnMenuUnsort: 'Desordenar',
+              columnMenuSortAsc: 'Ordenar ASC',
+              columnMenuSortDesc: 'Ordenar DESC',
+              columnHeaderSortIconLabel: 'Ordenar',
+              MuiTablePagination: {
+                labelRowsPerPage: 'Filas por página:',
+                labelDisplayedRows: ({ from, to, count }) =>
+                  `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`,
+              },
+            }}
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 10 }
+              },
+            }}
+            sx={{
+              '& .MuiDataGrid-cell:focus': {
+                outline: 'none',
+              },
+              '& .MuiDataGrid-row:hover': {
+                backgroundColor: '#f5f5f5',
+              },
+              '& .MuiDataGrid-footerContainer': {
+                borderTop: '1px solid rgba(102, 126, 234, 0.1) !important',
+                background: 'rgba(255,255,255,0.8) !important',
+              },
+              '& .MuiDataGrid-footerContainer .MuiTablePagination-root .MuiTablePagination-selectLabel': {
+                display: 'none'
+              },
+              '& .MuiDataGrid-footerContainer .MuiTablePagination-root .MuiTablePagination-select': {
+                display: 'none'
+              },
+              '& .MuiDataGrid-footerContainer .MuiTablePagination-root .MuiTablePagination-selectIcon': {
+                display: 'none'
+              }
+            }}
+          />
+        </div>
+      )}
 
       {/* Modal de Nuevo/Editar Agencia */}
       <Dialog 

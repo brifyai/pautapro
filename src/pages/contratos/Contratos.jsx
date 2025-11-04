@@ -1,22 +1,30 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { DataGrid } from '@mui/x-data-grid';
 import {
-    Container,
-    IconButton,
+    Button,
     TextField,
-    Grid,
     InputAdornment,
     Breadcrumbs,
     Link,
     Typography,
-    Button,
     Switch,
-    CircularProgress,
     Box,
+    Paper,
+    IconButton,
+    Grid,
+    Chip,
+    useMediaQuery,
+    useTheme,
+    Card,
+    CardContent,
+    Avatar,
+    Pagination,
+    Fab,
+    Skeleton,
     Tooltip,
-    Fab
+    CircularProgress
 } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
 import SearchIcon from '@mui/icons-material/Search';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
@@ -33,6 +41,7 @@ import ModalAgregarContrato from './ModalAgregarContrato';
 import ModalEditarContrato from './ModalEditarContrato';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './Contratos.css';
+import '../agencias/Agencias.css';
 
 // Constantes para mejor mantenibilidad
 const ESTADOS_CONTRATO = {
@@ -45,6 +54,9 @@ const COLUMNAS_POR_DEFECTO = 5;
 
 const Contratos = () => {
     const navigate = useNavigate();
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const [mobilePage, setMobilePage] = useState(1);
 
     // Estados principales
     const [contratos, setContratos] = useState([]);
@@ -67,6 +79,11 @@ const Contratos = () => {
     // Estados de UI
     const [pageSize, setPageSize] = useState(COLUMNAS_POR_DEFECTO);
     const [selectedContrato, setSelectedContrato] = useState(null);
+    // Paginación forzada 10 en 10 (mismo sistema que Clientes)
+    const [paginationModel, setPaginationModel] = useState({
+        pageSize: 10,
+        page: 0
+    });
 
     // Cargar datos iniciales
     useEffect(() => {
@@ -140,6 +157,11 @@ const Contratos = () => {
             ...prev,
             [campo]: valor
         }));
+    }, []);
+    // Forzar que siempre sea 10 por página
+    const handlePaginationChange = useCallback((newModel) => {
+        const forcedModel = { ...newModel, pageSize: 10 };
+        setPaginationModel(forcedModel);
     }, []);
 
     const handleModalChange = useCallback((modal, valor) => {
@@ -445,50 +467,351 @@ const Contratos = () => {
     }
 
     return (
-        <div className="dashboard animate-fade-in">
-            {/* Header moderno con gradiente */}
-            <div className="modern-header animate-slide-down">
-                <div className="modern-title" style={{ fontSize: '1.25rem' }}>
-                    📄 GESTIÓN DE CONTRATOS
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                        Administración de contratos comerciales
-                    </Typography>
-                </div>
-            </div>
+        <div className="agencias-container contratos-wrapper animate-fade-in">
+            {/* Versión móvil - Cards creativos */}
+            {isMobile ? (
+                <>
+                    <Box sx={{ p: 2 }}>
+                        {/* Barra de búsqueda móvil */}
+                        <Box sx={{ mb: 2 }}>
+                            <TextField
+                                fullWidth
+                                variant="outlined"
+                                placeholder="🔍 Buscar contratos..."
+                                value={filtros.searchText}
+                                onChange={(e) => handleFiltroChange('searchText', e.target.value)}
+                                size="small"
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '12px',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    }
+                                }}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <SearchIcon />
+                                        </InputAdornment>
+                                    )
+                                }}
+                            />
+                        </Box>
 
-            {/* Breadcrumbs */}
-            <Box sx={{ p: 3, pb: 0 }}>
-                <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
-                    <Link component={RouterLink} to="/dashboard" sx={{ color: 'var(--gradient-primary)', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
-                        Dashboard
-                    </Link>
-                    <Typography color="text.primary" sx={{ fontWeight: 600 }}>Contratos</Typography>
-                </Breadcrumbs>
-            </Box>
+                        {/* Filtros de fecha móvil */}
+                        <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+                            <TextField
+                                type="date"
+                                variant="outlined"
+                                value={filtros.dateFrom}
+                                onChange={(e) => handleFiltroChange('dateFrom', e.target.value)}
+                                label="📅 Desde"
+                                InputLabelProps={{ shrink: true }}
+                                size="small"
+                                sx={{
+                                    flex: 1,
+                                    minWidth: 120,
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '12px',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    }
+                                }}
+                            />
+                            <TextField
+                                type="date"
+                                variant="outlined"
+                                value={filtros.dateTo}
+                                onChange={(e) => handleFiltroChange('dateTo', e.target.value)}
+                                label="📅 Hasta"
+                                InputLabelProps={{ shrink: true }}
+                                size="small"
+                                sx={{
+                                    flex: 1,
+                                    minWidth: 120,
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '12px',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    }
+                                }}
+                            />
+                        </Box>
 
-            {/* Controles de búsqueda y acciones */}
-            <Box sx={{ p: 3, pt: 0 }}>
-                <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 3 }}>
-                    <Grid item xs={12} sm={6} md={3}>
+                        {/* Botones de acción */}
+                        <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
+                            <Button
+                                variant="contained"
+                                startIcon={<FileDownloadIcon sx={{ color: 'white' }} />}
+                                onClick={exportToExcel}
+                                disabled={contratos.length === 0}
+                                className="btn-agregar"
+                                sx={{ borderRadius: '12px', flex: 1 }}
+                            >
+                                📊 Exportar
+                            </Button>
+                            <Button
+                                variant="contained"
+                                className="btn-agregar"
+                                startIcon={<AddIcon sx={{ color: 'white' }} />}
+                                onClick={() => handleModalChange('agregar', true)}
+                                sx={{ borderRadius: '12px', flex: 1 }}
+                            >
+                                Agregar
+                            </Button>
+                        </Box>
+
+                        {/* Cards creativos para contratos */}
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+                            {filteredContratos.slice((mobilePage - 1) * 10, mobilePage * 10).map((contrato, index) => (
+                                <Card
+                                    key={contrato.id}
+                                    sx={{
+                                        background: `linear-gradient(135deg, ${
+                                            index % 4 === 0 ? '#667eea 0%, #764ba2 100%' :
+                                            index % 4 === 1 ? '#f093fb 0%, #f5576c 100%' :
+                                            index % 4 === 2 ? '#4facfe 0%, #00f2fe 100%' :
+                                            '#43e97b 0%, #38f9d7 100%'
+                                        })`,
+                                        borderRadius: '16px',
+                                        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                                        overflow: 'hidden',
+                                        position: 'relative'
+                                    }}
+                                >
+                                    {/* Header del Card */}
+                                    <Box sx={{
+                                        background: 'rgba(255,255,255,0.95)',
+                                        p: 2,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 2
+                                    }}>
+                                        {/* Avatar con iniciales */}
+                                        <Avatar
+                                            sx={{
+                                                width: 56,
+                                                height: 56,
+                                                background: `linear-gradient(135deg, ${
+                                                    index % 4 === 0 ? '#667eea 0%, #764ba2 100%' :
+                                                    index % 4 === 1 ? '#f093fb 0%, #f5576c 100%' :
+                                                    index % 4 === 2 ? '#4facfe 0%, #00f2fe 100%' :
+                                                    '#43e97b 0%, #38f9d7 100%'
+                                                })`,
+                                                fontSize: '1.5rem',
+                                                fontWeight: 'bold',
+                                                color: 'white'
+                                            }}
+                                        >
+                                            {contrato.nombrecontrato?.charAt(0)?.toUpperCase() || 'C'}
+                                        </Avatar>
+
+                                        {/* Información principal */}
+                                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                                            <Typography
+                                                variant="h6"
+                                                sx={{
+                                                    fontWeight: 'bold',
+                                                    fontSize: '1rem',
+                                                    color: '#1e293b',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    whiteSpace: 'nowrap'
+                                                }}
+                                            >
+                                                {contrato.nombrecontrato || 'Sin nombre'}
+                                            </Typography>
+                                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mt: 0.5 }}>
+                                                <Chip
+                                                    label={contrato.fechaInicio || 'Sin fecha'}
+                                                    size="small"
+                                                    sx={{
+                                                        height: '24px',
+                                                        fontSize: '0.75rem',
+                                                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                                                        color: '#667eea',
+                                                        fontWeight: 600
+                                                    }}
+                                                />
+                                                <Chip
+                                                    label={contrato.estado ? '✓ Activo' : '✗ Inactivo'}
+                                                    size="small"
+                                                    sx={{
+                                                        height: '24px',
+                                                        fontSize: '0.75rem',
+                                                        backgroundColor: contrato.estado ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                                                        color: contrato.estado ? '#16a34a' : '#dc2626',
+                                                        fontWeight: 600
+                                                    }}
+                                                />
+                                            </Box>
+                                        </Box>
+
+                                        {/* Botones de acción */}
+                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => handleView(contrato)}
+                                                sx={{
+                                                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                                    '&:hover': { backgroundColor: 'rgba(59, 130, 246, 0.2)' }
+                                                }}
+                                            >
+                                                <VisibilityIcon fontSize="small" sx={{ color: '#3b82f6' }} />
+                                            </IconButton>
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => handleEdit(contrato)}
+                                                sx={{
+                                                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                                    '&:hover': { backgroundColor: 'rgba(34, 197, 94, 0.2)' }
+                                                }}
+                                            >
+                                                <EditIcon fontSize="small" sx={{ color: '#22c55e' }} />
+                                            </IconButton>
+                                        </Box>
+                                    </Box>
+
+                                    {/* Detalles adicionales */}
+                                    <Box sx={{
+                                        background: 'rgba(255,255,255,0.85)',
+                                        p: 2,
+                                        pt: 1
+                                    }}>
+                                        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
+                                            <Box>
+                                                <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                                                    👤 Cliente
+                                                </Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                                                    {contrato.cliente || 'Sin cliente'}
+                                                </Typography>
+                                            </Box>
+                                            <Box>
+                                                <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                                                    🏢 Proveedor
+                                                </Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                                                    {contrato.proveedor || 'Sin proveedor'}
+                                                </Typography>
+                                            </Box>
+                                            <Box>
+                                                <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                                                    📺 Medio
+                                                </Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                                                    {contrato.medio || 'Sin medio'}
+                                                </Typography>
+                                            </Box>
+                                            <Box>
+                                                <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                                                    💳 Forma Pago
+                                                </Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                                                    {contrato.formaPago || 'Sin forma pago'}
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                    </Box>
+                                </Card>
+                            ))}
+
+                            {/* Mensaje si no hay contratos */}
+                            {filteredContratos.length === 0 && (
+                                <Box sx={{ textAlign: 'center', py: 8 }}>
+                                    <Typography variant="body1" color="text.secondary">
+                                        {loading ? 'Cargando datos...' : 'No se encontraron contratos'}
+                                    </Typography>
+                                </Box>
+                            )}
+
+                        </Box>
+
+                        {/* Paginación móvil */}
+                        {filteredContratos.length > 10 && (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 2 }}>
+                                <Pagination
+                                    count={Math.ceil(filteredContratos.length / 10)}
+                                    page={mobilePage}
+                                    onChange={(event, value) => {
+                                        setMobilePage(value);
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }}
+                                    color="primary"
+                                    size="large"
+                                    sx={{
+                                        '& .MuiPaginationItem-root': {
+                                            borderRadius: '12px',
+                                            fontWeight: 600,
+                                            minWidth: '40px',
+                                            height: '40px',
+                                            '&.Mui-selected': {
+                                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                color: 'white',
+                                                fontWeight: 700,
+                                                '&:hover': {
+                                                    background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                                                }
+                                            }
+                                        }
+                                    }}
+                                />
+                            </Box>
+                        )}
+
+                        {/* Contador de resultados */}
+                        <Box sx={{ textAlign: 'center', mb: 10 }}>
+                            <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                                Mostrando {Math.min((mobilePage - 1) * 10 + 1, filteredContratos.length)}-{Math.min(mobilePage * 10, filteredContratos.length)} de {filteredContratos.length} contrato{filteredContratos.length !== 1 ? 's' : ''}
+                            </Typography>
+                        </Box>
+
+                        {/* FAB para agregar contrato */}
+                        <Fab
+                            color="primary"
+                            aria-label="add"
+                            onClick={() => handleModalChange('agregar', true)}
+                            sx={{
+                                position: 'fixed',
+                                bottom: 80,
+                                right: 16,
+                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                '&:hover': {
+                                    background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                                }
+                            }}
+                        >
+                            <AddIcon />
+                        </Fab>
+                    </Box>
+                </>
+            ) : (
+                /* Versión escritorio - DataGrid */
+                <>
+                    {/* Breadcrumbs */}
+                    <Box sx={{ p: 3, pb: 0, display: 'none' }}>
+                        <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
+                            <Link component={RouterLink} to="/dashboard" sx={{ color: 'var(--gradient-primary)', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+                                Dashboard
+                            </Link>
+                            <Typography color="text.primary" sx={{ fontWeight: 600 }}>Contratos</Typography>
+                        </Breadcrumbs>
+                    </Box>
+
+                    {/* Caja de búsqueda */}
+                    <Box sx={{
+                        mb: 2,
+                        mt: 3
+                    }}>
                         <TextField
-                            fullWidth
                             variant="outlined"
                             placeholder="🔍 Buscar contratos..."
                             value={filtros.searchText}
                             onChange={(e) => handleFiltroChange('searchText', e.target.value)}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <SearchIcon sx={{ color: 'var(--gradient-primary)' }}/>
-                                    </InputAdornment>
-                                ),
-                            }}
+                            className="search-input"
+                            fullWidth
                             sx={{
+                                background: 'rgba(255,255,255,0.9)',
+                                backdropFilter: 'blur(10px)',
+                                borderRadius: '12px',
                                 '& .MuiOutlinedInput-root': {
-                                    background: 'rgba(255,255,255,0.9)',
-                                    backdropFilter: 'blur(10px)',
                                     borderRadius: '12px',
                                     '&:hover fieldset': {
                                         borderColor: 'var(--gradient-primary)',
@@ -498,11 +821,24 @@ const Contratos = () => {
                                     },
                                 }
                             }}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon sx={{ color: '#6777ef' }}/>
+                                    </InputAdornment>
+                                ),
+                            }}
                         />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={2}>
+                    </Box>
+
+                    {/* Filtros de fecha */}
+                    <Box sx={{
+                        display: 'flex',
+                        gap: 2,
+                        mb: 2,
+                        flexWrap: 'wrap'
+                    }}>
                         <TextField
-                            fullWidth
                             type="date"
                             variant="outlined"
                             value={filtros.dateFrom}
@@ -511,6 +847,8 @@ const Contratos = () => {
                             InputLabelProps={{ shrink: true }}
                             className="date-input"
                             sx={{
+                                flex: 1,
+                                minWidth: 150,
                                 '& .MuiOutlinedInput-root': {
                                     background: 'rgba(255,255,255,0.9)',
                                     backdropFilter: 'blur(10px)',
@@ -518,10 +856,7 @@ const Contratos = () => {
                                 }
                             }}
                         />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={2}>
                         <TextField
-                            fullWidth
                             type="date"
                             variant="outlined"
                             value={filtros.dateTo}
@@ -530,6 +865,8 @@ const Contratos = () => {
                             InputLabelProps={{ shrink: true }}
                             className="date-input"
                             sx={{
+                                flex: 1,
+                                minWidth: 150,
                                 '& .MuiOutlinedInput-root': {
                                     background: 'rgba(255,255,255,0.9)',
                                     backdropFilter: 'blur(10px)',
@@ -537,129 +874,102 @@ const Contratos = () => {
                                 }
                             }}
                         />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={2}>
+                    </Box>
+
+                    {/* Botones de acción */}
+                    <Box sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        gap: 2,
+                        mb: 2,
+                        flexWrap: 'wrap'
+                    }}>
                         <Button
                             variant="contained"
                             startIcon={<FileDownloadIcon sx={{ color: 'white' }} />}
                             onClick={exportToExcel}
                             disabled={contratos.length === 0}
-                            sx={{
-                                background: 'var(--gradient-success)',
-                                color: '#fff',
-                                height: '56px',
-                                width: '100%',
-                                borderRadius: '12px',
-                                fontWeight: 600,
-                                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                                '&:hover': {
-                                    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                                    transform: 'translateY(-2px)',
-                                    boxShadow: '0 6px 16px rgba(16, 185, 129, 0.4)',
-                                },
-                                transition: 'all 0.3s ease'
-                            }}
+                            className="btn-agregar"
                         >
-                            📊 Exportar
+                            📊 Exportar Excel
                         </Button>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
                         <Button
                             variant="contained"
                             onClick={() => handleModalChange('agregar', true)}
                             startIcon={<AddIcon sx={{ color: 'white' }} />}
-                            sx={{
-                                background: 'var(--gradient-primary)',
-                                color: '#fff',
-                                height: '56px',
-                                width: '100%',
-                                borderRadius: '12px',
-                                fontWeight: 600,
-                                boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
-                                '&:hover': {
-                                    background: 'var(--gradient-secondary)',
-                                    transform: 'translateY(-2px)',
-                                    boxShadow: '0 6px 16px rgba(247, 107, 138, 0.4)',
-                                },
-                                transition: 'all 0.3s ease'
-                            }}
+                            className="btn-agregar"
                         >
-                            ➕ Nuevo Contrato
+                            Nuevo Contrato
                         </Button>
-                    </Grid>
-                </Grid>
-            </Box>
+                    </Box>
 
-            {/* DataGrid Container */}
-            <Box sx={{ p: 3, pt: 0 }}>
-                <div className="data-grid-container">
-                    <DataGrid
-                        rows={filteredContratos}
-                        columns={columnas}
-                        pageSize={pageSize}
-                        onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-                        rowsPerPageOptions={[5, 10, 20, 50]}
-                        pagination
-                        autoHeight
-                        disableSelectionOnClick
-                        getRowId={(row) => row.id}
-                        sx={{
-                            '& .MuiDataGrid-columnHeaders': {
-                                backgroundColor: '#f5f5f5',
-                                color: '#333',
-                                fontWeight: 'bold',
-                            },
-                            '& .MuiDataGrid-cell': {
-                                borderBottom: '1px solid #ddd',
-                            },
-                            '& .MuiDataGrid-row:hover': {
-                                backgroundColor: '#f9f9f9',
-                            },
-                        }}
+                    {/* DataGrid Container */}
+                    <Box sx={{ p: 0, pt: 0 }}>
+                        <div className="data-grid-container">
+                            <DataGrid
+                                rows={filteredContratos}
+                                columns={columnas}
+                                pagination
+                                paginationMode="client"
+                                paginationModel={paginationModel}
+                                onPaginationModelChange={handlePaginationChange}
+                                pageSizeOptions={[10]}
+                                autoHeight
+                                rowHeight={56}
+                                columnHeaderHeight={56}
+                                disableSelectionOnClick
+                                getRowId={(row) => row.id}
+                                initialState={{
+                                    pagination: {
+                                        paginationModel: {
+                                            pageSize: 10
+                                        }
+                                    }
+                                }}
+                                sx={{
+                                    '& .MuiDataGrid-columnHeaders': {
+                                        backgroundColor: '#f5f5f5',
+                                        color: '#333',
+                                        fontWeight: 'bold',
+                                    },
+                                    '& .MuiDataGrid-cell': {
+                                        borderBottom: '1px solid #ddd',
+                                    },
+                                    '& .MuiDataGrid-row:hover': {
+                                        backgroundColor: '#f9f9f9',
+                                    },
+                                    '& .MuiDataGrid-footerContainer': {
+                                        borderTop: '1px solid rgba(102, 126, 234, 0.1) !important',
+                                        background: 'rgba(255,255,255,0.8) !important',
+                                    },
+                                    '& .MuiDataGrid-footerContainer .MuiTablePagination-root .MuiTablePagination-selectLabel': {
+                                        display: 'none'
+                                    },
+                                    '& .MuiDataGrid-footerContainer .MuiTablePagination-root .MuiTablePagination-select': {
+                                        display: 'none'
+                                    },
+                                    '& .MuiDataGrid-footerContainer .MuiTablePagination-root .MuiTablePagination-selectIcon': {
+                                        display: 'none'
+                                    }
+                                }}
+                            />
+                        </div>
+                    </Box>
+
+                    <ModalAgregarContrato
+                        open={modales.agregar}
+                        onClose={() => handleModalChange('agregar', false)}
+                        onContratoAdded={fetchContratos}
                     />
-                </div>
-            </Box>
 
-            {/* Botón flotante del Asistente */}
-            <Tooltip title="🤖 Asistente Inteligente - Gestión de Contratos" placement="left">
-                <Fab
-                    color="primary"
-                    aria-label="asistente"
-                    className="animate-float"
-                    sx={{
-                        position: 'fixed',
-                        bottom: 24,
-                        right: 24,
-                        width: 64,
-                        height: 64,
-                        background: 'var(--gradient-primary)',
-                        boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
-                        border: '2px solid rgba(255,255,255,0.2)',
-                        '&:hover': {
-                            background: 'var(--gradient-secondary)',
-                            transform: 'scale(1.1)',
-                            boxShadow: '0 12px 40px rgba(247, 107, 138, 0.4)',
-                        },
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                    }}
-                    onClick={() => window.open('/asistente', '_blank')}
-                >
-                    <AssistantIcon sx={{ fontSize: 28 }} />
-                </Fab>
-            </Tooltip>
-
-            <ModalAgregarContrato
-                open={modales.agregar}
-                onClose={() => handleModalChange('agregar', false)}
-                onContratoAdded={fetchContratos}
-            />
-
-            <ModalEditarContrato
-                open={modales.editar}
-                onClose={() => handleModalChange('editar', false)}
-                contrato={selectedContrato}
-                onContratoUpdated={fetchContratos}
-            />
+                    <ModalEditarContrato
+                        open={modales.editar}
+                        onClose={() => handleModalChange('editar', false)}
+                        contrato={selectedContrato}
+                        onContratoUpdated={fetchContratos}
+                    />
+                </>
+            )}
         </div>
     );
 };

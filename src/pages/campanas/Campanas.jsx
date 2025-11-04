@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { DataGrid } from '@mui/x-data-grid';
+import { useTheme } from '@mui/material/styles';
 import {
     Container,
     IconButton,
@@ -15,7 +16,24 @@ import {
     Switch,
     Chip,
     Box,
-    LinearProgress
+    LinearProgress,
+    useMediaQuery,
+    Fab,
+    Avatar,
+    Pagination,
+    Card,
+    CardContent,
+    CardActions,
+    Collapse,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    CircularProgress
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
@@ -24,6 +42,16 @@ import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import CampaignIcon from '@mui/icons-material/Campaign';
+import BusinessIcon from '@mui/icons-material/Business';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import BadgeIcon from '@mui/icons-material/Badge';
+import StorefrontIcon from '@mui/icons-material/Storefront';
+import CategoryIcon from '@mui/icons-material/Category';
+import CloseIcon from '@mui/icons-material/Close';
 import { supabase } from '../../config/supabase';
 import { mapearDatos } from '../../config/mapeo-campos';
 import { campaignService } from '../../services/campaignService';
@@ -35,6 +63,8 @@ import './Campanas.css';
 
 const Campanas = () => {
     const navigate = useNavigate();
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const [campanas, setCampanas] = useState([]);
     const [searchText, setSearchText] = useState('');
     const [dateFrom, setDateFrom] = useState('');
@@ -44,6 +74,8 @@ const Campanas = () => {
     const [openEditModal, setOpenEditModal] = useState(false);
     const [selectedCampana, setSelectedCampana] = useState(null);
     const [pageSize, setPageSize] = useState(10);
+    const [mobilePage, setMobilePage] = useState(1);
+    const [showFilters, setShowFilters] = useState(false);
 
     useEffect(() => {
         fetchCampanas();
@@ -526,133 +558,457 @@ const Campanas = () => {
 
     return (
         <div className="campanas-container">
-            {/* Header moderno con gradiente */}
-            <div className="modern-header animate-slide-down">
-                <div className="modern-title" style={{ fontSize: '1rem', marginTop: '14px', lineHeight: '1' }}>
-                    📋 LISTADO DE CAMPAÑAS
-                </div>
-            </div>
-
-            {/* Única fila: Campos de filtro y botones */}
-            <Box sx={{ mb: 2, mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                    <TextField
-                        sx={{ width: '300px' }}
-                        variant="outlined"
-                        placeholder="🔍 Buscar campaña..."
-                        value={searchText}
-                        onChange={(e) => setSearchText(e.target.value)}
-                        className="search-input"
-                        size="small"
-                        InputProps={{
-                            style: { height: '40px' }
-                        }}
-                    />
-                    <TextField
-                        type="date"
-                        variant="outlined"
-                        value={dateFrom}
-                        onChange={(e) => setDateFrom(e.target.value)}
-                        label="📅 Desde"
-                        InputLabelProps={{ shrink: true }}
-                        className="date-input"
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                background: 'rgba(255,255,255,0.9)',
-                                backdropFilter: 'blur(10px)',
-                                borderRadius: '12px',
-                            }
-                        }}
-                    />
-                    <TextField
-                        type="date"
-                        variant="outlined"
-                        value={dateTo}
-                        onChange={(e) => setDateTo(e.target.value)}
-                        label="📅 Hasta"
-                        InputLabelProps={{ shrink: true }}
-                        className="date-input"
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                background: 'rgba(255,255,255,0.9)',
-                                backdropFilter: 'blur(10px)',
-                                borderRadius: '12px',
-                            }
-                        }}
-                    />
-                </Box>
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                    <Button
-                        variant="contained"
-                        onClick={() => setOpenModal(true)}
-                        startIcon={<AddIcon sx={{ color: '#fff' }} />}
-                        className="btn-agregar"
-                        sx={{ height: '40px' }}
-                    >
-                        Nueva Campaña
-                    </Button>
-                    <Button
-                        variant="contained"
-                        onClick={exportToExcel}
-                        startIcon={<FileDownloadIcon sx={{ color: '#fff' }} />}
-                        className="btn-agregar"
-                        sx={{ height: '40px' }}
-                    >
-                        Exportar
-                    </Button>
-                </Box>
-            </Box>
-
-            <div className="data-grid-container">
-                {loading ? (
-                    <div style={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
-                        <Typography>Cargando...</Typography>
+            {/* Header moderno con gradiente - Oculto en móvil */}
+            {!isMobile && (
+                <div className="modern-header animate-slide-down">
+                    <div className="modern-title" style={{ fontSize: '1rem', marginTop: '14px', lineHeight: '1' }}>
+                        📋 LISTADO DE CAMPAÑAS
                     </div>
-                ) : (
-                    <DataGrid
-                        rows={rows}
-                        columns={columns}
-                        pageSize={10}
-                        rowsPerPageOptions={[10, 25, 50]}
-                        disableSelectionOnClick
-                        autoHeight
-                        localeText={{
-                            noRowsLabel: 'No hay datos para mostrar',
-                            footerRowSelected: count => `${count} fila${count !== 1 ? 's' : ''} seleccionada${count !== 1 ? 's' : ''}`,
-                            footerTotalRows: 'Filas totales:',
-                            footerTotalVisibleRows: (visibleCount, totalCount) =>
-                                `${visibleCount.toLocaleString()} de ${totalCount.toLocaleString()}`,
-                            footerPaginationRowsPerPage: 'Filas por página:',
-                            columnMenuLabel: 'Menú',
-                            columnMenuShowColumns: 'Mostrar columnas',
-                            columnMenuFilter: 'Filtrar',
-                            columnMenuHideColumn: 'Ocultar',
-                            columnMenuUnsort: 'Desordenar',
-                            columnMenuSortAsc: 'Ordenar ASC',
-                            columnMenuSortDesc: 'Ordenar DESC',
-                            columnHeaderSortIconLabel: 'Ordenar',
-                            MuiTablePagination: {
-                                labelRowsPerPage: 'Filas por página:',
-                                labelDisplayedRows: ({ from, to, count }) =>
-                                    `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`,
-                            },
-                        }}
-                        initialState={{
-                            pagination: {
-                                paginationModel: { pageSize: 10 }
-                            },
-                        }}
-                        sx={{
-                            '& .MuiDataGrid-cell:focus': {
-                                outline: 'none',
-                            },
-                            '& .MuiDataGrid-row:hover': {
-                                backgroundColor: '#f5f5f5',
-                            },
-                        }}
-                    />
-                )}
-            </div>
+                </div>
+            )}
+
+            {/* Versión móvil optimizada */}
+            {isMobile ? (
+                <>
+                    <Box sx={{ p: 2 }}>
+
+                        {/* Barra de búsqueda móvil */}
+                        <Box sx={{ mb: 2 }}>
+                            <TextField
+                                fullWidth
+                                variant="outlined"
+                                placeholder="Buscar campaña..."
+                                value={searchText}
+                                onChange={(e) => setSearchText(e.target.value)}
+                                size="small"
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '12px',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    }
+                                }}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <SearchIcon />
+                                        </InputAdornment>
+                                    )
+                                }}
+                            />
+                        </Box>
+
+                        {/* Botón de filtros */}
+                        <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
+                            <Button
+                                variant={showFilters ? 'contained' : 'outlined'}
+                                size="small"
+                                onClick={() => setShowFilters(!showFilters)}
+                                startIcon={<FilterListIcon />}
+                                sx={{ borderRadius: '12px' }}
+                            >
+                                Filtros
+                            </Button>
+                            <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={exportToExcel}
+                                startIcon={<FileDownloadIcon />}
+                                sx={{ borderRadius: '12px' }}
+                            >
+                                Exportar
+                            </Button>
+                        </Box>
+
+                        {/* Filtros avanzados (colapsables) */}
+                        {showFilters && (
+                            <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
+                                <TextField
+                                    type="date"
+                                    size="small"
+                                    label="Desde"
+                                    value={dateFrom}
+                                    onChange={(e) => setDateFrom(e.target.value)}
+                                    InputLabelProps={{ shrink: true }}
+                                    sx={{ flex: 1 }}
+                                />
+                                <TextField
+                                    type="date"
+                                    size="small"
+                                    label="Hasta"
+                                    value={dateTo}
+                                    onChange={(e) => setDateTo(e.target.value)}
+                                    InputLabelProps={{ shrink: true }}
+                                    sx={{ flex: 1 }}
+                                />
+                            </Box>
+                        )}
+
+                        {/* Cards creativos para campañas */}
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+                            {filteredCampanas.slice((mobilePage - 1) * 10, mobilePage * 10).map((campana, index) => (
+                                <Card
+                                    key={campana.id_campania}
+                                    sx={{
+                                        background: `linear-gradient(135deg, ${
+                                            index % 4 === 0 ? '#667eea 0%, #764ba2 100%' :
+                                            index % 4 === 1 ? '#f093fb 0%, #f5576c 100%' :
+                                            index % 4 === 2 ? '#4facfe 0%, #00f2fe 100%' :
+                                            '#43e97b 0%, #38f9d7 100%'
+                                        })`,
+                                        borderRadius: '16px',
+                                        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                                        overflow: 'hidden',
+                                        position: 'relative'
+                                    }}
+                                >
+                                    {/* Header del Card */}
+                                    <Box sx={{
+                                        background: 'rgba(255,255,255,0.95)',
+                                        p: 2,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 2
+                                    }}>
+                                        {/* Avatar con iniciales */}
+                                        <Avatar
+                                            sx={{
+                                                width: 56,
+                                                height: 56,
+                                                background: `linear-gradient(135deg, ${
+                                                    index % 4 === 0 ? '#667eea 0%, #764ba2 100%' :
+                                                    index % 4 === 1 ? '#f093fb 0%, #f5576c 100%' :
+                                                    index % 4 === 2 ? '#4facfe 0%, #00f2fe 100%' :
+                                                    '#43e97b 0%, #38f9d7 100%'
+                                                })`,
+                                                fontSize: '1.5rem',
+                                                fontWeight: 'bold',
+                                                color: 'white'
+                                            }}
+                                        >
+                                            {campana.nombrecampania?.charAt(0) || '?'}
+                                        </Avatar>
+
+                                        {/* Información principal */}
+                                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                                            <Typography
+                                                variant="h6"
+                                                sx={{
+                                                    fontWeight: 'bold',
+                                                    fontSize: '1rem',
+                                                    color: '#1e293b',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    whiteSpace: 'nowrap'
+                                                }}
+                                            >
+                                                {campana.nombrecampania}
+                                            </Typography>
+                                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mt: 0.5 }}>
+                                                <Chip
+                                                    label={campana.clientes?.nombrecliente || 'Sin cliente'}
+                                                    size="small"
+                                                    icon={<BusinessIcon />}
+                                                    sx={{
+                                                        height: '24px',
+                                                        fontSize: '0.75rem',
+                                                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                                                        color: '#667eea',
+                                                        fontWeight: 600
+                                                    }}
+                                                />
+                                                <Chip
+                                                    label={campana.estado ? '✓ Activa' : '✗ Inactiva'}
+                                                    size="small"
+                                                    sx={{
+                                                        height: '24px',
+                                                        fontSize: '0.75rem',
+                                                        backgroundColor: campana.estado ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                                                        color: campana.estado ? '#16a34a' : '#dc2626',
+                                                        fontWeight: 600
+                                                    }}
+                                                />
+                                            </Box>
+                                        </Box>
+
+                                        {/* Botones de acción */}
+                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => handleView(campana)}
+                                                sx={{
+                                                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                                    '&:hover': { backgroundColor: 'rgba(59, 130, 246, 0.2)' }
+                                                }}
+                                            >
+                                                <VisibilityIcon fontSize="small" sx={{ color: '#3b82f6' }} />
+                                            </IconButton>
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => handleEdit(campana)}
+                                                sx={{
+                                                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                                    '&:hover': { backgroundColor: 'rgba(34, 197, 94, 0.2)' }
+                                                }}
+                                            >
+                                                <EditIcon fontSize="small" sx={{ color: '#22c55e' }} />
+                                            </IconButton>
+                                        </Box>
+                                    </Box>
+
+                                    {/* Detalles adicionales */}
+                                    <Box sx={{
+                                        background: 'rgba(255,255,255,0.85)',
+                                        p: 2,
+                                        pt: 1
+                                    }}>
+                                        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
+                                            <Box>
+                                                <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                                                    Agencia
+                                                </Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                                                    {campana.agencias?.nombreidentificador || 'Sin agencia'}
+                                                </Typography>
+                                            </Box>
+                                            <Box>
+                                                <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                                                    💰 Presupuesto
+                                                </Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                                                    ${campana.presupuesto?.toLocaleString('es-CL') || '0'}
+                                                </Typography>
+                                            </Box>
+                                            <Box>
+                                                <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                                                    📦 Producto
+                                                </Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                                                    {campana.productos?.nombredelproducto || 'Sin producto'}
+                                                </Typography>
+                                            </Box>
+                                            <Box>
+                                                <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                                                    📅 Año
+                                                </Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                                                    {campana.anios?.years || 'N/A'}
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                    </Box>
+
+                                    {/* Badge de fecha */}
+                                    <Box sx={{
+                                        position: 'absolute',
+                                        top: 8,
+                                        right: 8,
+                                        background: 'rgba(255,255,255,0.95)',
+                                        borderRadius: '8px',
+                                        px: 1,
+                                        py: 0.5
+                                    }}>
+                                        <Typography variant="caption" sx={{ fontWeight: 600, color: '#64748b' }}>
+                                            📅 {campana.created_at ? new Date(campana.created_at).toLocaleDateString('es-CL') : new Date().toLocaleDateString('es-CL')}
+                                        </Typography>
+                                    </Box>
+                                </Card>
+                            ))}
+
+                            {/* Mensaje si no hay campañas */}
+                            {filteredCampanas.length === 0 && (
+                                <Box sx={{ textAlign: 'center', py: 8 }}>
+                                    <Typography variant="body1" color="text.secondary">
+                                        No se encontraron campañas
+                                    </Typography>
+                                </Box>
+                            )}
+
+                        </Box>
+
+                        {/* Paginación móvil */}
+                        {filteredCampanas.length > 10 && (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                                <Pagination
+                                    count={Math.ceil(filteredCampanas.length / 10)}
+                                    page={mobilePage}
+                                    onChange={(event, value) => setMobilePage(value)}
+                                    color="primary"
+                                    size="small"
+                                    sx={{
+                                        '& .MuiPaginationItem-root': {
+                                            fontSize: '0.875rem',
+                                        }
+                                    }}
+                                />
+                            </Box>
+                        )}
+
+                        {/* Contador de resultados */}
+                        <Box sx={{ textAlign: 'center', mb: 10 }}>
+                            <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                                Mostrando {Math.min((mobilePage - 1) * 10 + 1, filteredCampanas.length)}-{Math.min(mobilePage * 10, filteredCampanas.length)} de {filteredCampanas.length} campaña{filteredCampanas.length !== 1 ? 's' : ''}
+                            </Typography>
+                        </Box>
+
+                        {/* FAB para agregar campaña */}
+                        <Fab
+                            color="primary"
+                            aria-label="add"
+                            onClick={() => setOpenModal(true)}
+                            sx={{
+                                position: 'fixed',
+                                bottom: 80,
+                                right: 16,
+                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                '&:hover': {
+                                    background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                                }
+                            }}
+                        >
+                            <AddIcon />
+                        </Fab>
+                    </Box>
+                </>
+            ) : (
+                /* Versión escritorio */
+                <Box sx={{ mb: 2, mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                        <TextField
+                            sx={{ width: '300px' }}
+                            variant="outlined"
+                            placeholder="Buscar campaña..."
+                            value={searchText}
+                            onChange={(e) => setSearchText(e.target.value)}
+                            className="search-input"
+                            size="small"
+                            InputProps={{
+                                style: { height: '40px' }
+                            }}
+                        />
+                        <TextField
+                            type="date"
+                            variant="outlined"
+                            value={dateFrom}
+                            onChange={(e) => setDateFrom(e.target.value)}
+                            label="📅 Desde"
+                            InputLabelProps={{ shrink: true }}
+                            className="date-input"
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    background: 'rgba(255,255,255,0.9)',
+                                    backdropFilter: 'blur(10px)',
+                                    borderRadius: '12px',
+                                }
+                            }}
+                        />
+                        <TextField
+                            type="date"
+                            variant="outlined"
+                            value={dateTo}
+                            onChange={(e) => setDateTo(e.target.value)}
+                            label="📅 Hasta"
+                            InputLabelProps={{ shrink: true }}
+                            className="date-input"
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    background: 'rgba(255,255,255,0.9)',
+                                    backdropFilter: 'blur(10px)',
+                                    borderRadius: '12px',
+                                }
+                            }}
+                        />
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                        <Button
+                            variant="contained"
+                            onClick={() => setOpenModal(true)}
+                            startIcon={<AddIcon sx={{ color: '#fff' }} />}
+                            className="btn-agregar"
+                            sx={{ height: '40px' }}
+                        >
+                            Nueva Campaña
+                        </Button>
+                        <Button
+                            variant="contained"
+                            onClick={exportToExcel}
+                            startIcon={<FileDownloadIcon sx={{ color: '#fff' }} />}
+                            className="btn-agregar"
+                            sx={{ height: '40px' }}
+                        >
+                            Exportar
+                        </Button>
+                    </Box>
+                </Box>
+            )}
+
+            {/* DataGrid solo visible en escritorio */}
+            {!isMobile && (
+                <div className="data-grid-container">
+                    {loading ? (
+                        <div style={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>
+                            <Typography>Cargando...</Typography>
+                        </div>
+                    ) : (
+                        <DataGrid
+                            rows={rows}
+                            columns={columns}
+                            pageSize={10}
+                            rowsPerPageOptions={[10]}
+                            disableSelectionOnClick
+                            autoHeight
+                            rowHeight={56}
+                            columnHeaderHeight={56}
+                            localeText={{
+                                noRowsLabel: 'No hay datos para mostrar',
+                                footerRowSelected: count => `${count} fila${count !== 1 ? 's' : ''} seleccionada${count !== 1 ? 's' : ''}`,
+                                footerTotalRows: 'Filas totales:',
+                                footerTotalVisibleRows: (visibleCount, totalCount) =>
+                                    `${visibleCount.toLocaleString()} de ${totalCount.toLocaleString()}`,
+                                footerPaginationRowsPerPage: 'Filas por página:',
+                                columnMenuLabel: 'Menú',
+                                columnMenuShowColumns: 'Mostrar columnas',
+                                columnMenuFilter: 'Filtrar',
+                                columnMenuHideColumn: 'Ocultar',
+                                columnMenuUnsort: 'Desordenar',
+                                columnMenuSortAsc: 'Ordenar ASC',
+                                columnMenuSortDesc: 'Ordenar DESC',
+                                columnHeaderSortIconLabel: 'Ordenar',
+                                MuiTablePagination: {
+                                    labelRowsPerPage: 'Filas por página:',
+                                    labelDisplayedRows: ({ from, to, count }) =>
+                                        `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`,
+                                },
+                            }}
+                            initialState={{
+                                pagination: {
+                                    paginationModel: { pageSize: 10 }
+                                },
+                            }}
+                            sx={{
+                                '& .MuiDataGrid-cell:focus': {
+                                    outline: 'none',
+                                },
+                                '& .MuiDataGrid-row:hover': {
+                                    backgroundColor: '#f5f5f5',
+                                },
+                                '& .MuiDataGrid-footerContainer': {
+                                    borderTop: '1px solid rgba(102, 126, 234, 0.1) !important',
+                                    background: 'rgba(255,255,255,0.8) !important',
+                                },
+                                '& .MuiDataGrid-footerContainer .MuiTablePagination-root .MuiTablePagination-selectLabel': {
+                                    display: 'none'
+                                },
+                                '& .MuiDataGrid-footerContainer .MuiTablePagination-root .MuiTablePagination-select': {
+                                    display: 'none'
+                                },
+                                '& .MuiDataGrid-footerContainer .MuiTablePagination-root .MuiTablePagination-selectIcon': {
+                                    display: 'none'
+                                }
+                            }}
+                        />
+                    )}
+                </div>
+            )}
 
             <ModalAgregarCampana
                 open={openModal}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { createTheme, ThemeProvider, useTheme } from '@mui/material/styles';
 import { Link as RouterLink } from 'react-router-dom';
 import { DataGrid } from '@mui/x-data-grid';
 import clientScoringService from '../../services/clientScoringService';
@@ -28,10 +28,19 @@ import {
   Box,
   LinearProgress,
   Tooltip,
-  CircularProgress
+  CircularProgress,
+  useMediaQuery,
+  Fab,
+  Avatar,
+  CardActions,
+  Collapse,
+  Pagination
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import AddIcon from '@mui/icons-material/Add';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import PersonIcon from '@mui/icons-material/Person';
 import BusinessIcon from '@mui/icons-material/Business';
@@ -55,11 +64,15 @@ import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import { supabase } from '../../config/supabase';
 import { mapearDatos } from '../../config/mapeo-campos';
 import * as XLSX from 'xlsx';
 import Swal from 'sweetalert2';
 import './Clientes.css';
+import MobileLayout from '../../components/mobile/MobileLayout';
+import MobileTable from '../../components/mobile/MobileTable';
 
 // Constantes para mejor mantenibilidad
 const ESTADOS_CLIENTE = {
@@ -67,7 +80,6 @@ const ESTADOS_CLIENTE = {
   INACTIVO: false
 };
 
-const COLUMNAS_POR_DEFECTO = 10;
 const CAMPOS_REQUERIDOS = [
   'nombreCliente',
   'RUT'
@@ -139,10 +151,31 @@ const validatePhoneNumber = (phone) => {
 };
 
 const Clientes = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  
   // Estados principales
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [rows, setRows] = useState([]);
+  const [showFilters, setShowFilters] = useState(false);
+  const [mobilePage, setMobilePage] = useState(1);
+  
+  // Estado para paginación
+  const [paginationModel, setPaginationModel] = useState({
+    pageSize: 10,
+    page: 0
+  });
+  
+  // Forzar que siempre sea 10 por página
+  const handlePaginationChange = (newModel) => {
+    const forcedModel = {
+      ...newModel,
+      pageSize: 10
+    };
+    console.log('📄 Forzando paginación a 10:', forcedModel);
+    setPaginationModel(forcedModel);
+  };
   
   // Estados de filtros
   const [filtros, setFiltros] = useState({
@@ -150,6 +183,7 @@ const Clientes = () => {
     startDate: '',
     endDate: ''
   });
+  
   
   // Estados de modales
   const [modales, setModales] = useState({
@@ -242,6 +276,7 @@ const Clientes = () => {
     setError(null);
     
     try {
+      
       const [
         { data: clientesData, error: clientesError },
         { data: tiposClienteData, error: tiposClienteError },
@@ -255,6 +290,7 @@ const Clientes = () => {
         supabase.from('comunas').select('*'),
         supabase.from('grupos').select('*')
       ]);
+
 
       if (clientesError) throw clientesError;
       if (tiposClienteError) throw tiposClienteError;
@@ -338,7 +374,7 @@ const Clientes = () => {
     // Filtrar por término de búsqueda
     if (filtros.searchTerm) {
       const searchTermLower = filtros.searchTerm.toLowerCase();
-      filtered = filtered.filter(row => 
+      filtered = filtered.filter(row =>
         row.nombreCliente?.toLowerCase().includes(searchTermLower) ||
         row.nombreFantasia?.toLowerCase().includes(searchTermLower) ||
         row.razonSocial?.toLowerCase().includes(searchTermLower) ||
@@ -350,7 +386,18 @@ const Clientes = () => {
     // Filtrar por rango de fechas
     if (filtros.startDate || filtros.endDate) {
       filtered = filtered.filter(row => {
+        // Si no hay fecha de creación, incluir el registro (no filtrar por fechas)
+        if (!row._created_at) {
+          return true;
+        }
+        
         const clientDate = new Date(row._created_at);
+        
+        // Si la fecha es inválida, incluir el registro (no filtrar por fechas)
+        if (isNaN(clientDate.getTime())) {
+          return true;
+        }
+        
         const start = filtros.startDate ? new Date(filtros.startDate) : null;
         const end = filtros.endDate ? new Date(filtros.endDate) : null;
 
@@ -902,110 +949,935 @@ const Clientes = () => {
     );
   }
 
-  return (
-    <div className="clientes-container animate-fade-in">
-      {/* Header moderno con gradiente */}
-      <div className="modern-header animate-slide-down">
-        <div className="modern-title" style={{ fontSize: '1rem', marginTop: '14px', lineHeight: '1' }}>
-          👥 LISTADO DE CLIENTES
-        </div>
-      </div>
+  // VERSIÓN MÓVIL optimizada
+  if (isMobile) {
+    const mobileColumns = [
+      { field: 'nombreCliente', headerName: 'Cliente', width: 200 },
+      { field: 'rutEmpresa', headerName: 'RUT', width: 120 },
+      { field: 'grupo', headerName: 'Grupo', width: 150 },
+      { field: 'tipoCliente', headerName: 'Tipo', width: 150, hideInMobile: true },
+      { field: 'region', headerName: 'Región', width: 150, hideInMobile: true },
+      { field: 'comuna', headerName: 'Comuna', width: 120, hideInMobile: true },
+      {
+        field: 'estado',
+        headerName: 'Estado',
+        width: 100,
+        hideInMobile: true,
+        renderCell: (params) => (
+          <Chip
+            label={params.value ? 'Activo' : 'Inactivo'}
+            color={params.value ? 'success' : 'default'}
+            size="small"
+          />
+        )
+      }
+    ];
 
+    return (
+      <>
+        <Box sx={{ p: 2 }}>
 
-      {/* Contenedor principal */}
-      <Box sx={{ p: 3, pt: 3 }}>
-        {/* Contenedor único para todos los elementos en una línea */}
-        <Box sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 2,
-          mb: 3
-        }}>
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          {/* Barra de búsqueda móvil */}
+          <Box sx={{ mb: 2 }}>
             <TextField
+              fullWidth
               variant="outlined"
               placeholder="🔍 Buscar cliente..."
               value={filtros.searchTerm}
               onChange={(e) => handleFiltroChange('searchTerm', e.target.value)}
-              className="search-input"
+              size="small"
               sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                }
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                )
+              }}
+            />
+          </Box>
+
+          {/* Botón de filtros */}
+          <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
+            <Button
+              variant={showFilters ? 'contained' : 'outlined'}
+              size="small"
+              onClick={() => setShowFilters(!showFilters)}
+              startIcon={<FilterListIcon />}
+              sx={{ borderRadius: '12px' }}
+            >
+              Filtros
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={exportToExcel}
+              startIcon={<FileDownloadIcon />}
+              sx={{ borderRadius: '12px' }}
+            >
+              Exportar
+            </Button>
+          </Box>
+
+          {/* Filtros avanzados (colapsables) */}
+          {showFilters && (
+            <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
+              <TextField
+                type="date"
+                size="small"
+                label="Desde"
+                value={filtros.startDate}
+                onChange={(e) => handleFiltroChange('startDate', e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                sx={{ flex: 1 }}
+              />
+              <TextField
+                type="date"
+                size="small"
+                label="Hasta"
+                value={filtros.endDate}
+                onChange={(e) => handleFiltroChange('endDate', e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                sx={{ flex: 1 }}
+              />
+            </Box>
+          )}
+
+          {/* Cards creativos para clientes */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+            {filteredRows.slice((mobilePage - 1) * 10, mobilePage * 10).map((cliente, index) => (
+              <Card
+                key={cliente.id_cliente}
+                sx={{
+                  background: `linear-gradient(135deg, ${
+                    index % 4 === 0 ? '#667eea 0%, #764ba2 100%' :
+                    index % 4 === 1 ? '#f093fb 0%, #f5576c 100%' :
+                    index % 4 === 2 ? '#4facfe 0%, #00f2fe 100%' :
+                    '#43e97b 0%, #38f9d7 100%'
+                  })`,
+                  borderRadius: '16px',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                  overflow: 'hidden',
+                  position: 'relative'
+                }}
+              >
+                {/* Header del Card */}
+                <Box sx={{
+                  background: 'rgba(255,255,255,0.95)',
+                  p: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2
+                }}>
+                  {/* Avatar con iniciales */}
+                  <Avatar
+                    sx={{
+                      width: 56,
+                      height: 56,
+                      background: `linear-gradient(135deg, ${
+                        index % 4 === 0 ? '#667eea 0%, #764ba2 100%' :
+                        index % 4 === 1 ? '#f093fb 0%, #f5576c 100%' :
+                        index % 4 === 2 ? '#4facfe 0%, #00f2fe 100%' :
+                        '#43e97b 0%, #38f9d7 100%'
+                      })`,
+                      fontSize: '1.5rem',
+                      fontWeight: 'bold',
+                      color: 'white'
+                    }}
+                  >
+                    {cliente.nombreCliente?.charAt(0) || '?'}
+                  </Avatar>
+
+                  {/* Información principal */}
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 'bold',
+                        fontSize: '1rem',
+                        color: '#1e293b',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {cliente.nombreCliente}
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mt: 0.5 }}>
+                      <Chip
+                        label={cliente.rutEmpresa || 'Sin RUT'}
+                        size="small"
+                        icon={<BadgeIcon />}
+                        sx={{
+                          height: '24px',
+                          fontSize: '0.75rem',
+                          backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                          color: '#667eea',
+                          fontWeight: 600
+                        }}
+                      />
+                      <Chip
+                        label={cliente.estado ? '✓ Activo' : '✗ Inactivo'}
+                        size="small"
+                        sx={{
+                          height: '24px',
+                          fontSize: '0.75rem',
+                          backgroundColor: cliente.estado ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                          color: cliente.estado ? '#16a34a' : '#dc2626',
+                          fontWeight: 600
+                        }}
+                      />
+                    </Box>
+                  </Box>
+
+                  {/* Botones de acción */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    <IconButton
+                      size="small"
+                      onClick={() => window.location.href = `/clientes/view/${cliente.id_cliente}`}
+                      sx={{
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        '&:hover': { backgroundColor: 'rgba(59, 130, 246, 0.2)' }
+                      }}
+                    >
+                      <VisibilityIcon fontSize="small" sx={{ color: '#3b82f6' }} />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleOpenEditModal(cliente)}
+                      sx={{
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        '&:hover': { backgroundColor: 'rgba(34, 197, 94, 0.2)' }
+                      }}
+                    >
+                      <EditIcon fontSize="small" sx={{ color: '#22c55e' }} />
+                    </IconButton>
+                  </Box>
+                </Box>
+
+                {/* Detalles adicionales */}
+                <Box sx={{
+                  background: 'rgba(255,255,255,0.85)',
+                  p: 2,
+                  pt: 1
+                }}>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
+                    <Box>
+                      <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                        Grupo
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                        {cliente.grupo}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                        📍 Región
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                        {cliente.region}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                        🏙️ Comuna
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                        {cliente.comuna}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                        🏢 Tipo
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                        {cliente.tipoCliente}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+
+                {/* Badge de fecha */}
+                <Box sx={{
+                  position: 'absolute',
+                  top: 8,
+                  right: 8,
+                  background: 'rgba(255,255,255,0.95)',
+                  borderRadius: '8px',
+                  px: 1,
+                  py: 0.5
+                }}>
+                  <Typography variant="caption" sx={{ fontWeight: 600, color: '#64748b' }}>
+                    📅 {cliente.fechaIngreso}
+                  </Typography>
+                </Box>
+              </Card>
+            ))}
+
+            {/* Mensaje si no hay clientes */}
+            {filteredRows.length === 0 && (
+              <Box sx={{ textAlign: 'center', py: 8 }}>
+                <Typography variant="body1" color="text.secondary">
+                  No se encontraron clientes
+                </Typography>
+              </Box>
+            )}
+
+          </Box>
+
+          {/* Paginación móvil */}
+          {filteredRows.length > 10 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 2 }}>
+              <Pagination
+                count={Math.ceil(filteredRows.length / 10)}
+                page={mobilePage}
+                onChange={(event, value) => {
+                  setMobilePage(value);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                color="primary"
+                size="large"
+                sx={{
+                  '& .MuiPaginationItem-root': {
+                    borderRadius: '12px',
+                    fontWeight: 600,
+                    minWidth: '40px',
+                    height: '40px',
+                    '&.Mui-selected': {
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      color: 'white',
+                      fontWeight: 700,
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                      }
+                    }
+                  }
+                }}
+              />
+            </Box>
+          )}
+
+          {/* Contador de resultados */}
+          <Box sx={{ textAlign: 'center', mb: 10 }}>
+            <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+              Mostrando {Math.min((mobilePage - 1) * 10 + 1, filteredRows.length)}-{Math.min(mobilePage * 10, filteredRows.length)} de {filteredRows.length} cliente{filteredRows.length !== 1 ? 's' : ''}
+            </Typography>
+          </Box>
+
+          {/* FAB para agregar cliente */}
+          <Fab
+            color="primary"
+            aria-label="add"
+            onClick={handleOpenModal}
+            sx={{
+              position: 'fixed',
+              bottom: 80,
+              right: 16,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+              }
+            }}
+          >
+            <AddIcon />
+          </Fab>
+        </Box>
+
+        {/* Modales (compartidos entre móvil y escritorio) */}
+        {/* Modal para agregar cliente */}
+        <Dialog open={modales.agregar} onClose={handleCloseModal} maxWidth="md" fullWidth>
+          <DialogTitle>Agregar Nuevo Cliente</DialogTitle>
+          <DialogContent>
+            <Grid container spacing={2} sx={{ mt: 1 }}>
+              {/* Información básica del cliente */}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  name="nombreCliente"
+                  label="Nombre Cliente *"
+                  value={newClient.nombreCliente}
+                  onChange={handleInputChange}
+                  fullWidth
+                  required
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PersonIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  name="nombreFantasia"
+                  label="Nombre de Fantasía"
+                  value={newClient.nombreFantasia}
+                  onChange={handleInputChange}
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <BusinessIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+
+              {/* Grupo y Razón Social */}
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Grupo</InputLabel>
+                  <Select
+                    name="id_grupo"
+                    value={newClient.id_grupo || ''}
+                    onChange={handleInputChange}
+                    label="Grupo"
+                  >
+                    {Object.entries(datosRelacionados.grupos).map(([id, nombre]) => (
+                      <MenuItem key={id} value={id}>
+                        {nombre}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  name="razonSocial"
+                  label="Razón Social"
+                  value={newClient.razonSocial}
+                  onChange={handleInputChange}
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <StorefrontIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+
+              {/* Tipo de cliente y RUT */}
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Tipo de Cliente</InputLabel>
+                  <Select
+                    name="id_tipoCliente"
+                    value={newClient.id_tipoCliente || ''}
+                    onChange={handleInputChange}
+                    label="Tipo de Cliente"
+                  >
+                    {Object.entries(datosRelacionados.tiposCliente).map(([id, tipo]) => (
+                      <MenuItem key={id} value={id}>
+                        {tipo.nombreTipoCliente}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  name="RUT"
+                  label="RUT Empresa *"
+                  value={newClient.RUT}
+                  onChange={handleInputChange}
+                  fullWidth
+                  required
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <BadgeIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+
+              {/* Región y Comuna */}
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Región</InputLabel>
+                  <Select
+                    name="id_region"
+                    value={newClient.id_region || ''}
+                    onChange={handleInputChange}
+                    label="Región"
+                  >
+                    {Object.entries(datosRelacionados.regiones).map(([id, nombre]) => (
+                      <MenuItem key={id} value={id}>
+                        {nombre}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Comuna</InputLabel>
+                  <Select
+                    name="id_comuna"
+                    value={newClient.id_comuna || ''}
+                    onChange={handleInputChange}
+                    label="Comuna"
+                    disabled={!newClient.id_region}
+                  >
+                    {Object.entries(datosRelacionados.comunasFiltradas).map(([id, comuna]) => (
+                      <MenuItem key={id} value={id}>
+                        {comuna.nombrecomuna}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* Giro y Dirección */}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  name="giro"
+                  label="Giro"
+                  value={newClient.giro}
+                  onChange={handleInputChange}
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <CategoryIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  name="direccionEmpresa"
+                  label="Dirección Empresa"
+                  value={newClient.direccionEmpresa}
+                  onChange={handleInputChange}
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LocationOnIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+
+              {/* Representante Legal */}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  name="nombreRepresentanteLegal"
+                  label="Nombre Representante Legal"
+                  value={newClient.nombreRepresentanteLegal}
+                  onChange={handleInputChange}
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PersonIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  name="apellidoRepresentante"
+                  label="Apellido Representante"
+                  value={newClient.apellidoRepresentante}
+                  onChange={handleInputChange}
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PersonIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+
+              {/* RUT Representante */}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  name="RUT_representante"
+                  label="RUT Representante Legal"
+                  value={newClient.RUT_representante}
+                  onChange={handleInputChange}
+                  fullWidth
+                  error={!!errors.RUT_representante}
+                  helperText={errors.RUT_representante}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <BadgeIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+
+              {/* Contactos */}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  name="telCelular"
+                  label="Teléfono Celular"
+                  value={newClient.telCelular}
+                  onChange={handleInputChange}
+                  fullWidth
+                  error={!!errors.telCelular}
+                  helperText={errors.telCelular}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PhoneAndroidIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  name="telFijo"
+                  label="Teléfono Fijo"
+                  value={newClient.telFijo}
+                  onChange={handleInputChange}
+                  fullWidth
+                  error={!!errors.telFijo}
+                  helperText={errors.telFijo}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PhoneIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+
+              {/* Email y Web */}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  name="email"
+                  label="Email"
+                  type="email"
+                  value={newClient.email}
+                  onChange={handleInputChange}
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <EmailIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  name="web_cliente"
+                  label="Sitio Web"
+                  value={newClient.web_cliente}
+                  onChange={handleInputChange}
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LanguageIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseModal} color="primary">
+              Cancelar
+            </Button>
+            <Button onClick={handleSubmit} color="primary" variant="contained">
+              Guardar
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Modal de edición (simplificado para móvil) */}
+        <Dialog open={modales.editar} onClose={handleCloseEditModal} maxWidth="sm" fullWidth fullScreen={isMobile}>
+          <DialogTitle>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="h6">Editar Cliente</Typography>
+              <IconButton onClick={handleCloseEditModal}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+          </DialogTitle>
+          <DialogContent>
+            <Grid container spacing={2} sx={{ mt: 1 }}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Nombre Cliente *"
+                  name="nombreCliente"
+                  value={selectedClient?.nombreCliente || ''}
+                  onChange={handleEditInputChange}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PersonIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="RUT Empresa *"
+                  name="RUT"
+                  value={selectedClient?.RUT || ''}
+                  onChange={handleEditInputChange}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <BadgeIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>Región</InputLabel>
+                  <Select
+                    name="id_region"
+                    value={selectedClient?.id_region || ''}
+                    onChange={handleEditInputChange}
+                    label="Región"
+                  >
+                    {Object.entries(datosRelacionados.regiones).map(([id, nombre]) => (
+                      <MenuItem key={id} value={id}>
+                        {nombre}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>Comuna</InputLabel>
+                  <Select
+                    name="id_comuna"
+                    value={selectedClient?.id_comuna || ''}
+                    onChange={handleEditInputChange}
+                    label="Comuna"
+                    disabled={!selectedClient?.id_region}
+                  >
+                    {Object.entries(datosRelacionados.comunasFiltradas).map(([id, nombre]) => (
+                      <MenuItem key={id} value={id}>
+                        {typeof nombre === 'object' ? nombre.nombrecomuna : nombre}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={selectedClient?.estado ?? true}
+                      onChange={(e) => setSelectedClient(prev => ({ ...prev, estado: e.target.checked }))}
+                      color="primary"
+                    />
+                  }
+                  label="Cliente Activo"
+                />
+              </Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseEditModal}>Cancelar</Button>
+            <Button onClick={handleEditSubmit} variant="contained" color="primary">
+              Guardar Cambios
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </>
+    );
+  }
+
+  // VERSIÓN ESCRITORIO (original)
+  return (
+      <div className="clientes-container animate-fade-in">
+      {/* Header moderno con gradiente - Oculto en móvil */}
+      {!isMobile && (
+        <div className="modern-header animate-slide-down">
+          <div className="modern-title" style={{ fontSize: '1rem', marginTop: '14px', lineHeight: '1' }}>
+            LISTADO DE CLIENTES
+          </div>
+        </div>
+      )}
+
+
+      {/* Única fila: Campos de filtro y botones */}
+      <Box sx={{ mb: 2, mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          <TextField
+            variant="outlined"
+            placeholder="🔍 Buscar cliente..."
+            value={filtros.searchTerm}
+            onChange={(e) => handleFiltroChange('searchTerm', e.target.value)}
+            className="search-input"
+            sx={{
+              background: 'rgba(255,255,255,0.9)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '12px',
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '12px',
+                '&:hover fieldset': {
+                  borderColor: 'var(--gradient-primary)',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'var(--gradient-primary)',
+                },
+              }
+            }}
+          />
+          <TextField
+            type="date"
+            variant="outlined"
+            value={filtros.startDate}
+            onChange={(e) => handleFiltroChange('startDate', e.target.value)}
+            label="📅 Desde"
+            InputLabelProps={{ shrink: true }}
+            className="date-input"
+            sx={{
+              '& .MuiOutlinedInput-root': {
                 background: 'rgba(255,255,255,0.9)',
                 backdropFilter: 'blur(10px)',
                 borderRadius: '12px',
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: '12px',
-                  '&:hover fieldset': {
-                    borderColor: 'var(--gradient-primary)',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'var(--gradient-primary)',
-                  },
-                }
-              }}
-            />
-            <TextField
-              type="date"
-              variant="outlined"
-              value={filtros.startDate}
-              onChange={(e) => handleFiltroChange('startDate', e.target.value)}
-              label="📅 Desde"
-              InputLabelProps={{ shrink: true }}
-              className="date-input"
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  background: 'rgba(255,255,255,0.9)',
-                  backdropFilter: 'blur(10px)',
-                  borderRadius: '12px',
-                }
-              }}
-            />
-            <TextField
-              type="date"
-              variant="outlined"
-              value={filtros.endDate}
-              onChange={(e) => handleFiltroChange('endDate', e.target.value)}
-              label="📅 Hasta"
-              InputLabelProps={{ shrink: true }}
-              className="date-input"
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  background: 'rgba(255,255,255,0.9)',
-                  backdropFilter: 'blur(10px)',
-                  borderRadius: '12px',
-                }
-              }}
-            />
-          </Box>
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-            <Button
-              variant="contained"
-              className="btn-agregar"
-              startIcon={<PersonIcon sx={{ color: 'white' }} />}
-              onClick={handleOpenModal}
-            >
-              Agregar Nuevo Cliente
-            </Button>
-            <Button
-              variant="contained"
-              onClick={exportToExcel}
-              startIcon={<FileDownloadIcon sx={{ color: 'white' }} />}
-              className="btn-agregar"
-            >
-              📊 Exportar Excel
-            </Button>
-          </Box>
+              }
+            }}
+          />
+          <TextField
+            type="date"
+            variant="outlined"
+            value={filtros.endDate}
+            onChange={(e) => handleFiltroChange('endDate', e.target.value)}
+            label="📅 Hasta"
+            InputLabelProps={{ shrink: true }}
+            className="date-input"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                background: 'rgba(255,255,255,0.9)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '12px',
+              }
+            }}
+          />
         </Box>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          <Button
+            variant="contained"
+            className="btn-agregar"
+            startIcon={<PersonIcon sx={{ color: 'white' }} />}
+            onClick={handleOpenModal}
+          >
+            Agregar Nuevo Cliente
+          </Button>
+          <Button
+            variant="contained"
+            onClick={exportToExcel}
+            startIcon={<FileDownloadIcon sx={{ color: 'white' }} />}
+            className="btn-agregar"
+          >
+            Exportar Excel
+          </Button>
+        </Box>
+      </Box>
 
-        <div className="data-grid-container">
+      <div className="data-grid-container">
+          {console.log('🔍 DataGrid recibiendo:', {
+            totalRows: filteredRows.length,
+            paginationModel,
+            loading,
+            firstPageRows: filteredRows.slice(0, 10).length,
+            actualPage: paginationModel.page,
+            pageSize: paginationModel.pageSize
+          })}
           <DataGrid
             rows={filteredRows}
             columns={columns}
-            pageSize={COLUMNAS_POR_DEFECTO}
             loading={loading}
             disableSelectionOnClick
-            autoHeight
+            autoHeight={true}
+            rowHeight={56}
+            columnHeaderHeight={56}
+            sx={{
+              '& .MuiDataGrid-cell:focus': {
+                outline: 'none',
+              },
+              '& .MuiDataGrid-row:hover': {
+                backgroundColor: 'rgba(102, 126, 234, 0.08)',
+                
+              },
+              '& .MuiDataGrid-row:nth-of-type(even)': {
+                backgroundColor: 'rgba(102, 126, 234, 0.02)',
+              },
+              '& .MuiDataGrid-cell': {
+                borderBottom: '1px solid rgba(102, 126, 234, 0.1) !important',
+                display: 'flex !important',
+                alignItems: 'center !important',
+                padding: '12px 16px !important',
+                minHeight: '56px !important',
+                transition: 'background-color 0.2s ease !important',
+              },
+              '& .MuiDataGrid-row': {
+                minHeight: '56px !important',
+                transition: 'background-color 0.2s ease !important',
+              },
+              '& .MuiDataGrid-footerContainer': {
+                borderTop: '1px solid rgba(102, 126, 234, 0.1) !important',
+                background: 'rgba(255,255,255,0.8) !important',
+                '& .MuiTablePagination-root': {
+                  '& .MuiTablePagination-selectLabel': {
+                    display: 'none'
+                  },
+                  '& .MuiTablePagination-select': {
+                    display: 'none'
+                  },
+                  '& .MuiTablePagination-selectIcon': {
+                    display: 'none'
+                  }
+                }
+              },
+              '& .MuiDataGrid-virtualScroller': {
+                overflowX: 'hidden !important',
+              },
+              border: 'none',
+              borderRadius: '12px',
+            }}
+            paginationModel={paginationModel}
+            onPaginationModelChange={handlePaginationChange}
+            pageSizeOptions={[10]}
+            hideFooterSelectedRowCount
+            rowCount={filteredRows.length}
+            pagination
+            paginationMode="client"
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 10,
+                },
+              },
+            }}
             localeText={{
               noRowsLabel: 'No hay datos para mostrar',
               footerRowSelected: count => `${count} fila${count !== 1 ? 's' : ''} seleccionada${count !== 1 ? 's' : ''}`,
@@ -1027,49 +1899,8 @@ const Clientes = () => {
                   `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`,
               },
             }}
-            initialState={{
-              pagination: {
-                paginationModel: { pageSize: COLUMNAS_POR_DEFECTO }
-              },
-            }}
-            pageSizeOptions={[5, 10, 25, 50]}
-            sx={{
-              '& .MuiDataGrid-cell:focus': {
-                outline: 'none',
-              },
-              '& .MuiDataGrid-row:hover': {
-                backgroundColor: 'rgba(102, 126, 234, 0.08)',
-                transform: 'scale(1.01)',
-                transition: 'all 0.2s ease',
-              },
-              '& .MuiDataGrid-row:nth-of-type(even)': {
-                backgroundColor: 'rgba(102, 126, 234, 0.02)',
-              },
-              '& .MuiDataGrid-cell': {
-                borderBottom: '1px solid rgba(102, 126, 234, 0.1) !important',
-                display: 'flex !important',
-                alignItems: 'center !important',
-                padding: '12px 16px !important',
-                minHeight: '56px !important',
-                transition: 'background-color 0.2s ease !important',
-              },
-              '& .MuiDataGrid-row': {
-                minHeight: '56px !important',
-                transition: 'background-color 0.2s ease !important',
-              },
-              '& .MuiDataGrid-footerContainer': {
-                borderTop: '1px solid rgba(102, 126, 234, 0.1) !important',
-                background: 'rgba(255,255,255,0.8) !important',
-              },
-              '& .MuiDataGrid-virtualScroller': {
-                overflowX: 'hidden !important',
-              },
-              border: 'none',
-              borderRadius: '12px',
-            }}
           />
         </div>
-      </Box>
 
       {/* Modal para agregar cliente */}
       <Dialog open={modales.agregar} onClose={handleCloseModal} maxWidth="md" fullWidth>

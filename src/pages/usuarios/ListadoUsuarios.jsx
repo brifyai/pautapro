@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../config/supabase';
+import { useTheme } from '@mui/material/styles';
 import {
   Box,
   Paper,
@@ -26,7 +27,12 @@ import {
   Grid,
   MenuItem,
   CircularProgress,
-  Fab
+  Fab,
+  useMediaQuery,
+  Card,
+  CardContent,
+  Avatar,
+  Pagination
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import {
@@ -41,13 +47,19 @@ import {
   Group as GroupIcon,
   VpnKey as VpnKeyIcon,
   Add as AddIcon,
-  Assistant as AssistantIcon
+  Assistant as AssistantIcon,
+  Badge as BadgeIcon,
+  Phone as PhoneIcon,
+  LocationOn as LocationOnIcon,
+  Business as BusinessIcon,
+  FilterList as FilterListIcon
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import './ListadoUsuarios.css';
+import '../agencias/Agencias.css';
 
 const EditUserModal = ({ open, onClose, usuario, onUserUpdated }) => {
   const [formData, setFormData] = useState({
@@ -624,6 +636,8 @@ const AddUserModal = ({ open, onClose, onUserAdded }) => {
 
 const ListadoUsuarios = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [usuarios, setUsuarios] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -634,6 +648,9 @@ const ListadoUsuarios = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [pageSize, setPageSize] = useState(10);
+  const [paginationModel, setPaginationModel] = useState({ pageSize: 10, page: 0 });
+  const [showFilters, setShowFilters] = useState(false);
+  const [mobilePage, setMobilePage] = useState(1);
 
   const fetchUsuarios = async (start, limit, searchQuery = '') => {
     try {
@@ -732,6 +749,11 @@ const ListadoUsuarios = () => {
     setSearchTerm(event.target.value);
   };
 
+  // Forzar que siempre sea 10 por página (paginación cliente)
+  const handlePaginationChange = (newModel) => {
+    setPaginationModel({ ...newModel, pageSize: 10 });
+  };
+
   const handleEditClick = (usuario) => {
     setSelectedUser(usuario);
     setEditModalOpen(true);
@@ -809,22 +831,290 @@ const ListadoUsuarios = () => {
   };
 
 
-  return (
-    <div className="dashboard animate-fade-in">
-      {/* Header moderno con gradiente */}
-      <div className="modern-header animate-slide-down">
-        <div className="modern-title" style={{ fontSize: '1.25rem' }}>
-            👥 GESTIÓN DE USUARIOS
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-            Administración de usuarios del sistema
-          </Typography>
-        </div>
-      </div>
+  // VERSIÓN MÓVIL optimizada con diseño de cards creativos
+  if (isMobile) {
+    return (
+      <>
+        <Box sx={{ p: 2 }}>
+          {/* Barra de búsqueda móvil */}
+          <Box sx={{ mb: 2 }}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="🔍 Buscar usuario..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              size="small"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                }
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                )
+              }}
+            />
+          </Box>
 
-      {/* Breadcrumbs */}
-      <Box sx={{ p: 3, pb: 0 }}>
+          {/* Botón de filtros y exportar */}
+          <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
+            <Button
+              variant={showFilters ? 'contained' : 'outlined'}
+              size="small"
+              onClick={() => setShowFilters(!showFilters)}
+              startIcon={<FilterListIcon />}
+              sx={{ borderRadius: '12px' }}
+            >
+              Filtros
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<FileDownloadIcon />}
+              sx={{ borderRadius: '12px' }}
+            >
+              Exportar
+            </Button>
+          </Box>
+
+          {/* Cards creativos para usuarios */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+            {usuarios.slice((mobilePage - 1) * 10, mobilePage * 10).map((usuario, index) => (
+              <Card
+                key={usuario.id}
+                sx={{
+                  background: `linear-gradient(135deg, ${
+                    index % 4 === 0 ? '#667eea 0%, #764ba2 100%' :
+                    index % 4 === 1 ? '#f093fb 0%, #f5576c 100%' :
+                    index % 4 === 2 ? '#4facfe 0%, #00f2fe 100%' :
+                    '#43e97b 0%, #38f9d7 100%'
+                  })`,
+                  borderRadius: '16px',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                  overflow: 'hidden',
+                  position: 'relative'
+                }}
+              >
+                {/* Header del Card */}
+                <Box sx={{
+                  background: 'rgba(255,255,255,0.95)',
+                  p: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2
+                }}>
+                  {/* Avatar con iniciales */}
+                  <Avatar
+                    sx={{
+                      width: 56,
+                      height: 56,
+                      background: `linear-gradient(135deg, ${
+                        index % 4 === 0 ? '#667eea 0%, #764ba2 100%' :
+                        index % 4 === 1 ? '#f093fb 0%, #f5576c 100%' :
+                        index % 4 === 2 ? '#4facfe 0%, #00f2fe 100%' :
+                        '#43e97b 0%, #38f9d7 100%'
+                      })`,
+                      fontSize: '1.5rem',
+                      fontWeight: 'bold',
+                      color: 'white'
+                    }}
+                  >
+                    {usuario.nombre?.charAt(0) || usuario.Apellido?.charAt(0) || '?'}
+                  </Avatar>
+
+                  {/* Información principal */}
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 'bold',
+                        fontSize: '1rem',
+                        color: '#1e293b',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {usuario.nombre} {usuario.Apellido}
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mt: 0.5 }}>
+                      <Chip
+                        label={usuario.email || 'Sin email'}
+                        size="small"
+                        icon={<EmailIcon />}
+                        sx={{
+                          height: '24px',
+                          fontSize: '0.75rem',
+                          backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                          color: '#667eea',
+                          fontWeight: 600
+                        }}
+                      />
+                      <Chip
+                        label={usuario.Estado ? '✓ Activo' : '✗ Inactivo'}
+                        size="small"
+                        sx={{
+                          height: '24px',
+                          fontSize: '0.75rem',
+                          backgroundColor: usuario.Estado ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                          color: usuario.Estado ? '#16a34a' : '#dc2626',
+                          fontWeight: 600
+                        }}
+                      />
+                    </Box>
+                  </Box>
+
+                  {/* Botones de acción */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleEditClick(usuario)}
+                      sx={{
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        '&:hover': { backgroundColor: 'rgba(34, 197, 94, 0.2)' }
+                      }}
+                    >
+                      <EditIcon fontSize="small" sx={{ color: '#22c55e' }} />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleDeleteClick(usuario)}
+                      sx={{
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        '&:hover': { backgroundColor: 'rgba(239, 68, 68, 0.2)' }
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" sx={{ color: '#ef4444' }} />
+                    </IconButton>
+                  </Box>
+                </Box>
+
+                {/* Detalles adicionales */}
+                <Box sx={{
+                  background: 'rgba(255,255,255,0.85)',
+                  p: 2,
+                  pt: 1
+                }}>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
+                    <Box>
+                      <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                        Perfil
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                        {usuario.Perfiles?.NombrePerfil || 'Sin perfil'}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                        Grupo
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                        {usuario.Grupos?.nombre_grupo || 'Sin grupo'}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                        📅 Creación
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                        {formatDate(usuario.fechaCreacion)}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                        🔄 Modificación
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                        {formatDate(usuario.fechadeultimamodificacion)}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              </Card>
+            ))}
+
+            {/* Mensaje si no hay usuarios */}
+            {usuarios.length === 0 && !loading && (
+              <Box sx={{ textAlign: 'center', py: 8 }}>
+                <Typography variant="body1" color="text.secondary">
+                  No se encontraron usuarios
+                </Typography>
+              </Box>
+            )}
+          </Box>
+
+          {/* Paginación móvil */}
+          {usuarios.length > 10 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+              <Pagination
+                count={Math.ceil(usuarios.length / 10)}
+                page={mobilePage}
+                onChange={(event, value) => setMobilePage(value)}
+                color="primary"
+                size="small"
+                sx={{
+                  '& .MuiPaginationItem-root': {
+                    fontSize: '0.875rem',
+                  }
+                }}
+              />
+            </Box>
+          )}
+
+          {/* Contador de resultados */}
+          <Box sx={{ textAlign: 'center', mb: 10 }}>
+            <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+              Mostrando {Math.min((mobilePage - 1) * 10 + 1, usuarios.length)}-{Math.min(mobilePage * 10, usuarios.length)} de {usuarios.length} usuario{usuarios.length !== 1 ? 's' : ''}
+            </Typography>
+          </Box>
+
+          {/* FAB para agregar usuario */}
+          <Fab
+            color="primary"
+            aria-label="add"
+            onClick={handleOpenAddModal}
+            sx={{
+              position: 'fixed',
+              bottom: 80,
+              right: 16,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+              }
+            }}
+          >
+            <AddIcon />
+          </Fab>
+        </Box>
+
+        {/* Modal de edición */}
+        <EditUserModal
+          open={editModalOpen}
+          onClose={handleCloseEditModal}
+          usuario={selectedUser}
+          onUserUpdated={handleUserUpdated}
+        />
+        {/* Modal de agregar usuario */}
+        <AddUserModal
+          open={addModalOpen}
+          onClose={handleCloseAddModal}
+          onUserAdded={handleUserUpdated}
+        />
+      </>
+    );
+  }
+
+  // VERSIÓN ESCRITORIO (original)
+  return (
+    <div className="agencias-container animate-fade-in">
+
+      {/* Breadcrumbs ocultos */}
+      <Box sx={{ p: 3, pb: 0, display: 'none' }}>
         <Breadcrumbs
           separator={<HomeIcon fontSize="small" />}
           aria-label="breadcrumb"
@@ -842,90 +1132,68 @@ const ListadoUsuarios = () => {
         </Breadcrumbs>
       </Box>
 
-      {/* Controles de búsqueda y acciones */}
-      <Box sx={{ p: 3, pt: 0 }}>
-        <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={6} md={4}>
-            <TextField
-              fullWidth
-              variant="outlined"
-              placeholder="🔍 Buscar por nombre, apellido o email..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon sx={{ color: 'var(--gradient-primary)' }}/>
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  background: 'rgba(255,255,255,0.9)',
-                  backdropFilter: 'blur(10px)',
-                  borderRadius: '12px',
-                  '&:hover fieldset': {
-                    borderColor: 'var(--gradient-primary)',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'var(--gradient-primary)',
-                  },
-                }
-              }}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon sx={{ color: 'white' }} />}
-              onClick={handleOpenAddModal}
-              sx={{
-                background: 'var(--gradient-primary)',
-                color: '#fff',
-                height: '56px',
-                width: '100%',
+      {/* Única fila: Campos de filtro y botones */}
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: 2,
+        mb: 2,
+        mt: 3
+      }}>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          <TextField
+            variant="outlined"
+            placeholder="Buscar por nombre, apellido o email..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            sx={{
+              background: 'rgba(255,255,255,0.9)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '12px',
+              '& .MuiOutlinedInput-root': {
                 borderRadius: '12px',
-                fontWeight: 600,
-                boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
-                '&:hover': {
-                  background: 'var(--gradient-secondary)',
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 6px 16px rgba(247, 107, 138, 0.4)',
+                '&:hover fieldset': {
+                  borderColor: 'var(--gradient-primary)',
                 },
-                transition: 'all 0.3s ease'
-              }}
-            >
-              ➕ Agregar Usuario
-            </Button>
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <Button
-              variant="contained"
-              startIcon={<FileDownloadIcon sx={{ color: 'white' }} />}
-              sx={{
-                background: 'var(--gradient-success)',
-                color: '#fff',
-                height: '56px',
-                width: '100%',
-                borderRadius: '12px',
-                fontWeight: 600,
-                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 6px 16px rgba(16, 185, 129, 0.4)',
+                '&.Mui-focused fieldset': {
+                  borderColor: 'var(--gradient-primary)',
                 },
-                transition: 'all 0.3s ease'
-              }}
-            >
-              📊 Exportar Usuarios
-            </Button>
-          </Grid>
-        </Grid>
+              }
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: '#6777ef' }}/>
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Box>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon sx={{ color: 'white' }} />}
+            onClick={handleOpenAddModal}
+            className="btn-agregar"
+            sx={{ height: '40px' }}
+          >
+            Agregar Usuario
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<FileDownloadIcon sx={{ color: 'white' }} />}
+            className="btn-agregar"
+            sx={{ height: '40px' }}
+          >
+            📊 Exportar Usuarios
+          </Button>
+        </Box>
       </Box>
 
       {/* DataGrid Container */}
-      <Box sx={{ p: 3, pt: 0 }}>
+      <Box sx={{ p: 0, pt: 0 }}>
         <div className="data-grid-container">
         <DataGrid
         rows={usuarios.map(usuario => ({
@@ -1017,13 +1285,24 @@ const ListadoUsuarios = () => {
             )
           }
         ]}
-        pageSize={pageSize}
-        onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-        rowsPerPageOptions={[5, 10, 20, 50]}
         pagination
+        paginationMode="client"
+        paginationModel={paginationModel}
+        onPaginationModelChange={handlePaginationChange}
+        pageSizeOptions={[10]}
         autoHeight
+        rowHeight={56}
+        columnHeaderHeight={56}
         disableSelectionOnClick
+        hideFooterSelectedRowCount
         getRowId={(row) => row.id}
+        initialState={{
+          pagination: {
+            paginationModel: {
+              pageSize: 10
+            }
+          }
+        }}
         sx={{
           '& .MuiDataGrid-columnHeaders': {
             backgroundColor: '#f5f5f5',
@@ -1036,38 +1315,23 @@ const ListadoUsuarios = () => {
           '& .MuiDataGrid-row:hover': {
             backgroundColor: '#f9f9f9',
           },
+          '& .MuiDataGrid-footerContainer': {
+            borderTop: '1px solid rgba(102, 126, 234, 0.1) !important',
+            background: 'rgba(255,255,255,0.8) !important',
+          },
+          '& .MuiDataGrid-footerContainer .MuiTablePagination-root .MuiTablePagination-selectLabel': {
+            display: 'none'
+          },
+          '& .MuiDataGrid-footerContainer .MuiTablePagination-root .MuiTablePagination-select': {
+            display: 'none'
+          },
+          '& .MuiDataGrid-footerContainer .MuiTablePagination-root .MuiTablePagination-selectIcon': {
+            display: 'none'
+          },
         }}
         />
         </div>
       </Box>
-
-      {/* Botón flotante del Asistente */}
-      <Tooltip title="🤖 Asistente Inteligente - Gestión de Usuarios" placement="left">
-        <Fab
-          color="primary"
-          aria-label="asistente"
-          className="animate-float"
-          sx={{
-            position: 'fixed',
-            bottom: 24,
-            right: 24,
-            width: 64,
-            height: 64,
-            background: 'var(--gradient-primary)',
-            boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
-            border: '2px solid rgba(255,255,255,0.2)',
-            '&:hover': {
-              background: 'var(--gradient-secondary)',
-              transform: 'scale(1.1)',
-              boxShadow: '0 12px 40px rgba(247, 107, 138, 0.4)',
-            },
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-          }}
-          onClick={() => window.open('/asistente', '_blank')}
-        >
-          <AssistantIcon sx={{ fontSize: 28 }} />
-        </Fab>
-      </Tooltip>
 
       {/* Modal de edición */}
       <EditUserModal

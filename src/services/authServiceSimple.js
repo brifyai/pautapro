@@ -313,7 +313,7 @@ export const authServiceSimple = {
       let user = JSON.parse(userStr);
       
       // Verificar si el usuario tiene los permisos actualizados
-      const requiredModules = ['planificacion', 'proveedores', 'agencias', 'medios', 'soportes', 'contratos'];
+      const requiredModules = ['planificacion', 'proveedores', 'agencias', 'medios', 'soportes', 'contratos', 'rentabilidad'];
       let needsUpdate = false;
       
       requiredModules.forEach(module => {

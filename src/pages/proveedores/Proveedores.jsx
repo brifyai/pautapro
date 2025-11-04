@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { DataGrid } from '@mui/x-data-grid';
+import { useTheme } from '@mui/material/styles';
 import {
   Button,
   Container,
@@ -25,7 +26,13 @@ import {
   Paper,
   CircularProgress,
   Tooltip,
-  Fab
+  Fab,
+  useMediaQuery,
+  Chip,
+  Avatar,
+  Pagination,
+  Card,
+  CardContent
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -47,18 +54,26 @@ import ApartmentIcon from '@mui/icons-material/Apartment';
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import UploadIcon from '@mui/icons-material/Upload';
 import AssistantIcon from '@mui/icons-material/Assistant';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import CloseIcon from '@mui/icons-material/Close';
 import { supabase } from '../../config/supabase';
 import { mapearDatos } from '../../config/mapeo-campos';
 import * as XLSX from 'xlsx';
 import Swal from 'sweetalert2';
 import './Proveedores.css';
+import MobileLayout from '../../components/mobile/MobileLayout';
+import MobileTable from '../../components/mobile/MobileTable';
 
 const Proveedores = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  
   const [pageSize, setPageSize] = useState(10);
   const [rows, setRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -422,50 +437,59 @@ const Proveedores = () => {
     {
       field: 'id_proveedor',
       headerName: 'ID',
-      width: 60
+      width: 50,
+      headerClassName: 'data-grid-header',
     },
     {
       field: 'nombreproveedor',
       headerName: 'Nombre',
-      width: 150,
-      flex: 1
+      width: 130,
+      headerClassName: 'data-grid-header',
+      flex: 1,
     },
     {
       field: 'razonsocial',
       headerName: 'Razón Social',
-      width: 150,
-      flex: 1
+      width: 130,
+      headerClassName: 'data-grid-header',
+      flex: 1,
     },
     {
       field: 'rut',
       headerName: 'RUT',
-      width: 120
+      width: 100,
+      headerClassName: 'data-grid-header',
     },
     {
       field: 'direccion_facturacion',
       headerName: 'Dirección Facturación',
-      width: 200,
-      flex: 1
+      width: 150,
+      headerClassName: 'data-grid-header',
+      flex: 1,
     },
     {
       field: 'telefono_celular',
       headerName: 'Teléfono Celular',
-      width: 130
+      width: 130,
+      headerClassName: 'data-grid-header',
     },
     {
       field: 'telefono_fijo',
       headerName: 'Teléfono Fijo',
-      width: 130
+      width: 130,
+      headerClassName: 'data-grid-header',
     },
     {
       field: 'identificador',
       headerName: 'Identificador',
-      width: 120
+      width: 120,
+      headerClassName: 'data-grid-header',
     },
     {
       field: 'bonificacion_anio',
       headerName: 'Bonificación Año',
       width: 120,
+      headerClassName: 'data-grid-header',
       type: 'number',
       headerAlign: 'center',
       align: 'center'
@@ -474,6 +498,7 @@ const Proveedores = () => {
       field: 'escala_rango',
       headerName: 'Escala Rango',
       width: 100,
+      headerClassName: 'data-grid-header',
       type: 'number',
       headerAlign: 'center',
       align: 'center'
@@ -481,15 +506,14 @@ const Proveedores = () => {
     {
       field: 'fecha_formateada',
       headerName: 'Fecha Creación',
-      width: 160,
-      renderCell: (params) => {
-        return params.value;
-      }
+      width: 150,
+      headerClassName: 'data-grid-header',
     },
     {
       field: 'num_soportes',
       headerName: 'N° Soportes',
       width: 100,
+      headerClassName: 'data-grid-header',
       type: 'number',
       headerAlign: 'center',
       align: 'center'
@@ -497,7 +521,8 @@ const Proveedores = () => {
     {
       field: 'estado',
       headerName: 'Estado',
-      width: 100,
+      width: 80,
+      headerClassName: 'data-grid-header',
       renderCell: (params) => (
         <Switch
           checked={params.value}
@@ -524,6 +549,7 @@ const Proveedores = () => {
       field: 'actions',
       headerName: 'Acciones',
       width: 180,
+      headerClassName: 'data-grid-header',
       renderCell: (params) => (
         <div className="action-buttons">
           <IconButton
@@ -884,142 +910,659 @@ const Proveedores = () => {
   };
 
 
+  // VERSIÓN MÓVIL optimizada con diseño de cards creativos
+  if (isMobile) {
+    const [mobilePage, setMobilePage] = useState(1);
+
+    return (
+      <>
+        <Box sx={{ p: 2 }}>
+          {/* Barra de búsqueda móvil */}
+          <Box sx={{ mb: 2 }}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="Buscar proveedor..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              size="small"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                }
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                )
+              }}
+            />
+          </Box>
+
+          {/* Botón de filtros y exportar */}
+          <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
+            <Button
+              variant={showFilters ? 'contained' : 'outlined'}
+              size="small"
+              onClick={() => setShowFilters(!showFilters)}
+              startIcon={<FilterListIcon />}
+              sx={{ borderRadius: '12px' }}
+            >
+              Filtros
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={handleExportToExcel}
+              startIcon={<FileDownloadIcon />}
+              sx={{ borderRadius: '12px' }}
+            >
+              Exportar
+            </Button>
+          </Box>
+
+          {/* Filtros avanzados (colapsables) */}
+          {showFilters && (
+            <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
+              <TextField
+                type="date"
+                size="small"
+                label="Desde"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                sx={{ flex: 1 }}
+              />
+              <TextField
+                type="date"
+                size="small"
+                label="Hasta"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                sx={{ flex: 1 }}
+              />
+            </Box>
+          )}
+
+          {/* Cards creativos para proveedores */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+            {filteredRows.slice((mobilePage - 1) * 10, mobilePage * 10).map((proveedor, index) => (
+              <Card
+                key={proveedor.id}
+                sx={{
+                  background: `linear-gradient(135deg, ${
+                    index % 4 === 0 ? '#667eea 0%, #764ba2 100%' :
+                    index % 4 === 1 ? '#f093fb 0%, #f5576c 100%' :
+                    index % 4 === 2 ? '#4facfe 0%, #00f2fe 100%' :
+                    '#43e97b 0%, #38f9d7 100%'
+                  })`,
+                  borderRadius: '16px',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                  overflow: 'hidden',
+                  position: 'relative'
+                }}
+              >
+                {/* Header del Card */}
+                <Box sx={{
+                  background: 'rgba(255,255,255,0.95)',
+                  p: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2
+                }}>
+                  {/* Avatar con iniciales */}
+                  <Avatar
+                    sx={{
+                      width: 56,
+                      height: 56,
+                      background: `linear-gradient(135deg, ${
+                        index % 4 === 0 ? '#667eea 0%, #764ba2 100%' :
+                        index % 4 === 1 ? '#f093fb 0%, #f5576c 100%' :
+                        index % 4 === 2 ? '#4facfe 0%, #00f2fe 100%' :
+                        '#43e97b 0%, #38f9d7 100%'
+                      })`,
+                      fontSize: '1.5rem',
+                      fontWeight: 'bold',
+                      color: 'white'
+                    }}
+                  >
+                    {proveedor.nombreproveedor?.charAt(0) || '?'}
+                  </Avatar>
+
+                  {/* Información principal */}
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 'bold',
+                        fontSize: '1rem',
+                        color: '#1e293b',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {proveedor.nombreproveedor}
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mt: 0.5 }}>
+                      <Chip
+                        label={proveedor.rut || 'Sin RUT'}
+                        size="small"
+                        icon={<BadgeIcon />}
+                        sx={{
+                          height: '24px',
+                          fontSize: '0.75rem',
+                          backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                          color: '#667eea',
+                          fontWeight: 600
+                        }}
+                      />
+                      <Chip
+                        label={proveedor.estado ? '✓ Activo' : '✗ Inactivo'}
+                        size="small"
+                        sx={{
+                          height: '24px',
+                          fontSize: '0.75rem',
+                          backgroundColor: proveedor.estado ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                          color: proveedor.estado ? '#16a34a' : '#dc2626',
+                          fontWeight: 600
+                        }}
+                      />
+                    </Box>
+                  </Box>
+
+                  {/* Botones de acción */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    <IconButton
+                      size="small"
+                      onClick={() => navigate(`/proveedores/view/${proveedor.id}`)}
+                      sx={{
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        '&:hover': { backgroundColor: 'rgba(59, 130, 246, 0.2)' }
+                      }}
+                    >
+                      <VisibilityIcon fontSize="small" sx={{ color: '#3b82f6' }} />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleEdit(proveedor)}
+                      sx={{
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        '&:hover': { backgroundColor: 'rgba(34, 197, 94, 0.2)' }
+                      }}
+                    >
+                      <EditIcon fontSize="small" sx={{ color: '#22c55e' }} />
+                    </IconButton>
+                  </Box>
+                </Box>
+
+                {/* Detalles adicionales */}
+                <Box sx={{
+                  background: 'rgba(255,255,255,0.85)',
+                  p: 2,
+                  pt: 1
+                }}>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
+                    <Box>
+                      <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                        📧 Email
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                        {proveedor.email || 'Sin email'}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                        📱 Teléfono
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                        {proveedor.telefono_celular || proveedor.telCelular || 'Sin teléfono'}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                        📍 Dirección
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                        {proveedor.direccion_facturacion || proveedor.direccion || 'Sin dirección'}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                        🏢 Soportes
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                        {proveedor.num_soportes || 0} soporte{proveedor.num_soportes !== 1 ? 's' : ''}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+
+                {/* Badge de fecha */}
+                <Box sx={{
+                  position: 'absolute',
+                  top: 8,
+                  right: 8,
+                  background: 'rgba(255,255,255,0.95)',
+                  borderRadius: '8px',
+                  px: 1,
+                  py: 0.5
+                }}>
+                  <Typography variant="caption" sx={{ fontWeight: 600, color: '#64748b' }}>
+                    📅 {proveedor.fecha_formateada?.split(',')[0] || new Date().toLocaleDateString('es-CL')}
+                  </Typography>
+                </Box>
+              </Card>
+            ))}
+
+            {/* Mensaje si no hay proveedores */}
+            {filteredRows.length === 0 && (
+              <Box sx={{ textAlign: 'center', py: 8 }}>
+                <Typography variant="body1" color="text.secondary">
+                  No se encontraron proveedores
+                </Typography>
+              </Box>
+            )}
+
+          </Box>
+
+          {/* Paginación móvil */}
+          {filteredRows.length > 10 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+              <Pagination
+                count={Math.ceil(filteredRows.length / 10)}
+                page={mobilePage}
+                onChange={(event, value) => setMobilePage(value)}
+                color="primary"
+                size="small"
+                sx={{
+                  '& .MuiPaginationItem-root': {
+                    fontSize: '0.875rem',
+                  }
+                }}
+              />
+            </Box>
+          )}
+
+          {/* Contador de resultados */}
+          <Box sx={{ textAlign: 'center', mb: 10 }}>
+            <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+              Mostrando {Math.min((mobilePage - 1) * 10 + 1, filteredRows.length)}-{Math.min(mobilePage * 10, filteredRows.length)} de {filteredRows.length} proveedor{filteredRows.length !== 1 ? 'es' : ''}
+            </Typography>
+          </Box>
+
+          {/* FAB para agregar proveedor */}
+          <Fab
+            color="primary"
+            aria-label="add"
+            onClick={() => {
+              setSelectedProveedor(null);
+              setNewProveedor({
+                nombreproveedor: '',
+                razonSocial: '',
+                nombreFantasia: '',
+                rutProveedor: '',
+                giroProveedor: '',
+                nombreRepresentante: '',
+                rutRepresentante: '',
+                direccionFacturacion: '',
+                id_region: '',
+                id_comuna: '',
+                telCelular: '',
+                telFijo: '',
+                email: '',
+                estado: true,
+                nombreidentificador: '',
+                bonificacionano: '',
+                escala_rango: ''
+              });
+              setOpenModal(true);
+            }}
+            sx={{
+              position: 'fixed',
+              bottom: 80,
+              right: 16,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+              }
+            }}
+          >
+            <AddIcon />
+          </Fab>
+        </Box>
+
+        {/* Modal de edición/creación (adaptado para móvil) */}
+        <Dialog
+          open={openModal}
+          onClose={() => setOpenModal(false)}
+          maxWidth="sm"
+          fullWidth
+          fullScreen={isMobile}
+        >
+          <DialogTitle>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="h6">
+                {selectedProveedor ? 'Editar Proveedor' : 'Nuevo Proveedor'}
+              </Typography>
+              <IconButton onClick={() => setOpenModal(false)}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+          </DialogTitle>
+          <DialogContent>
+            <Grid container spacing={2} sx={{ mt: 1 }}>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  label="Proveedor"
+                  name="nombreproveedor"
+                  value={selectedProveedor?.nombreproveedor || newProveedor.nombreproveedor || ''}
+                  onChange={handleInputChange}
+                  error={!!errors.nombreproveedor}
+                  helperText={errors.nombreproveedor}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <BusinessIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  label="RUT Proveedor"
+                  name="rutProveedor"
+                  value={selectedProveedor?.rut || selectedProveedor?.RUT || selectedProveedor?.rutProveedor || newProveedor.rutProveedor || ''}
+                  onChange={handleInputChange}
+                  error={!!errors.rutProveedor}
+                  helperText={errors.rutProveedor}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <BadgeIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  label="Dirección Facturación"
+                  name="direccionFacturacion"
+                  value={selectedProveedor?.direccion_facturacion || selectedProveedor?.Direccion || selectedProveedor?.direccionFacturacion || newProveedor.direccionFacturacion || ''}
+                  onChange={handleInputChange}
+                  error={!!errors.direccionFacturacion}
+                  helperText={errors.direccionFacturacion}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LocationOnIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth required>
+                  <InputLabel>Región *</InputLabel>
+                  <Select
+                    name="id_region"
+                    value={selectedProveedor?.id_region || newProveedor.id_region || ''}
+                    onChange={handleInputChange}
+                    label="Región"
+                    error={!!errors.id_region}
+                  >
+                    <MenuItem value="">
+                      <em>Seleccione una región</em>
+                    </MenuItem>
+                    {Object.keys(regiones).map((region, index) => (
+                      <MenuItem key={index} value={region}>
+                        {regiones[region]}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth required>
+                  <InputLabel>Comuna *</InputLabel>
+                  <Select
+                    name="id_comuna"
+                    value={selectedProveedor?.id_comuna || newProveedor.id_comuna || ''}
+                    onChange={handleInputChange}
+                    label="Comuna"
+                    disabled={!(selectedProveedor?.id_region || newProveedor.id_region)}
+                    error={!!errors.id_comuna}
+                  >
+                    <MenuItem value="">
+                      <em>Seleccione una comuna</em>
+                    </MenuItem>
+                    {Object.entries(comunasFiltradas).map(([id, nombre]) => (
+                      <MenuItem key={id} value={id}>
+                        {nombre}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Teléfono Celular"
+                  name="telCelular"
+                  value={selectedProveedor?.telefono_celular || selectedProveedor?.telcelular || selectedProveedor?.telCelular || newProveedor.telCelular || ''}
+                  onChange={handleInputChange}
+                  error={!!errors.telCelular}
+                  helperText={errors.telCelular || 'Formato: +569XXXXXXXX'}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PhoneIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={selectedProveedor?.email || selectedProveedor?.Email || newProveedor.email || ''}
+                  onChange={handleInputChange}
+                  error={!!errors.email}
+                  helperText={errors.email}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <EmailIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              {errors.telefono && (
+                <Grid item xs={12}>
+                  <Typography color="error" variant="body2">
+                    {errors.telefono}
+                  </Typography>
+                </Grid>
+              )}
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={selectedProveedor ? selectedProveedor.estado : newProveedor.estado}
+                      onChange={(e) => {
+                        if (selectedProveedor) {
+                          setSelectedProveedor({
+                            ...selectedProveedor,
+                            estado: e.target.checked
+                          });
+                        } else {
+                          setNewProveedor({
+                            ...newProveedor,
+                            estado: e.target.checked
+                          });
+                        }
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Activo"
+                />
+              </Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenModal(false)}>Cancelar</Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSave}
+              disabled={isSaving}
+              startIcon={isSaving ? <CircularProgress size={20} /> : null}
+            >
+              {isSaving ? 'Guardando...' : 'Guardar'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </>
+    );
+  }
+
+  // VERSIÓN ESCRITORIO (original)
   return (
-    <div className="proveedores-container animate-fade-in">
+      <div className="proveedores-container animate-fade-in">
       {/* Header moderno con gradiente */}
       <div className="modern-header animate-slide-down">
         <div className="modern-title" style={{ fontSize: '1rem', marginTop: '14px', lineHeight: '1' }}>
           🏢 GESTIÓN DE PROVEEDORES
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-            Administración de proveedores del sistema
-          </Typography>
-        </div>
       </div>
 
-      {/* Controles de búsqueda y acciones */}
-      <Box sx={{ p: 3, pt: 6 }}>
-        <Box sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 2,
-          mb: 3
-        }}>
-          {/* Campos de búsqueda y fechas - lado izquierdo */}
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-            <TextField
-              variant="outlined"
-              placeholder="🔍 Buscar proveedores..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  background: 'rgba(255,255,255,0.9)',
-                  backdropFilter: 'blur(10px)',
-                  borderRadius: '12px',
-                  '&:hover fieldset': {
-                    borderColor: 'var(--gradient-primary)',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'var(--gradient-primary)',
-                  },
-                }
-              }}
-            />
-            <TextField
-              type="date"
-              variant="outlined"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              label="📅 Desde"
-              InputLabelProps={{ shrink: true }}
-              className="date-input"
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  background: 'rgba(255,255,255,0.9)',
-                  backdropFilter: 'blur(10px)',
-                  borderRadius: '12px',
-                }
-              }}
-            />
-            <TextField
-              type="date"
-              variant="outlined"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              label="📅 Hasta"
-              InputLabelProps={{ shrink: true }}
-              className="date-input"
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  background: 'rgba(255,255,255,0.9)',
-                  backdropFilter: 'blur(10px)',
-                  borderRadius: '12px',
-                }
-              }}
-            />
-          </Box>
-
-          {/* Botones de acción - lado derecho */}
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-            <Button
-              variant="contained"
-              onClick={handleExportToExcel}
-              startIcon={<FileDownloadIcon sx={{ color: 'white' }} />}
-              className="btn-agregar"
-            >
-              Exportar Excel
-            </Button>
-            <Button
-              variant="contained"
-              onClick={() => {
-                setSelectedProveedor(null);
-                setNewProveedor({
-                  nombreproveedor: '',
-                  razonSocial: '',
-                  nombreFantasia: '',
-                  rutProveedor: '',
-                  giroProveedor: '',
-                  nombreRepresentante: '',
-                  rutRepresentante: '',
-                  direccionFacturacion: '',
-                  id_region: '',
-                  id_comuna: '',
-                  telCelular: '',
-                  telFijo: '',
-                  email: '',
-                  estado: true,
-                  nombreidentificador: '',
-                  bonificacionano: '',
-                  escala_rango: ''
-                });
-                setOpenModal(true);
-              }}
-              startIcon={<AddIcon sx={{ color: 'white' }} />}
-              className="btn-agregar"
-            >
-              Agregar Nuevo Proveedor
-            </Button>
-          </Box>
+      {/* Única fila: Campos de filtro y botones */}
+      <Box sx={{ mt: '28px !important', mb: '16px !important', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          <TextField
+            variant="outlined"
+            placeholder="🔍 Buscar proveedores..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                background: 'rgba(255,255,255,0.9)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '12px',
+                '&:hover fieldset': {
+                  borderColor: 'var(--gradient-primary)',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'var(--gradient-primary)',
+                },
+              }
+            }}
+          />
+          <TextField
+            type="date"
+            variant="outlined"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            label="📅 Desde"
+            InputLabelProps={{ shrink: true }}
+            className="date-input"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                background: 'rgba(255,255,255,0.9)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '12px',
+              }
+            }}
+          />
+          <TextField
+            type="date"
+            variant="outlined"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            label="📅 Hasta"
+            InputLabelProps={{ shrink: true }}
+            className="date-input"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                background: 'rgba(255,255,255,0.9)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '12px',
+              }
+            }}
+          />
+        </Box>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          <Button
+            variant="contained"
+            onClick={handleExportToExcel}
+            startIcon={<FileDownloadIcon sx={{ color: 'white' }} />}
+            className="btn-agregar"
+          >
+            Exportar Excel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setSelectedProveedor(null);
+              setNewProveedor({
+                nombreproveedor: '',
+                razonSocial: '',
+                nombreFantasia: '',
+                rutProveedor: '',
+                giroProveedor: '',
+                nombreRepresentante: '',
+                rutRepresentante: '',
+                direccionFacturacion: '',
+                id_region: '',
+                id_comuna: '',
+                telCelular: '',
+                telFijo: '',
+                email: '',
+                estado: true,
+                nombreidentificador: '',
+                bonificacionano: '',
+                escala_rango: ''
+              });
+              setOpenModal(true);
+            }}
+            startIcon={<AddIcon sx={{ color: 'white' }} />}
+            className="btn-agregar"
+          >
+            Agregar Nuevo Proveedor
+          </Button>
         </Box>
       </Box>
 
       {/* DataGrid Container */}
-      <Box sx={{ p: 3, pt: 0 }}>
-        <div className="data-grid-container">
+      <Box sx={{ p: 0, pt: 0 }}>
+        <div className="data-grid-container" style={{ marginTop: 0, paddingTop: '20px' }}>
           <DataGrid
             rows={filteredRows}
             columns={columns}
-            pageSize={pageSize}
-            onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-            rowsPerPageOptions={[5, 10, 25]}
-            disableSelectionOnClick
             loading={loading}
+            disableSelectionOnClick
             autoHeight
+            rowHeight={56}
+            columnHeaderHeight={56}
             localeText={{
               noRowsLabel: 'No hay datos para mostrar',
               footerRowSelected: count => `${count} fila${count !== 1 ? 's' : ''} seleccionada${count !== 1 ? 's' : ''}`,
@@ -1046,15 +1589,13 @@ const Proveedores = () => {
                 paginationModel: { pageSize: 10 }
               },
             }}
-            pageSizeOptions={[5, 10, 25]}
+            pageSizeOptions={[10]}
             sx={{
               '& .MuiDataGrid-cell:focus': {
                 outline: 'none',
               },
               '& .MuiDataGrid-row:hover': {
                 backgroundColor: 'rgba(102, 126, 234, 0.08)',
-                transform: 'scale(1.01)',
-                transition: 'all 0.2s ease',
               },
               '& .MuiDataGrid-row:nth-of-type(even)': {
                 backgroundColor: 'rgba(102, 126, 234, 0.02)',
@@ -1109,6 +1650,15 @@ const Proveedores = () => {
                 borderTop: '1px solid rgba(102, 126, 234, 0.1) !important',
                 background: 'rgba(255,255,255,0.8) !important',
               },
+              '& .MuiDataGrid-footerContainer .MuiTablePagination-root .MuiTablePagination-selectLabel': {
+                display: 'none'
+              },
+              '& .MuiDataGrid-footerContainer .MuiTablePagination-root .MuiTablePagination-select': {
+                display: 'none'
+              },
+              '& .MuiDataGrid-footerContainer .MuiTablePagination-root .MuiTablePagination-selectIcon': {
+                display: 'none'
+              },
               '& .MuiDataGrid-virtualScroller': {
                 overflowX: 'hidden !important',
               },
@@ -1119,33 +1669,6 @@ const Proveedores = () => {
         </div>
       </Box>
 
-      {/* Botón flotante del Asistente */}
-      <Tooltip title="🤖 Asistente Inteligente - Gestión de Proveedores" placement="left">
-        <Fab
-          color="primary"
-          aria-label="asistente"
-          className="animate-float"
-          sx={{
-            position: 'fixed',
-            bottom: 24,
-            right: 24,
-            width: 64,
-            height: 64,
-            background: 'var(--gradient-primary)',
-            boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
-            border: '2px solid rgba(255,255,255,0.2)',
-            '&:hover': {
-              background: 'var(--gradient-secondary)',
-              transform: 'scale(1.1)',
-              boxShadow: '0 12px 40px rgba(247, 107, 138, 0.4)',
-            },
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-          }}
-          onClick={() => window.open('/asistente', '_blank')}
-        >
-          <AssistantIcon sx={{ fontSize: 28 }} />
-        </Fab>
-      </Tooltip>
 
       {/* Modal de Nuevo/Editar Proveedor */}
       <Dialog 

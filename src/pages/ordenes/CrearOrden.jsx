@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '@mui/material/styles';
 import { supabase } from '../../config/supabase';
 import { safeFetchClientes } from '../../services/dataNormalization';
 import { orderService } from '../../services/orderService';
@@ -31,7 +32,21 @@ import {
   IconButton,
   Checkbox,
   Chip,
-  Alert
+  Alert,
+  useMediaQuery,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemButton,
+  Stepper,
+  Step,
+  StepLabel,
+  Card,
+  CardContent,
+  Fab,
+  Avatar,
+  Pagination,
+  Chip
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -41,18 +56,27 @@ import {
   Close as CloseIcon,
   Warning as WarningIcon,
   Schedule as ScheduleIcon,
-  CheckCircle as SuccessIcon
+  CheckCircle as SuccessIcon,
+  Info as InfoIcon,
+  ArrowBack as ArrowBackIcon,
+  ArrowForward as ArrowForwardIcon
 } from '@mui/icons-material';
+import MobileLayout from '../../components/mobile/MobileLayout';
+import MobileCard from '../../components/mobile/MobileCard';
 
 const CrearOrden = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
   const handleClose = () => {
     navigate('/');
   };
 
   const [openClienteModal, setOpenClienteModal] = useState(true);
+  const [mobileStep, setMobileStep] = useState(0);
   const [openCampanaModal, setOpenCampanaModal] = useState(false);
+  const [mobilePage, setMobilePage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [clientes, setClientes] = useState([]);
   const [campanas, setCampanas] = useState([]);
@@ -630,8 +654,736 @@ const handleCrearOrden = async () => {
     cliente.razonSocial?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // VERSIÓN MÓVIL con diseño de Agencias
+  if (isMobile) {
+    return (
+      <>
+        <Box sx={{ p: 2 }}>
+          {/* Header con gradiente como Agencias */}
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2, color: '#34395e', textAlign: 'center' }}>
+              📝 Crear Orden
+            </Typography>
+            
+            {/* Stepper simplificado */}
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                {['Cliente', 'Campaña', 'Plan', 'Alternativas'].map((label, index) => (
+                  <Box key={label} sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Box
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: '50%',
+                        background: mobileStep >= index
+                          ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                          : '#e0e0e0',
+                        color: mobileStep >= index ? 'white' : '#666',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.75rem',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      {index + 1}
+                    </Box>
+                    {index < 3 && (
+                      <Box
+                        sx={{
+                          width: 20,
+                          height: 2,
+                          background: mobileStep > index ? '#667eea' : '#e0e0e0',
+                          mx: 0.5
+                        }}
+                      />
+                    )}
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+          </Box>
+
+          {/* Paso 1: Seleccionar Cliente con cards creativos */}
+          {mobileStep === 0 && (
+            <Box>
+              {/* Barra de búsqueda móvil */}
+              <Box sx={{ mb: 2 }}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  placeholder="🔍 Buscar cliente..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    }
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    )
+                  }}
+                />
+              </Box>
+
+              {/* Cards creativos para clientes */}
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+                {loading ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                    <CircularProgress />
+                  </Box>
+                ) : (
+                  filteredClientes.slice((mobilePage - 1) * 10, mobilePage * 10).map((cliente, index) => (
+                    <Card
+                      key={cliente.id_cliente}
+                      sx={{
+                        background: `linear-gradient(135deg, ${
+                          index % 4 === 0 ? '#667eea 0%, #764ba2 100%' :
+                          index % 4 === 1 ? '#f093fb 0%, #f5576c 100%' :
+                          index % 4 === 2 ? '#4facfe 0%, #00f2fe 100%' :
+                          '#43e97b 0%, #38f9d7 100%'
+                        })`,
+                        borderRadius: '16px',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                        overflow: 'hidden',
+                        position: 'relative'
+                      }}
+                    >
+                      {/* Header del Card */}
+                      <Box sx={{
+                        background: 'rgba(255,255,255,0.95)',
+                        p: 2,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2
+                      }}>
+                        {/* Avatar con iniciales */}
+                        <Avatar
+                          sx={{
+                            width: 56,
+                            height: 56,
+                            background: `linear-gradient(135deg, ${
+                              index % 4 === 0 ? '#667eea 0%, #764ba2 100%' :
+                              index % 4 === 1 ? '#f093fb 0%, #f5576c 100%' :
+                              index % 4 === 2 ? '#4facfe 0%, #00f2fe 100%' :
+                              '#43e97b 0%, #38f9d7 100%'
+                            })`,
+                            fontSize: '1.5rem',
+                            fontWeight: 'bold',
+                            color: 'white'
+                          }}
+                        >
+                          {cliente.nombrecliente?.charAt(0)?.toUpperCase() || '?'}
+                        </Avatar>
+
+                        {/* Información principal */}
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              fontWeight: 'bold',
+                              fontSize: '1rem',
+                              color: '#1e293b',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            {cliente.nombrecliente}
+                          </Typography>
+                          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mt: 0.5 }}>
+                            <Chip
+                              label={cliente.RUT || 'Sin RUT'}
+                              size="small"
+                              sx={{
+                                height: '24px',
+                                fontSize: '0.75rem',
+                                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                                color: '#667eea',
+                                fontWeight: 600
+                              }}
+                            />
+                            <Chip
+                              label={cliente.estado ? '✓ Activo' : '✗ Inactivo'}
+                              size="small"
+                              sx={{
+                                height: '24px',
+                                fontSize: '0.75rem',
+                                backgroundColor: cliente.estado ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                                color: cliente.estado ? '#16a34a' : '#dc2626',
+                                fontWeight: 600
+                              }}
+                            />
+                          </Box>
+                        </Box>
+
+                        {/* Botón de acción */}
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            handleClienteSelect(cliente);
+                            setMobileStep(1);
+                          }}
+                          sx={{
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            '&:hover': { backgroundColor: 'rgba(59, 130, 246, 0.2)' }
+                          }}
+                        >
+                          <ArrowForwardIcon fontSize="small" sx={{ color: '#3b82f6' }} />
+                        </IconButton>
+                      </Box>
+
+                      {/* Detalles adicionales */}
+                      <Box sx={{
+                        background: 'rgba(255,255,255,0.85)',
+                        p: 2,
+                        pt: 1
+                      }}>
+                        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
+                          <Box>
+                            <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                              🏢 Razón Social
+                            </Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                              {cliente.razonSocial || 'No especificada'}
+                            </Typography>
+                          </Box>
+                          <Box>
+                            <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                              📞 Teléfono
+                            </Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                              {cliente.telefono || 'No especificado'}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                    </Card>
+                  ))
+                )}
+
+                {/* Mensaje si no hay clientes */}
+                {filteredClientes.length === 0 && (
+                  <Box sx={{ textAlign: 'center', py: 8 }}>
+                    <Typography variant="body1" color="text.secondary">
+                      No se encontraron clientes
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+
+              {/* Paginación móvil */}
+              {filteredClientes.length > 10 && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 2 }}>
+                  <Pagination
+                    count={Math.ceil(filteredClientes.length / 10)}
+                    page={mobilePage}
+                    onChange={(event, value) => {
+                      setMobilePage(value);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    color="primary"
+                    size="large"
+                    sx={{
+                      '& .MuiPaginationItem-root': {
+                        borderRadius: '12px',
+                        fontWeight: 600,
+                        minWidth: '40px',
+                        height: '40px',
+                        '&.Mui-selected': {
+                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          color: 'white',
+                          fontWeight: 700,
+                          '&:hover': {
+                            background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                          }
+                        }
+                      }
+                    }}
+                  />
+                </Box>
+              )}
+
+              {/* Contador de resultados */}
+              <Box sx={{ textAlign: 'center', mb: 10 }}>
+                <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                  Mostrando {Math.min((mobilePage - 1) * 10 + 1, filteredClientes.length)}-{Math.min(mobilePage * 10, filteredClientes.length)} de {filteredClientes.length} cliente{filteredClientes.length !== 1 ? 's' : ''}
+                </Typography>
+              </Box>
+            </Box>
+          )}
+
+          {/* Paso 2: Seleccionar Campaña con cards creativos */}
+          {mobileStep === 1 && (
+            <Box>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="h6" sx={{ mb: 1, fontWeight: 'bold', color: '#34395e' }}>
+                  Seleccionar Campaña
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Cliente: {selectedCliente?.nombrecliente}
+                </Typography>
+              </Box>
+
+              {/* Cards creativos para campañas */}
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+                {loading ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                    <CircularProgress />
+                  </Box>
+                ) : (
+                  campanas.map((campana, index) => (
+                    <Card
+                      key={campana.id_campania}
+                      sx={{
+                        background: `linear-gradient(135deg, ${
+                          index % 4 === 0 ? '#667eea 0%, #764ba2 100%' :
+                          index % 4 === 1 ? '#f093fb 0%, #f5576c 100%' :
+                          index % 4 === 2 ? '#4facfe 0%, #00f2fe 100%' :
+                          '#43e97b 0%, #38f9d7 100%'
+                        })`,
+                        borderRadius: '16px',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                        overflow: 'hidden',
+                        position: 'relative'
+                      }}
+                    >
+                      {/* Header del Card */}
+                      <Box sx={{
+                        background: 'rgba(255,255,255,0.95)',
+                        p: 2,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2
+                      }}>
+                        {/* Avatar con iniciales */}
+                        <Avatar
+                          sx={{
+                            width: 56,
+                            height: 56,
+                            background: `linear-gradient(135deg, ${
+                              index % 4 === 0 ? '#667eea 0%, #764ba2 100%' :
+                              index % 4 === 1 ? '#f093fb 0%, #f5576c 100%' :
+                              index % 4 === 2 ? '#4facfe 0%, #00f2fe 100%' :
+                              '#43e97b 0%, #38f9d7 100%'
+                            })`,
+                            fontSize: '1.5rem',
+                            fontWeight: 'bold',
+                            color: 'white'
+                          }}
+                        >
+                          {campana.nombrecampania?.charAt(0)?.toUpperCase() || 'C'}
+                        </Avatar>
+
+                        {/* Información principal */}
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              fontWeight: 'bold',
+                              fontSize: '1rem',
+                              color: '#1e293b',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            {campana.nombrecampania}
+                          </Typography>
+                          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mt: 0.5 }}>
+                            <Chip
+                              label={campana.Anios?.years || 'Sin año'}
+                              size="small"
+                              sx={{
+                                height: '24px',
+                                fontSize: '0.75rem',
+                                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                                color: '#667eea',
+                                fontWeight: 600
+                              }}
+                            />
+                            <Chip
+                              label={campana.Productos?.nombredelproducto || 'Sin producto'}
+                              size="small"
+                              sx={{
+                                height: '24px',
+                                fontSize: '0.75rem',
+                                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                color: '#16a34a',
+                                fontWeight: 600
+                              }}
+                            />
+                          </Box>
+                        </Box>
+
+                        {/* Botón de acción */}
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            handleCampanaSelect(campana);
+                            setMobileStep(2);
+                          }}
+                          sx={{
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            '&:hover': { backgroundColor: 'rgba(59, 130, 246, 0.2)' }
+                          }}
+                        >
+                          <ArrowForwardIcon fontSize="small" sx={{ color: '#3b82f6' }} />
+                        </IconButton>
+                      </Box>
+                    </Card>
+                  ))
+                )}
+              </Box>
+
+              <Button
+                fullWidth
+                variant="outlined"
+                startIcon={<ArrowBackIcon />}
+                onClick={() => setMobileStep(0)}
+                sx={{ mb: 2, borderRadius: '12px' }}
+              >
+                Volver a Clientes
+              </Button>
+            </Box>
+          )}
+
+          {/* Paso 3: Seleccionar Plan con cards creativos */}
+          {mobileStep === 2 && (
+            <Box>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="h6" sx={{ mb: 1, fontWeight: 'bold', color: '#34395e' }}>
+                  Seleccionar Plan
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Campaña: {selectedCampana?.nombrecampania}
+                </Typography>
+              </Box>
+
+              {/* Cards creativos para planes */}
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+                {loading ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                    <CircularProgress />
+                  </Box>
+                ) : (
+                  planes.map((plan, index) => (
+                    <Card
+                      key={plan.id}
+                      sx={{
+                        background: `linear-gradient(135deg, ${
+                          index % 4 === 0 ? '#667eea 0%, #764ba2 100%' :
+                          index % 4 === 1 ? '#f093fb 0%, #f5576c 100%' :
+                          index % 4 === 2 ? '#4facfe 0%, #00f2fe 100%' :
+                          '#43e97b 0%, #38f9d7 100%'
+                        })`,
+                        borderRadius: '16px',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                        overflow: 'hidden',
+                        position: 'relative',
+                        border: selectedPlan?.id === plan.id ? '3px solid #667eea' : 'none'
+                      }}
+                    >
+                      {/* Header del Card */}
+                      <Box sx={{
+                        background: 'rgba(255,255,255,0.95)',
+                        p: 2,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2
+                      }}>
+                        {/* Avatar con iniciales */}
+                        <Avatar
+                          sx={{
+                            width: 56,
+                            height: 56,
+                            background: `linear-gradient(135deg, ${
+                              index % 4 === 0 ? '#667eea 0%, #764ba2 100%' :
+                              index % 4 === 1 ? '#f093fb 0%, #f5576c 100%' :
+                              index % 4 === 2 ? '#4facfe 0%, #00f2fe 100%' :
+                              '#43e97b 0%, #38f9d7 100%'
+                            })`,
+                            fontSize: '1.5rem',
+                            fontWeight: 'bold',
+                            color: 'white'
+                          }}
+                        >
+                          {plan.nombre_plan?.charAt(0)?.toUpperCase() || 'P'}
+                        </Avatar>
+
+                        {/* Información principal */}
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              fontWeight: 'bold',
+                              fontSize: '1rem',
+                              color: '#1e293b',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            {plan.nombre_plan}
+                          </Typography>
+                          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mt: 0.5 }}>
+                            <Chip
+                              label={plan.Anios?.years || 'Sin año'}
+                              size="small"
+                              sx={{
+                                height: '24px',
+                                fontSize: '0.75rem',
+                                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                                color: '#667eea',
+                                fontWeight: 600
+                              }}
+                            />
+                            <Chip
+                              label={plan.Meses?.Nombre || 'Sin mes'}
+                              size="small"
+                              sx={{
+                                height: '24px',
+                                fontSize: '0.75rem',
+                                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                color: '#16a34a',
+                                fontWeight: 600
+                              }}
+                            />
+                          </Box>
+                        </Box>
+
+                        {/* Botón de acción */}
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            setSelectedPlan(plan);
+                            setMobileStep(3);
+                          }}
+                          sx={{
+                            backgroundColor: selectedPlan?.id === plan.id ? 'rgba(34, 197, 94, 0.2)' : 'rgba(59, 130, 246, 0.1)',
+                            '&:hover': { backgroundColor: 'rgba(59, 130, 246, 0.2)' }
+                          }}
+                        >
+                          <ArrowForwardIcon fontSize="small" sx={{ color: selectedPlan?.id === plan.id ? '#22c55e' : '#3b82f6' }} />
+                        </IconButton>
+                      </Box>
+                    </Card>
+                  ))
+                )}
+              </Box>
+
+              <Button
+                fullWidth
+                variant="outlined"
+                startIcon={<ArrowBackIcon />}
+                onClick={() => setMobileStep(1)}
+                sx={{ mb: 2, borderRadius: '12px' }}
+              >
+                Volver a Campañas
+              </Button>
+            </Box>
+          )}
+
+          {/* Paso 4: Seleccionar Alternativas con cards creativos */}
+          {mobileStep === 3 && (
+            <Box>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="h6" sx={{ mb: 1, fontWeight: 'bold', color: '#34395e' }}>
+                  Alternativas Disponibles
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Plan: {selectedPlan?.nombre_plan} | {selectedAlternativas.length} seleccionada{selectedAlternativas.length !== 1 ? 's' : ''}
+                </Typography>
+              </Box>
+
+              {/* Cards creativos para alternativas */}
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+                {loading ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                    <CircularProgress />
+                  </Box>
+                ) : (
+                  alternativas.map((alt, index) => (
+                    <Card
+                      key={alt.id}
+                      sx={{
+                        background: selectedAlternativas.includes(alt.id)
+                          ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                          : `linear-gradient(135deg, ${
+                              index % 4 === 0 ? '#f093fb 0%, #f5576c 100%' :
+                              index % 4 === 1 ? '#4facfe 0%, #00f2fe 100%' :
+                              index % 4 === 2 ? '#43e97b 0%, #38f9d7 100%' :
+                              '#fa709a 0%, #fee140 100%'
+                            })`,
+                        borderRadius: '16px',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                        overflow: 'hidden',
+                        position: 'relative',
+                        border: selectedAlternativas.includes(alt.id) ? '3px solid #667eea' : 'none'
+                      }}
+                    >
+                      {/* Header del Card */}
+                      <Box sx={{
+                        background: selectedAlternativas.includes(alt.id)
+                          ? 'rgba(255,255,255,1)'
+                          : 'rgba(255,255,255,0.95)',
+                        p: 2,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2
+                      }}>
+                        {/* Checkbox y Avatar */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Checkbox
+                            checked={selectedAlternativas.includes(alt.id)}
+                            onChange={() => handleSelectAlternativa(alt.id)}
+                            sx={{
+                              color: selectedAlternativas.includes(alt.id) ? '#667eea' : 'default'
+                            }}
+                          />
+                          <Avatar
+                            sx={{
+                              width: 48,
+                              height: 48,
+                              background: selectedAlternativas.includes(alt.id)
+                                ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                                : `linear-gradient(135deg, ${
+                                    index % 4 === 0 ? '#f093fb 0%, #f5576c 100%' :
+                                    index % 4 === 1 ? '#4facfe 0%, #00f2fe 100%' :
+                                    index % 4 === 2 ? '#43e97b 0%, #38f9d7 100%' :
+                                    '#fa709a 0%, #fee140 100%'
+                                  })`,
+                              fontSize: '1.2rem',
+                              fontWeight: 'bold',
+                              color: 'white'
+                            }}
+                          >
+                            {alt.nlinea || '?'}
+                          </Avatar>
+                        </Box>
+
+                        {/* Información principal */}
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              fontWeight: 'bold',
+                              fontSize: '0.9rem',
+                              color: selectedAlternativas.includes(alt.id) ? '#1e293b' : '#1e293b',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            Línea {alt.nlinea} - {alt.Soportes?.nombreidentificador || 'N/A'}
+                          </Typography>
+                          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mt: 0.5 }}>
+                            <Chip
+                              label={alt.Contratos?.nombrecontrato || 'Sin contrato'}
+                              size="small"
+                              sx={{
+                                height: '20px',
+                                fontSize: '0.7rem',
+                                backgroundColor: selectedAlternativas.includes(alt.id)
+                                  ? 'rgba(102, 126, 234, 0.2)'
+                                  : 'rgba(102, 126, 234, 0.1)',
+                                color: selectedAlternativas.includes(alt.id) ? '#667eea' : '#667eea',
+                                fontWeight: 600
+                              }}
+                            />
+                            <Chip
+                              label={alt.tipo_item || 'N/A'}
+                              size="small"
+                              sx={{
+                                height: '20px',
+                                fontSize: '0.7rem',
+                                backgroundColor: selectedAlternativas.includes(alt.id)
+                                  ? 'rgba(34, 197, 94, 0.2)'
+                                  : 'rgba(34, 197, 94, 0.1)',
+                                color: selectedAlternativas.includes(alt.id) ? '#16a34a' : '#16a34a',
+                                fontWeight: 600
+                              }}
+                            />
+                          </Box>
+                        </Box>
+                      </Box>
+
+                      {/* Detalles adicionales */}
+                      <Box sx={{
+                        background: selectedAlternativas.includes(alt.id)
+                          ? 'rgba(255,255,255,0.9)'
+                          : 'rgba(255,255,255,0.85)',
+                        p: 2,
+                        pt: 1
+                      }}>
+                        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
+                          <Box>
+                            <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                              💰 Valor Unitario
+                            </Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                              ${alt.valor_unitario?.toLocaleString('es-CL') || '0'}
+                            </Typography>
+                          </Box>
+                          <Box>
+                            <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                              📏 Segundos
+                            </Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                              {alt.segundos || '0'}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                    </Card>
+                  ))
+                )}
+              </Box>
+
+              {/* Botones de acción */}
+              <Box sx={{ mt: 2, display: 'flex', gap: 1, flexDirection: 'column' }}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={handleCrearOrden}
+                  disabled={selectedAlternativas.length === 0 || loading}
+                  sx={{
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                    }
+                  }}
+                >
+                  Crear Orden ({selectedAlternativas.length})
+                </Button>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  startIcon={<ArrowBackIcon />}
+                  onClick={() => setMobileStep(2)}
+                  sx={{ borderRadius: '12px' }}
+                >
+                  Volver a Planes
+                </Button>
+              </Box>
+            </Box>
+          )}
+        </Box>
+      </>
+    );
+  }
+
+  // VERSIÓN ESCRITORIO (original)
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       {/* Modal de Selección de Cliente */}
         <Dialog 
         open={openClienteModal} 

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useTheme, useMediaQuery } from '@mui/material';
+import MobileWrapper from './components/mobile/MobileWrapper';
 import Login from './pages/auth/Login';
 import Dashboard from './pages/dashboard/Dashboard';
 import RevisarOrden from './pages/ordenes/RevisarOrden';
@@ -54,6 +56,8 @@ import './assets/css/modern-theme.css';
 import './styles/sweetalert2-custom.css';
 
 function App() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -119,12 +123,17 @@ function App() {
           <div className="app">
             {isAuthenticated ? (
               <>
-                <Header onToggleSidebar={toggleSidebar} onLogout={handleLogout} />
-                <HorizontalNav />
+                {!isMobile && (
+                  <>
+                    <Header onToggleSidebar={toggleSidebar} onLogout={handleLogout} />
+                    <HorizontalNav />
+                  </>
+                )}
                 <div className="app-container">
-                  <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
-                  <main className="app-content">
-                  <Routes>
+                  {!isMobile && <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />}
+                  <main className={isMobile ? "app-content mobile-content" : "app-content"}>
+                  <MobileWrapper>
+                    <Routes>
                   {/* Rutas públicas con protección básica */}
                   <Route
                     path="/dashboard"
@@ -424,14 +433,21 @@ function App() {
                   />
                   
                   {/* Módulo de Rentabilidad Inteligente */}
-                  <Route
-                    path="/rentabilidad"
-                    element={
-                      <ProtectedRoute requiredModule="rentabilidad" requiredPermission="ver_rentabilidad">
-                        <RentabilidadDashboard />
-                      </ProtectedRoute>
-                    }
-                  />
+                  {isMobile ? (
+                    <Route
+                      path="/rentabilidad"
+                      element={<RentabilidadDashboard />}
+                    />
+                  ) : (
+                    <Route
+                      path="/rentabilidad"
+                      element={
+                        <ProtectedRoute requiredModule="rentabilidad" requiredPermission="ver_rentabilidad">
+                          <RentabilidadDashboard />
+                        </ProtectedRoute>
+                      }
+                    />
+                  )}
                   
                   {/* Módulo de Usuarios - Solo para roles altos */}
                   <Route
@@ -496,7 +512,8 @@ function App() {
                   {/* Rutas por defecto */}
                   <Route path="/" element={<Navigate to="/dashboard" replace />} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                  </Routes>
+                    </Routes>
+                  </MobileWrapper>
                 </main>
               </div>
             </>

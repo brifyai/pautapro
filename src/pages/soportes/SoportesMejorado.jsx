@@ -27,7 +27,9 @@ import {
   OutlinedInput,
   FormControlLabel,
   FormGroup,
-  Badge
+  Badge,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
@@ -36,6 +38,11 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import AddIcon from '@mui/icons-material/Add';
+import Avatar from '@mui/material/Avatar';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Pagination from '@mui/material/Pagination';
+import Fab from '@mui/material/Fab';
 import Skeleton from '@mui/material/Skeleton';
 import Tooltip from '@mui/material/Tooltip';
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -49,13 +56,16 @@ import './Soportes.css';
 
 const SoportesMejorado = () => {
   const navigate = useNavigate();
-  const [pageSize, setPageSize] = useState(5);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [pageSize, setPageSize] = useState(10);
   const [rows, setRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [mobilePage, setMobilePage] = useState(1);
   const [openModal, setOpenModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({});
@@ -187,7 +197,7 @@ const SoportesMejorado = () => {
         return;
       }
       
-      // Para cada soporte, obtener sus medios relacionados
+      // Para cada soporte, obtener sus medios relacionados y nombre del proveedor
       const soportesConMedios = await Promise.all(
         soportesData.map(async (soporte) => {
           // Obtener medios del soporte
@@ -204,6 +214,20 @@ const SoportesMejorado = () => {
             mediosNombres = mediosData.map(m => m.medios?.nombre_medio).filter(Boolean);
           }
 
+          // Obtener nombre del proveedor si existe
+          let nombreProveedor = 'Sin proveedor';
+          if (soporte.id_proveedor) {
+            const { data: proveedorData, error: proveedorError } = await supabase
+              .from('proveedores')
+              .select('nombreproveedor')
+              .eq('id_proveedor', soporte.id_proveedor)
+              .single();
+            
+            if (!proveedorError && proveedorData) {
+              nombreProveedor = proveedorData.nombreproveedor;
+            }
+          }
+
           return {
             id: soporte.id_soporte,
             nombreidentficiador: soporte.nombreidentficiador || soporte.nombreidentificador || '',
@@ -213,6 +237,7 @@ const SoportesMejorado = () => {
             descripcion: soporte.descripcion || '',
             id_proveedor: soporte.id_proveedor || null,
             id_cliente: soporte.id_cliente || null,
+            nombreproveedor: nombreProveedor,
             medios: mediosNombres.length > 0 ? mediosNombres.join(', ') : 'Sin medios',
             mediosIds: mediosData ? mediosData.map(m => m.id_medio) : [],
             fechaCreacion: soporte.created_at ? new Date(soporte.created_at).toLocaleDateString('es-CL', {
@@ -665,38 +690,32 @@ const SoportesMejorado = () => {
   return (
     <div className="soportes-container">
       <div className="header">
-        <Breadcrumbs 
-          separator={<NavigateNextIcon fontSize="small" />} 
-          aria-label="breadcrumb"
-          className="breadcrumb"
-        >
-          <Link component={RouterLink} to="/dashboard">
-            Home
-          </Link>
-          <Typography color="text.primary">Soportes</Typography>
-        </Breadcrumbs>
 
-        <div className="header-content">
-          <Typography variant="h5" component="h1">
-            Gestión de Soportes
-          </Typography>
-        </div>
+        {!isMobile && (
+          <>
+            <div className="modern-header animate-slide-down">
+              <div className="modern-title" style={{ fontSize: '1rem', marginTop: '14px', lineHeight: '1' }}>
+                📋 GESTIÓN DE SOPORTES
+              </div>
+            </div>
 
-        {/* Contador de resultados */}
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="body2" color="textSecondary">
-            {loading ? 'Cargando...' : (
-              <>
-                Mostrando <strong>{filteredRows.length}</strong> de <strong>{rows.length}</strong> soportes
-                {hasActiveFilters && ' (con filtros aplicados)'}
-              </>
-            )}
-          </Typography>
-          
-          <Typography variant="body2" color="textSecondary">
-            {rows.filter(r => r.estado).length} activos / {rows.filter(r => !r.estado).length} inactivos
-          </Typography>
-        </Box>
+            {/* Contador de resultados */}
+            <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant="body2" color="textSecondary">
+                {loading ? 'Cargando...' : (
+                  <>
+                    Mostrando <strong>{filteredRows.length}</strong> de <strong>{rows.length}</strong> soportes
+                    {hasActiveFilters && ' (con filtros aplicados)'}
+                  </>
+                )}
+              </Typography>
+              
+              <Typography variant="body2" color="textSecondary">
+                {rows.filter(r => r.estado).length} activos / {rows.filter(r => !r.estado).length} inactivos
+              </Typography>
+            </Box>
+          </>
+        )}
 
         {/* Barra de búsqueda y acciones principales */}
         <Grid container spacing={2} style={{ marginBottom: '16px' }}>
@@ -719,78 +738,155 @@ const SoportesMejorado = () => {
             </Tooltip>
           </Grid>
           <Grid item xs={12} md={8}>
-            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-              <Tooltip title="Filtros avanzados" placement="top">
-                <Button
-                  variant={hasActiveFilters ? "contained" : "outlined"}
-                  onClick={() => setShowFilters(!showFilters)}
-                  startIcon={<FilterListIcon />}
-                  sx={{
-                    borderColor: hasActiveFilters ? '#6777ef' : undefined,
-                    backgroundColor: hasActiveFilters ? '#6777ef' : undefined,
-                    color: hasActiveFilters ? '#fff' : '#6777ef',
-                    height: '56px',
-                  }}
-                >
-                  Filtros
-                  {hasActiveFilters && (
-                    <Badge
-                      badgeContent="!"
-                      color="error"
-                      sx={{ ml: 1 }}
-                    />
-                  )}
-                </Button>
-              </Tooltip>
-              
-              <Tooltip title="Limpiar todos los filtros" placement="top">
-                <Button
-                  variant="outlined"
-                  onClick={clearFilters}
-                  startIcon={<ClearIcon />}
-                  sx={{ height: '56px' }}
-                  disabled={!hasActiveFilters}
-                >
-                  Limpiar
-                </Button>
-              </Tooltip>
+            {isMobile ? (
+              // Layout para móvil: dos filas de botones
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                {/* Primera fila: Filtros y Limpiar */}
+                <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                  <Tooltip title="Filtros avanzados" placement="top">
+                    <Button
+                      variant={hasActiveFilters ? "contained" : "outlined"}
+                      onClick={() => setShowFilters(!showFilters)}
+                      startIcon={<FilterListIcon />}
+                      className="btn-agregar"
+                      sx={{
+                        borderColor: hasActiveFilters ? '#6777ef' : undefined,
+                        backgroundColor: hasActiveFilters ? '#6777ef' : undefined,
+                        color: hasActiveFilters ? '#fff' : '#6777ef',
+                        height: '40px',
+                        flex: 1,
+                        maxWidth: '120px'
+                      }}
+                    >
+                      Filtros
+                      {hasActiveFilters && (
+                        <Badge
+                          badgeContent="!"
+                          color="error"
+                          sx={{ ml: 1 }}
+                        />
+                      )}
+                    </Button>
+                  </Tooltip>
 
-              <Tooltip title="Exportar datos a Excel (Ctrl+E)" placement="top">
-                <Button
-                  variant="contained"
-                  onClick={handleExportToExcel}
-                  startIcon={<FileDownloadIcon sx={{ color: '#fff' }} />}
-                  sx={{
-                    backgroundColor: '#206e43',
-                    color: '#fff',
-                    height: '56px',
-                    '&:hover': {
-                      backgroundColor: '#185735',
-                    },
-                  }}
-                >
-                  Exportar
-                </Button>
-              </Tooltip>
+                  <Tooltip title="Limpiar todos los filtros" placement="top">
+                    <Button
+                      variant="outlined"
+                      onClick={clearFilters}
+                      startIcon={<ClearIcon />}
+                      className="btn-agregar"
+                      sx={{
+                        height: '40px',
+                        flex: 1,
+                        maxWidth: '120px'
+                      }}
+                      disabled={!hasActiveFilters}
+                    >
+                      Limpiar
+                    </Button>
+                  </Tooltip>
+                </Box>
+                
+                {/* Segunda fila: Exportar Excel y Nuevo Soporte */}
+                <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                  <Tooltip title="Exportar datos a Excel (Ctrl+E)" placement="top">
+                    <Button
+                      variant="contained"
+                      onClick={handleExportToExcel}
+                      startIcon={<FileDownloadIcon sx={{ color: 'white' }} />}
+                      className="btn-agregar"
+                      sx={{
+                        height: '40px',
+                        flex: 1,
+                        maxWidth: '140px'
+                      }}
+                    >
+                      📊 Exportar
+                    </Button>
+                  </Tooltip>
 
-              <Tooltip title="Crear nuevo soporte (Ctrl+N)" placement="top">
-                <Button
-                  variant="contained"
-                  onClick={handleNew}
-                  startIcon={<AddIcon sx={{ color: '#fff' }} />}
-                  sx={{
-                    backgroundColor: '#6777ef',
-                    color: '#fff',
-                    height: '56px',
-                    '&:hover': {
-                      backgroundColor: '#5a67d8',
-                    },
-                  }}
-                >
-                  Nuevo Soporte
-                </Button>
-              </Tooltip>
-            </Box>
+                  <Tooltip title="Crear nuevo soporte (Ctrl+N)" placement="top">
+                    <Button
+                      variant="contained"
+                      onClick={handleNew}
+                      startIcon={<AddIcon sx={{ color: 'white' }} />}
+                      className="btn-agregar"
+                      sx={{
+                        height: '40px',
+                        flex: 1,
+                        maxWidth: '140px'
+                      }}
+                    >
+                      Nuevo Soporte
+                    </Button>
+                  </Tooltip>
+                </Box>
+              </Box>
+            ) : (
+              // Layout para desktop: una sola fila
+              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                <Tooltip title="Filtros avanzados" placement="top">
+                  <Button
+                    variant={hasActiveFilters ? "contained" : "outlined"}
+                    onClick={() => setShowFilters(!showFilters)}
+                    startIcon={<FilterListIcon />}
+                    className="btn-agregar"
+                    sx={{
+                      borderColor: hasActiveFilters ? '#6777ef' : undefined,
+                      backgroundColor: hasActiveFilters ? '#6777ef' : undefined,
+                      color: hasActiveFilters ? '#fff' : '#6777ef',
+                      height: '40px',
+                    }}
+                  >
+                    Filtros
+                    {hasActiveFilters && (
+                      <Badge
+                        badgeContent="!"
+                        color="error"
+                        sx={{ ml: 1 }}
+                      />
+                    )}
+                  </Button>
+                </Tooltip>
+
+                <Tooltip title="Limpiar todos los filtros" placement="top">
+                  <Button
+                    variant="outlined"
+                    onClick={clearFilters}
+                    startIcon={<ClearIcon />}
+                    className="btn-agregar"
+                    sx={{ height: '40px' }}
+                    disabled={!hasActiveFilters}
+                  >
+                    Limpiar
+                  </Button>
+                </Tooltip>
+
+                <Tooltip title="Exportar datos a Excel (Ctrl+E)" placement="top">
+                  <Button
+                    variant="contained"
+                    onClick={handleExportToExcel}
+                    startIcon={<FileDownloadIcon sx={{ color: 'white' }} />}
+                    className="btn-agregar"
+                    sx={{ height: '40px' }}
+                  >
+                    📊 Exportar Excel
+                  </Button>
+                </Tooltip>
+
+                <Tooltip title="Crear nuevo soporte (Ctrl+N)" placement="top">
+                  <Button
+                    variant="contained"
+                    onClick={handleNew}
+                    startIcon={<AddIcon sx={{ color: 'white' }} />}
+                    className="btn-agregar"
+                    sx={{ height: '40px' }}
+                  >
+                    Nuevo Soporte
+                  </Button>
+                </Tooltip>
+              </Box>
+            )}
           </Grid>
         </Grid>
 
@@ -880,74 +976,376 @@ const SoportesMejorado = () => {
         )}
       </div>
 
-      <div className="data-grid-container">
-        {loading ? (
-          // Skeleton de carga
-          <div style={{ padding: '16px' }}>
-            {[...Array(5)].map((_, index) => (
-              <Box key={index} sx={{ mb: 2 }}>
-                <Skeleton variant="rectangular" height={60} sx={{ borderRadius: 1 }} />
+      {/* Versión móvil - Cards creativos como Medios */}
+      {isMobile ? (
+        <>
+          <Box sx={{ p: 2 }}>
+            {/* Barra de búsqueda móvil */}
+            <Box sx={{ mb: 2 }}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                placeholder="🔍 Buscar soporte..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                size="small"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '12px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                  }
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  )
+                }}
+              />
+            </Box>
+
+            {/* Botones de acción */}
+            <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
+              <Button
+                variant="contained"
+                className="btn-agregar"
+                startIcon={<AddIcon sx={{ color: 'white' }} />}
+                onClick={handleNew}
+                sx={{ borderRadius: '12px', flex: 1 }}
+              >
+                Agregar
+              </Button>
+            </Box>
+
+            {/* Cards creativos para soportes */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+              {filteredRows.slice((mobilePage - 1) * 10, mobilePage * 10).map((soporte, index) => (
+                <Card
+                  key={soporte.id}
+                  sx={{
+                    background: `linear-gradient(135deg, ${
+                      index % 4 === 0 ? '#667eea 0%, #764ba2 100%' :
+                      index % 4 === 1 ? '#f093fb 0%, #f5576c 100%' :
+                      index % 4 === 2 ? '#4facfe 0%, #00f2fe 100%' :
+                      '#43e97b 0%, #38f9d7 100%'
+                    })`,
+                    borderRadius: '16px',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                    overflow: 'hidden',
+                    position: 'relative'
+                  }}
+                >
+                  {/* Header del Card */}
+                  <Box sx={{
+                    background: 'rgba(255,255,255,0.95)',
+                    p: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2
+                  }}>
+                    {/* Avatar con iniciales */}
+                    <Avatar
+                      sx={{
+                        width: 56,
+                        height: 56,
+                        background: `linear-gradient(135deg, ${
+                          index % 4 === 0 ? '#667eea 0%, #764ba2 100%' :
+                          index % 4 === 1 ? '#f093fb 0%, #f5576c 100%' :
+                          index % 4 === 2 ? '#4facfe 0%, #00f2fe 100%' :
+                          '#43e97b 0%, #38f9d7 100%'
+                        })`,
+                        fontSize: '1.5rem',
+                        fontWeight: 'bold',
+                        color: 'white'
+                      }}
+                    >
+                      {soporte.nombreidentficiador?.charAt(0)?.toUpperCase() || 'S'}
+                    </Avatar>
+
+                    {/* Información principal */}
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontWeight: 'bold',
+                          fontSize: '1rem',
+                          color: '#1e293b',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {soporte.nombreidentficiador || 'Sin identificador'}
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mt: 0.5 }}>
+                        <Chip
+                          label={soporte.fechaCreacion || 'Sin fecha'}
+                          size="small"
+                          sx={{
+                            height: '24px',
+                            fontSize: '0.75rem',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            color: '#667eea',
+                            fontWeight: 600
+                          }}
+                        />
+                        <Chip
+                          label={soporte.estado ? '✓ Activo' : '✗ Inactivo'}
+                          size="small"
+                          sx={{
+                            height: '24px',
+                            fontSize: '0.75rem',
+                            backgroundColor: soporte.estado ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                            color: soporte.estado ? '#16a34a' : '#dc2626',
+                            fontWeight: 600
+                          }}
+                        />
+                      </Box>
+                    </Box>
+
+                    {/* Botones de acción */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          if (soporte.id_proveedor) {
+                            navigate(`/proveedores/view/${soporte.id_proveedor}`);
+                          } else {
+                            Swal.fire({
+                              icon: 'warning',
+                              title: 'Sin proveedor',
+                              text: 'Este soporte no tiene un proveedor asignado'
+                            });
+                          }
+                        }}
+                        sx={{
+                          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                          '&:hover': { backgroundColor: 'rgba(59, 130, 246, 0.2)' }
+                        }}
+                      >
+                        <VisibilityIcon fontSize="small" sx={{ color: '#3b82f6' }} />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          setEditMode(true);
+                          setFormData(soporte);
+                          setOpenModal(true);
+                        }}
+                        sx={{
+                          backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                          '&:hover': { backgroundColor: 'rgba(34, 197, 94, 0.2)' }
+                        }}
+                      >
+                        <EditIcon fontSize="small" sx={{ color: '#22c55e' }} />
+                      </IconButton>
+                    </Box>
+                  </Box>
+
+                  {/* Detalles adicionales */}
+                  <Box sx={{
+                    background: 'rgba(255,255,255,0.85)',
+                    p: 2,
+                    pt: 1
+                  }}>
+                    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
+                      <Box>
+                        <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                          🏢 Proveedor
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                          {soporte.nombreproveedor || 'Sin proveedor'}
+                        </Typography>
+                      </Box>
+                      <Box>
+                        <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                          📺 Medios
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                          {soporte.medios || 'Sin medios'}
+                        </Typography>
+                      </Box>
+                      <Box>
+                        <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                          💰 Bonificación
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                          ${soporte.bonificacionano?.toLocaleString('es-CL') || 0}
+                        </Typography>
+                      </Box>
+                      <Box>
+                        <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                          📏 Escala
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                          {soporte.escala || 0}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                </Card>
+              ))}
+
+              {/* Mensaje si no hay soportes */}
+              {filteredRows.length === 0 && (
+                <Box sx={{ textAlign: 'center', py: 8 }}>
+                  <Typography variant="body1" color="text.secondary">
+                    {loading ? 'Cargando datos...' : 'No se encontraron soportes'}
+                  </Typography>
+                </Box>
+              )}
+
+            </Box>
+
+            {/* Paginación móvil */}
+            {filteredRows.length > 10 && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 2 }}>
+                <Pagination
+                  count={Math.ceil(filteredRows.length / 10)}
+                  page={mobilePage}
+                  onChange={(event, value) => {
+                    setMobilePage(value);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  color="primary"
+                  size="large"
+                  sx={{
+                    '& .MuiPaginationItem-root': {
+                      borderRadius: '12px',
+                      fontWeight: 600,
+                      minWidth: '40px',
+                      height: '40px',
+                      '&.Mui-selected': {
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        color: 'white',
+                        fontWeight: 700,
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                        }
+                      }
+                    }
+                  }}
+                />
               </Box>
-            ))}
-          </div>
-        ) : filteredRows && filteredRows.length > 0 ? (
-          <DataGrid
-            getRowId={(row) => row.id}
-            rows={filteredRows}
-            columns={columns}
-            pageSize={pageSize}
-            onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-            rowsPerPageOptions={[5, 10, 25]}
-            disableSelectionOnClick
-            loading={loading}
-            autoHeight
-            localeText={{
-              noRowsLabel: 'No hay datos para mostrar',
-              footerRowSelected: count => `${count} fila${count !== 1 ? 's' : ''} seleccionada${count !== 1 ? 's' : ''}`,
-              footerTotalRows: 'Filas totales:',
-              footerTotalVisibleRows: (visibleCount, totalCount) =>
-                `${visibleCount.toLocaleString()} de ${totalCount.toLocaleString()}`,
-              footerPaginationRowsPerPage: 'Filas por página:',
-              columnMenuLabel: 'Menú',
-              columnMenuShowColumns: 'Mostrar columnas',
-              columnMenuFilter: 'Filtrar',
-              columnMenuHideColumn: 'Ocultar',
-              columnMenuUnsort: 'Desordenar',
-              columnMenuSortAsc: 'Ordenar ASC',
-              columnMenuSortDesc: 'Ordenar DESC',
-              columnHeaderSortIconLabel: 'Ordenar',
-              MuiTablePagination: {
-                labelRowsPerPage: 'Filas por página:',
-                labelDisplayedRows: ({ from, to, count }) =>
-                  `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`,
-              },
-            }}
-            sx={{
-              '& .MuiDataGrid-cell:focus': {
-                outline: 'none',
-              },
-              '& .MuiDataGrid-row:hover': {
-                backgroundColor: '#f5f5f5',
-              },
-            }}
-          />
-        ) : (
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '200px',
-            backgroundColor: 'white',
-            borderRadius: '8px',
-            boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-            padding: '16px'
-          }}>
-            <Typography variant="h6" color="textSecondary">
-              No hay datos para mostrar
-            </Typography>
-          </div>
-        )}
-      </div>
+            )}
+
+            {/* Contador de resultados */}
+            <Box sx={{ textAlign: 'center', mb: 10 }}>
+              <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                Mostrando {Math.min((mobilePage - 1) * 10 + 1, filteredRows.length)}-{Math.min(mobilePage * 10, filteredRows.length)} de {filteredRows.length} soporte{filteredRows.length !== 1 ? 's' : ''}
+              </Typography>
+            </Box>
+
+            {/* FAB para agregar soporte */}
+            <Fab
+              color="primary"
+              aria-label="add"
+              onClick={handleNew}
+              sx={{
+                position: 'fixed',
+                bottom: 80,
+                right: 16,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                }
+              }}
+            >
+              <AddIcon />
+            </Fab>
+          </Box>
+        </>
+      ) : (
+        /* Versión escritorio - DataGrid */
+        <div className="data-grid-container">
+          {loading ? (
+            // Skeleton de carga
+            <div style={{ padding: '16px' }}>
+              {[...Array(5)].map((_, index) => (
+                <Box key={index} sx={{ mb: 2 }}>
+                  <Skeleton variant="rectangular" height={60} sx={{ borderRadius: 1 }} />
+                </Box>
+              ))}
+            </div>
+          ) : filteredRows && filteredRows.length > 0 ? (
+            <DataGrid
+              getRowId={(row) => row.id}
+              rows={filteredRows}
+              columns={columns}
+              pageSize={10}
+              rowsPerPageOptions={[10]}
+              disableSelectionOnClick
+              loading={loading}
+              autoHeight
+              rowHeight={56}
+              columnHeaderHeight={56}
+              initialState={{
+                pagination: {
+                  paginationModel: { pageSize: 10 }
+                }
+              }}
+              localeText={{
+                noRowsLabel: 'No hay datos para mostrar',
+                footerRowSelected: count => `${count} fila${count !== 1 ? 's' : ''} seleccionada${count !== 1 ? 's' : ''}`,
+                footerTotalRows: 'Filas totales:',
+                footerTotalVisibleRows: (visibleCount, totalCount) =>
+                  `${visibleCount.toLocaleString()} de ${totalCount.toLocaleString()}`,
+                footerPaginationRowsPerPage: 'Filas por página:',
+                columnMenuLabel: 'Menú',
+                columnMenuShowColumns: 'Mostrar columnas',
+                columnMenuFilter: 'Filtrar',
+                columnMenuHideColumn: 'Ocultar',
+                columnMenuUnsort: 'Desordenar',
+                columnMenuSortAsc: 'Ordenar ASC',
+                columnMenuSortDesc: 'Ordenar DESC',
+                columnHeaderSortIconLabel: 'Ordenar',
+                MuiTablePagination: {
+                  labelRowsPerPage: 'Filas por página:',
+                  labelDisplayedRows: ({ from, to, count }) =>
+                    `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`,
+                },
+              }}
+              sx={{
+                '& .MuiDataGrid-cell:focus': {
+                  outline: 'none',
+                },
+                '& .MuiDataGrid-row:hover': {
+                  backgroundColor: '#f5f5f5',
+                },
+                '& .MuiDataGrid-footerContainer': {
+                  borderTop: '1px solid rgba(102, 126, 234, 0.1) !important',
+                  background: 'rgba(255,255,255,0.8) !important',
+                },
+                '& .MuiDataGrid-footerContainer .MuiTablePagination-root .MuiTablePagination-selectLabel': {
+                  display: 'none'
+                },
+                '& .MuiDataGrid-footerContainer .MuiTablePagination-root .MuiTablePagination-select': {
+                  display: 'none'
+                },
+                '& .MuiDataGrid-footerContainer .MuiTablePagination-root .MuiTablePagination-selectIcon': {
+                  display: 'none'
+                }
+              }}
+            />
+          ) : (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '200px',
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+              padding: '16px'
+            }}>
+              <Typography variant="h6" color="textSecondary">
+                No hay datos para mostrar
+              </Typography>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Modal de Nuevo/Editar Soporte */}
       <Dialog 

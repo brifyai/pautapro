@@ -25,6 +25,20 @@ const mapeoConfig = {
     "estado": "estado",
     "created_at": "created_at",
     "updated_at": "updated_at"
+  },
+  "medios": {
+    "id": "id",
+    "nombre": "nombre_medio",
+    "codigo": "codigo",
+    "duracion": "duracion",
+    "codigo_megatime": "codigo_megatime",
+    "color": "color",
+    "calidad": "calidad",
+    "cooperado": "cooperado",
+    "rubro": "rubro",
+    "estado": "estado",
+    "created_at": "created_at",
+    "updated_at": "updated_at"
   }
 };
 

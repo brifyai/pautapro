@@ -616,7 +616,7 @@ class ClientScoringService {
   async saveClientScore(scoreData) {
     try {
       const { error } = await supabase
-        .from('client_scores')
+        .from('client_scoring')
         .upsert({
           client_id: scoreData.clientId,
           model: scoreData.model,
@@ -643,11 +643,8 @@ class ClientScoringService {
   async getClientScores(clientId = null, model = 'advanced') {
     try {
       let query = supabase
-        .from('client_scores')
-        .select(`
-          *,
-          clientes (nombrecliente, razonsocial)
-        `)
+        .from('client_scoring')
+        .select('*')
         .eq('model', model)
         .order('calculated_at', { ascending: false });
 
@@ -691,11 +688,8 @@ class ClientScoringService {
   async getTopClients(limit = 10, model = 'advanced') {
     try {
       const { data, error } = await supabase
-        .from('client_scores')
-        .select(`
-          *,
-          clientes (nombrecliente, razonsocial)
-        `)
+        .from('client_scoring')
+        .select('*')
         .eq('model', model)
         .order('total_score', { ascending: false })
         .limit(limit);
@@ -822,7 +816,7 @@ class ClientScoringService {
   async getClientScore(clientId) {
     try {
       const { data, error } = await supabase
-        .from('client_scores')
+        .from('client_scoring')
         .select('*')
         .eq('client_id', clientId)
         .order('calculated_at', { ascending: false })
