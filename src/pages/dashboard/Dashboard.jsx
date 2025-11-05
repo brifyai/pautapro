@@ -26,7 +26,8 @@ import {
   Tooltip,
   Fab,
   Zoom,
-  TextField
+  TextField,
+  Button
 } from '@mui/material';
 import {
   TrendingUp as TrendingUpIcon,
@@ -47,6 +48,9 @@ import {
 import ChatIA from '../../components/chat/ChatIA';
 
 ChartJS.register(ArcElement, ChartTooltip, Legend, CategoryScale, LinearScale, BarElement);
+
+// Variable global para proteger contra cargas múltiples
+let dashboardLoadedGlobally = false;
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -90,7 +94,25 @@ const Dashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
+  const getLast6MonthsLabels = useCallback(() => {
+    const monthNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const labels = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      labels.push(`${monthNames[d.getMonth()]} ${d.getFullYear()}`);
+    }
+    return labels;
+  }, []);
+  
+  // REMOVIDO: computedPieData y computedBarData causaban re-renders
+  // Ahora usamos directamente pieData y barData que ya están validados
+  const computedPieData = pieData;
+  const computedBarData = barData;
+  
   const pieOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -170,85 +192,188 @@ const Dashboard = () => {
     }
   };
 
-  useEffect(() => {
-    // Prevenir scroll automático al cargar el dashboard - MÉTODO ROBUSTO
-    // 1. Guardar posición actual del scroll
-    const scrollY = window.scrollY || window.pageYOffset;
-    const scrollX = window.scrollX || window.pageXOffset;
-    
-    // 2. Forzar scroll a la parte superior inmediatamente
-    window.scrollTo(0, 0);
-    
-    // 3. Prevenir cualquier scroll automático durante la carga
-    const preventScroll = (e) => {
-      e.preventDefault();
-      window.scrollTo(0, 0);
-    };
-    
-    // 4. Bloquear scroll temporalmente
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-    window.addEventListener('scroll', preventScroll, { passive: false });
-    
-    // 5. Cargar datos del dashboard
-    loadDashboardData();
-
-    // 6. Restaurar scroll después de cargar completamente
-    setTimeout(() => {
-      // Restaurar estilos de scroll
-      document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
-      window.removeEventListener('scroll', preventScroll);
+  // Función de validación robusta para datos del gráfico de pie
+  const validatePieData = (data) => {
+    try {
+      console.log('🔍 Validando pieData:', data);
       
-      // Forzar mantener posición en la parte superior
-      window.scrollTo(0, 0);
+      // Verificar estructura básica
+      if (!data || typeof data !== 'object') {
+        console.warn('❌ pieData no es un objeto válido:', data);
+        return getFallbackPieData();
+      }
+
+      // Verificar datasets
+      if (!Array.isArray(data.datasets) || data.datasets.length === 0) {
+        console.warn('❌ pieData.datasets no es válido:', data.datasets);
+        return getFallbackPieData();
+      }
+
+      // Verificar primer dataset
+      const firstDataset = data.datasets[0];
+      if (!firstDataset || !Array.isArray(firstDataset.data) || firstDataset.data.length === 0) {
+        console.warn('❌ Primer dataset inválido:', firstDataset);
+        return getFallbackPieData();
+      }
+
+      // Verificar labels
+      if (!Array.isArray(data.labels) || data.labels.length === 0) {
+        console.warn('❌ pieData.labels inválido:', data.labels);
+        return getFallbackPieData();
+      }
+
+      // Verificar que labels y data tengan misma longitud
+      if (data.labels.length !== firstDataset.data.length) {
+        console.warn('❌ Labels y data tienen diferente longitud:', {
+          labelsLength: data.labels.length,
+          dataLength: firstDataset.data.length
+        });
+        return getFallbackPieData();
+      }
+
+      // Verificar que los datos sean números válidos
+      const hasValidNumbers = firstDataset.data.some(v => typeof v === 'number' && !isNaN(v) && v > 0);
+      if (!hasValidNumbers) {
+        console.warn('❌ No hay datos numéricos válidos:', firstDataset.data);
+        return getFallbackPieData();
+      }
+
+      console.log('✅ pieData válido:', data);
+      return data;
+    } catch (error) {
+      console.error('❌ Error validando pieData:', error);
+      return getFallbackPieData();
+    }
+  };
+
+  // Función de validación robusta para datos del gráfico de barras
+  const validateBarData = (data) => {
+    try {
+      console.log('🔍 Validando barData:', data);
       
-      // Doble aseguramiento después de un pequeño delay
-      setTimeout(() => {
-        window.scrollTo(0, 0);
-      }, 50);
-    }, 200);
+      // Verificar estructura básica
+      if (!data || typeof data !== 'object') {
+        console.warn('❌ barData no es un objeto válido:', data);
+        return getFallbackBarData();
+      }
 
-    // Actualización automática cada 5 minutos
-    const interval = setInterval(() => {
-      loadDashboardData();
-      // Prevenir scroll en actualizaciones automáticas también
-      setTimeout(() => window.scrollTo(0, 0), 100);
-    }, 300000);
-    
-    return () => {
-      clearInterval(interval);
-      document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
-      window.removeEventListener('scroll', preventScroll);
+      // Verificar datasets
+      if (!Array.isArray(data.datasets) || data.datasets.length === 0) {
+        console.warn('❌ barData.datasets no es válido:', data.datasets);
+        return getFallbackBarData();
+      }
+
+      // Verificar primer dataset
+      const firstDataset = data.datasets[0];
+      if (!firstDataset || !Array.isArray(firstDataset.data) || firstDataset.data.length === 0) {
+        console.warn('❌ Primer dataset inválido:', firstDataset);
+        return getFallbackBarData();
+      }
+
+      // Verificar labels
+      if (!Array.isArray(data.labels) || data.labels.length === 0) {
+        console.warn('❌ barData.labels inválido:', data.labels);
+        return getFallbackBarData();
+      }
+
+      // Verificar que labels y data tengan misma longitud
+      if (data.labels.length !== firstDataset.data.length) {
+        console.warn('❌ Labels y data tienen diferente longitud:', {
+          labelsLength: data.labels.length,
+          dataLength: firstDataset.data.length
+        });
+        return getFallbackBarData();
+      }
+
+      console.log('✅ barData válido:', data);
+      return data;
+    } catch (error) {
+      console.error('❌ Error validando barData:', error);
+      return getFallbackBarData();
+    }
+  };
+
+  // Datos fallback para gráfico de pie
+  const getFallbackPieData = () => {
+    console.log('🔄 Usando fallback para pieData');
+    return {
+      labels: ['Sin datos'],
+      datasets: [{
+        data: [100],
+        backgroundColor: ['#cbd5e1'],
+        borderWidth: 0,
+      }]
     };
-  }, []);
+  };
 
-  // Memoizar datos para evitar re-renders innecesarios
-  const memoizedStats = useMemo(() => stats, [stats]);
-  const memoizedKpiData = useMemo(() => kpiData, [kpiData]);
-  const memoizedPieData = useMemo(() => pieData, [pieData]);
-  const memoizedBarData = useMemo(() => barData, [barData]);
-
-  useEffect(() => {
-    // Generar alertas automáticas basadas en los datos
-    generateAutomaticAlerts();
-  }, [stats]);
+  // Datos fallback para gráfico de barras
+  const getFallbackBarData = () => {
+    console.log('🔄 Usando fallback para barData');
+    const monthNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const labels = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      labels.push(`${monthNames[d.getMonth()]} ${d.getFullYear()}`);
+    }
+    return {
+      labels: labels,
+      datasets: [{
+        label: 'Campañas',
+        data: new Array(6).fill(0),
+        backgroundColor: '#3b82f6',
+        borderWidth: 0,
+        borderRadius: 4
+      }]
+    };
+  };
 
   const loadDashboardData = useCallback(async () => {
+    // PROTECCIÓN TRIPLE: Estado local + estado global + refresh check
+    if (dashboardLoadedGlobally && !isRefreshing) {
+      console.log('🔄 Dashboard ya cargado GLOBALMENTE, evitando carga múltiple');
+      return;
+    }
+
     try {
-      setLoading(true);
+      console.log('🚀 Iniciando carga del dashboard (GLOBAL:', dashboardLoadedGlobally, ', hasLoadedOnce:', hasLoadedOnce, ', isRefreshing:', isRefreshing, ')');
 
       // Cargar estadísticas básicas
       const statsData = await dashboardService.getDashboardStats();
 
-      // Cargar estadísticas adicionales
-      const [campaignStats, orderStats, scoringStats, monthlyData] = await Promise.all([
+      // Cargar gráficos con manejo individual de errores
+      let monthlyData = null;
+      let chartData = null;
+
+      try {
+        monthlyData = await dashboardService.getMonthlyCampaignData();
+        console.log('✅ monthlyData cargado:', monthlyData);
+      } catch (error) {
+        console.error('❌ Error cargando monthlyData:', error);
+        monthlyData = null;
+      }
+
+      try {
+        chartData = await dashboardService.getClientDistribution();
+        console.log('✅ chartData cargado:', chartData);
+      } catch (error) {
+        console.error('❌ Error cargando chartData:', error);
+        chartData = null;
+      }
+
+      // Cargar otros datos en paralelo
+      const [campaignStats, orderStats, scoringStats] = await Promise.all([
         campaignService.getCampaignStats(),
         orderService.getOrderStats(),
-        clientScoringService.getScoringStats(),
-        dashboardService.getMonthlyCampaignData()
+        clientScoringService.getScoringStats()
       ]);
+
+      // Validar y procesar datos de gráficos
+      const validChartData = validatePieData(chartData);
+      const validMonthlyData = validateBarData(monthlyData);
+
+      console.log('📊 CHART DATA VALIDADO (Pie):', validChartData);
+      console.log('📊 MONTHLY DATA VALIDADO (Bar):', validMonthlyData);
 
       // Combinar todas las estadísticas
       const enhancedStats = {
@@ -261,12 +386,9 @@ const Dashboard = () => {
 
       setStats(enhancedStats);
 
-      // Cargar datos del gráfico de clientes
-      const chartData = await dashboardService.getClientDistribution();
-      setPieData(chartData);
-
-      // Cargar datos del gráfico de barras (mensual)
-      setBarData(monthlyData);
+      // Asignar datos de gráficos validados
+      setPieData(validChartData);
+      setBarData(validMonthlyData);
 
       // Cargar clientes recientes
       const clients = await dashboardService.getRecentClients();
@@ -292,14 +414,105 @@ const Dashboard = () => {
       });
 
       setLastUpdate(new Date());
+      
+      // Marcar que ya se cargó al menos una vez (doble protección)
+      setHasLoadedOnce(true);
+      dashboardLoadedGlobally = true; // <-- Protección global
+      console.log('✅ Dashboard cargado exitosamente (PROTECCIÓN GLOBAL ACTIVADA)');
 
     } catch (error) {
-      console.error('Error cargando datos del dashboard:', error);
-      // No mostrar alertas de error generales, solo log en consola
+      console.error('❌ Error general cargando dashboard:', error);
+      
+      // En caso de error general, mostrar gráficos con datos de fallback
+      setPieData(getFallbackPieData());
+      setBarData(getFallbackBarData());
+      
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
-  }, []);
+  }, []); // <-- SIN DEPENDENCIAS PARA EVITAR RE-CREACIÓN
+
+  // Función separada para el refresh manual
+  const handleManualRefresh = useCallback(async () => {
+    if (isRefreshing) {
+      console.log('🔄 Ya se está actualizando, evitando múltiples clics');
+      return;
+    }
+    
+    console.log('🔄 Iniciando refresh manual del dashboard');
+    setIsRefreshing(true);
+    setLoading(true); // Mostrar loading durante refresh
+    
+    try {
+      await loadDashboardData();
+    } catch (error) {
+      console.error('❌ Error en refresh manual:', error);
+    } finally {
+      setIsRefreshing(false);
+      setLoading(false);
+    }
+  }, [isRefreshing]); // <-- Solo depende de isRefreshing
+
+  useEffect(() => {
+    // EJECUTAR SOLO UNA VEZ - sin dependencias que causen re-ejecución
+    
+    // Prevenir scroll automático al cargar el dashboard - MÉTODO ROBUSTO
+    // 1. Guardar posición actual del scroll
+    const scrollY = window.scrollY || window.pageYOffset;
+    const scrollX = window.scrollX || window.pageXOffset;
+    
+    // 2. Forzar scroll a la parte superior inmediatamente
+    window.scrollTo(0, 0);
+    
+    // 3. Prevenir cualquier scroll automático durante la carga
+    const preventScroll = (e) => {
+      e.preventDefault();
+      window.scrollTo(0, 0);
+    };
+    
+    // 4. Bloquear scroll temporalmente
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    window.addEventListener('scroll', preventScroll, { passive: false });
+    
+    // 5. Cargar datos del dashboard SOLO la primera vez
+    console.log('🚀 Primer carga del dashboard - useEffect (EJECUCIÓN ÚNICA)');
+    loadDashboardData();
+
+    // 6. Restaurar scroll después de cargar completamente
+    setTimeout(() => {
+      // Restaurar estilos de scroll
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      window.removeEventListener('scroll', preventScroll);
+      
+      // Forzar mantener posición en la parte superior
+      window.scrollTo(0, 0);
+      
+      // Doble aseguramiento después de un pequeño delay
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+      }, 50);
+    }, 200);
+
+    // ABSOLUTAMENTE SIN ACTUALIZACIONES AUTOMÁTICAS
+    // Los gráficos permanecen estáticos después de la carga inicial
+    
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      window.removeEventListener('scroll', preventScroll);
+    };
+  }, []); // <-- ARRAY VACÍO: EJECUTAR SOLO UNA VEZ
+
+  // REMOVIDO: Memoized data causaban re-renders innecesarios
+  // Ahora usamos directamente los datos originales
+
+  // DESHABILITADO: Generar alertas automáticas causaba re-renders innecesarios
+  // useEffect(() => {
+  //   generateAutomaticAlerts();
+  // }, [stats]);
 
   const generateAutomaticAlerts = () => {
     const newAlerts = [];
@@ -383,10 +596,20 @@ const Dashboard = () => {
             </Box>
             <Tooltip title="Actualizar datos">
               <IconButton
-                onClick={loadDashboardData}
-                sx={{ color: 'white', background: 'rgba(255,255,255,0.1)' }}
+                onClick={handleManualRefresh}
+                disabled={isRefreshing}
+                sx={{
+                  color: 'white',
+                  background: 'rgba(255,255,255,0.1)',
+                  '&.Mui-disabled': {
+                    color: 'rgba(255,255,255,0.5)',
+                    background: 'rgba(255,255,255,0.05)'
+                  }
+                }}
               >
-                <RefreshIcon />
+                <RefreshIcon sx={{
+                  animation: isRefreshing ? 'spin 1s linear infinite' : 'none'
+                }} />
               </IconButton>
             </Tooltip>
           </Box>
@@ -445,7 +668,7 @@ const Dashboard = () => {
                 <div className="modern-loading"></div>
               ) : (
                 <Box sx={{ width: '100%', height: '100%', maxWidth: '300px' }}>
-                  <Pie data={pieData} options={pieOptions} />
+                  <Pie key="pie-chart-mobile" data={computedPieData} options={pieOptions} />
                 </Box>
               )}
             </Box>
@@ -462,7 +685,7 @@ const Dashboard = () => {
               {loading ? (
                 <div className="modern-loading"></div>
               ) : (
-                <Bar data={barData} options={barOptions} />
+                <Bar key="bar-chart-mobile" data={computedBarData} options={barOptions} />
               )}
             </Box>
           </MobileCard>
@@ -564,12 +787,21 @@ const Dashboard = () => {
           </Box>
           <Tooltip title="Actualizar datos">
             <IconButton
-              onClick={loadDashboardData}
+              onClick={handleManualRefresh}
+              disabled={isRefreshing}
               size="small"
               className="modern-btn-outline"
-              sx={{ borderRadius: '50%' }}
+              sx={{
+                borderRadius: '50%',
+                '&.Mui-disabled': {
+                  opacity: 0.5,
+                  color: 'rgba(255,255,255,0.5)'
+                }
+              }}
             >
-              <RefreshIcon />
+              <RefreshIcon sx={{
+                animation: isRefreshing ? 'spin 1s linear infinite' : 'none'
+              }} />
             </IconButton>
           </Tooltip>
         </div>
@@ -743,7 +975,7 @@ const Dashboard = () => {
                   </Box>
                 ) : (
                   <Box sx={{ width: '100%', height: '100%', maxWidth: '380px', maxHeight: '380px' }}>
-                    <Pie data={pieData} options={pieOptions} />
+                    <Pie key="pie-chart" data={computedPieData} options={pieOptions} />
                   </Box>
                 )}
               </Box>
@@ -764,7 +996,7 @@ const Dashboard = () => {
                     <div className="modern-loading"></div>
                   </Box>
                 ) : (
-                  <Bar data={barData} options={barOptions} />
+                  <Bar key="bar-chart" data={computedBarData} options={barOptions} />
                 )}
               </Box>
             </CardContent>
@@ -902,7 +1134,7 @@ const Dashboard = () => {
           </Card>
         </Grid>
 
-        {/* Chat IA Asistente */}
+        {/* Chat IA Asistente - HABILITADO CON TODAS SUS FUNCIONES */}
         <Grid item xs={12} sm={6} className="animate-slide-up" style={{ animationDelay: '0.9s' }}>
           <Card className="modern-card" sx={{ height: '100%', minHeight: 400, maxHeight: 600, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden', p: 2 }}>
