@@ -41,7 +41,7 @@ import {
   Download as DownloadIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Eye as EyeIcon,
+  Visibility as VisibilityIcon,
   TrendingUp as TrendingUpIcon,
   People as PeopleIcon,
   Business as BusinessIcon,
@@ -185,7 +185,7 @@ const TableResult = ({ data, message, expandedRow, setExpandedRow, onAction }) =
                     <Button
                       size="small"
                       variant="outlined"
-                      startIcon={<EyeIcon />}
+                      startIcon={<VisibilityIcon />}
                       onClick={() => setExpandedRow(expandedRow === idx ? null : idx)}
                       sx={{ fontSize: '0.75rem', padding: '2px 6px' }}
                     >

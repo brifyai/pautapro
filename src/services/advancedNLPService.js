@@ -457,4 +457,5 @@ class AdvancedNLPService {
 
 // Exportar como singleton
 const advancedNLPService = new AdvancedNLPService();
+export { advancedNLPService };
 export default advancedNLPService;

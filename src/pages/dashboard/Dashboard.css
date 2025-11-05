@@ -21,7 +21,22 @@
     box-sizing: border-box;
     position: relative;
     overflow: hidden;
+    /* Prevenir scroll automático */
+    scroll-behavior: auto;
+    scroll-margin-top: 0;
   }
+
+/* Prevenir scroll automático al cargar */
+html, body {
+  scroll-behavior: auto !important;
+  scroll-padding-top: 0 !important;
+}
+
+/* Forzar posición inicial sin scroll */
+.dashboard-container {
+  scroll-snap-type: none;
+  scroll-behavior: auto;
+}
 
   .dashboard::before {
     content: '';

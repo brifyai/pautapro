@@ -610,4 +610,5 @@ class ActionOrchestrator {
 
 // Exportar como singleton
 const actionOrchestrator = new ActionOrchestrator();
+export { actionOrchestrator };
 export default actionOrchestrator;

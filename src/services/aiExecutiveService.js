@@ -398,4 +398,5 @@ class AIExecutiveService {
 
 // Exportar como singleton
 const aiExecutiveService = new AIExecutiveService();
+export { aiExecutiveService };
 export default aiExecutiveService;

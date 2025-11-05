@@ -10,7 +10,7 @@
  * - Validar datos de clientes
  */
 
-import { supabase } from '../config/supabase';
+import { supabase } from '../../config/supabase';
 
 class ClientActionHandler {
   constructor() {
@@ -477,4 +477,5 @@ class ClientActionHandler {
 
 // Exportar como singleton
 const clientActionHandler = new ClientActionHandler();
+export { clientActionHandler };
 export default clientActionHandler;

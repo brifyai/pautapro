@@ -69,22 +69,23 @@ const ConfiguracionIA = () => {
       planificacion: true,
       ordenes: true,
       campanas: true,
-      reportes: true
+      reportes: true,
+      asistenteIA: true
     }
   });
 
   const [stats, setStats] = useState({
     totalModels: 7,
-    activeModules: 5,
+    activeModules: 6,
     apiCallsToday: 0,
     lastOptimization: new Date()
   });
 
   const [pieData, setPieData] = useState({
-    labels: ['Dashboard', 'Planificación', 'Órdenes', 'Campañas', 'Reportes'],
+    labels: ['Dashboard', 'Planificación', 'Órdenes', 'Campañas', 'Reportes', 'Asistente IA'],
     datasets: [{
-      data: [20, 20, 20, 20, 20],
-      backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'],
+      data: [16, 16, 16, 16, 16, 20],
+      backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4'],
       borderWidth: 0,
     }]
   });
@@ -205,6 +206,18 @@ const ConfiguracionIA = () => {
         'Recomendaciones estratégicas',
         'Predicciones de rendimiento'
       ]
+    },
+    {
+      module: 'AsistenteIA',
+      icon: <AIIcon />,
+      functions: [
+        '🤖 Asistente IA PautaPro - Control total',
+        'Procesamiento de lenguaje natural avanzado',
+        'Ejecución de comandos de voz y texto',
+        'Gestión inteligente de clientes y proveedores',
+        'Análisis semántico y detección de intenciones',
+        'Integración con todas las entidades del sistema'
+      ]
     }
   ];
 
@@ -234,7 +247,8 @@ const ConfiguracionIA = () => {
             planificacion: true,
             ordenes: true,
             campanas: true,
-            reportes: true
+            reportes: true,
+            asistenteIA: true
           }
         };
 
@@ -287,7 +301,8 @@ const ConfiguracionIA = () => {
             planificacion: true,
             ordenes: true,
             campanas: true,
-            reportes: true
+            reportes: true,
+            asistenteIA: true
           }
         });
         return;
@@ -305,7 +320,8 @@ const ConfiguracionIA = () => {
           planificacion: data.modules?.planificacion ?? true,
           ordenes: data.modules?.ordenes ?? true,
           campanas: data.modules?.campanas ?? true,
-          reportes: data.modules?.reportes ?? true
+          reportes: data.modules?.reportes ?? true,
+          asistenteIA: data.modules?.asistenteIA ?? true
         }
       });
 
@@ -667,7 +683,7 @@ const ConfiguracionIA = () => {
                   variant="contained"
                   onClick={saveConfig}
                   disabled={saving}
-                  startIcon={<SaveIcon />}
+                  startIcon={<SaveIcon sx={{ color: 'white !important' }} />}
                   fullWidth
                 >
                   {saving ? 'Guardando...' : 'Guardar Configuración'}
@@ -724,7 +740,7 @@ const ConfiguracionIA = () => {
                       }
                       label={
                         <Typography variant="body2" fontWeight={500}>
-                          {module.charAt(0).toUpperCase() + module.slice(1)}
+                          {module === 'asistenteIA' ? '🤖 Asistente IA PautaPro' : module.charAt(0).toUpperCase() + module.slice(1)}
                         </Typography>
                       }
                     />
@@ -742,33 +758,37 @@ const ConfiguracionIA = () => {
               <Typography variant="h6" gutterBottom>
                 Funciones de IA por Módulo
               </Typography>
-              {aiFunctions.map((module, index) => (
-                <Accordion key={index} disabled={!config.modules[module.module.toLowerCase()] || !config.aiEnabled}>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Box display="flex" alignItems="center">
-                      {module.icon}
-                      <Typography variant="h6" sx={{ ml: 2 }}>
-                        {module.module}
-                      </Typography>
-                      {!config.modules[module.module.toLowerCase()] && (
-                        <Chip label="Deshabilitado" size="small" color="default" sx={{ ml: 2 }} />
-                      )}
-                    </Box>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <List dense>
-                      {module.functions.map((func, funcIndex) => (
-                        <ListItem key={funcIndex}>
-                          <ListItemIcon>
-                            <AIIcon color="primary" />
-                          </ListItemIcon>
-                          <ListItemText primary={func} />
-                        </ListItem>
-                      ))}
-                    </List>
-                  </AccordionDetails>
-                </Accordion>
-              ))}
+              {aiFunctions.map((module, index) => {
+                const moduleKey = module.module.toLowerCase();
+                const isEnabled = config.modules[moduleKey] || config.modules[moduleKey.replace('asistenteia', 'asistenteIA')] || false;
+                return (
+                  <Accordion key={index} disabled={!isEnabled || !config.aiEnabled}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      <Box display="flex" alignItems="center">
+                        {module.icon}
+                        <Typography variant="h6" sx={{ ml: 2 }}>
+                          {module.module === 'AsistenteIA' ? '🤖 Asistente IA PautaPro' : module.module}
+                        </Typography>
+                        {!isEnabled && (
+                          <Chip label="Deshabilitado" size="small" color="default" sx={{ ml: 2 }} />
+                        )}
+                      </Box>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <List dense>
+                        {module.functions.map((func, funcIndex) => (
+                          <ListItem key={funcIndex}>
+                            <ListItemIcon>
+                              <AIIcon color="primary" />
+                            </ListItemIcon>
+                            <ListItemText primary={func} />
+                          </ListItem>
+                        ))}
+                      </List>
+                    </AccordionDetails>
+                  </Accordion>
+                );
+              })}
             </CardContent>
           </Card>
         </Grid>

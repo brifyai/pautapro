@@ -208,8 +208,16 @@
 }
 
 .user-menu .menu-item:hover {
-  color: white;
+  color: white !important;
   transform: translateX(4px);
+}
+
+.user-menu .menu-item:hover i {
+  color: white !important;
+}
+
+.user-menu .menu-item:hover span {
+  color: white !important;
 }
 
 .user-menu .menu-item:hover::before {
@@ -224,9 +232,6 @@
   text-align: center;
 }
 
-.user-menu .menu-item:hover i {
-  color: #2563eb;
-}
 
 .user-menu .menu-item:last-child {
   border-top: 1px solid rgba(220, 38, 38, 0.2);
@@ -237,8 +242,16 @@
 }
 
 .user-menu .menu-item:last-child:hover {
-  background: var(--gradient-error);
-  color: white;
+  background: var(--gradient-error) !important;
+  color: white !important;
+}
+
+.user-menu .menu-item:last-child:hover i {
+  color: white !important;
+}
+
+.user-menu .menu-item:last-child:hover span {
+  color: white !important;
 }
 
 .user-menu .menu-item:last-child i {

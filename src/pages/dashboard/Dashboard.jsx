@@ -171,10 +171,16 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
+    // Prevenir scroll automático al cargar el dashboard
+    const scrollY = window.scrollY;
+    const scrollX = window.scrollX;
+    
     loadDashboardData();
 
-    // Scroll automático al cargar
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Restaurar posición del scroll después de cargar
+    setTimeout(() => {
+      window.scrollTo(scrollX, scrollY);
+    }, 100);
 
     // Actualización automática cada 5 minutos
     const interval = setInterval(loadDashboardData, 300000);

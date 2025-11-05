@@ -11,6 +11,24 @@ body {
   background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
   color: #1e293b;
   line-height: 1.6;
+  /* Prevenir scroll automático */
+  scroll-behavior: auto !important;
+  scroll-padding-top: 0 !important;
+}
+
+/* Prevenir scroll automático al cargar páginas */
+html {
+  scroll-behavior: auto !important;
+  scroll-padding-top: 0 !important;
+  scroll-margin-top: 0 !important;
+}
+
+/* Forzar que no haya scroll automático en el dashboard */
+.dashboard,
+.dashboard-container,
+[class*="dashboard"] {
+  scroll-behavior: auto !important;
+  scroll-snap-type: none !important;
 }
 
 /* Scrollbar personalizado */
