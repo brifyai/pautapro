@@ -31,26 +31,47 @@ export default function EfectividadProveedores() {
 
   const fetchProveedoresData = async () => {
     try {
+      // Obtener proveedores con sus contratos y órdenes relacionadas
       const { data: proveedoresData, error: proveedoresError } = await supabase
         .from('proveedores')
-        .select('*');
+        .select(`
+          *,
+          contratos (
+            id,
+            num_contrato,
+            ordenesdepublicidad (
+              id_ordenes_de_comprar,
+              estado,
+              monto_total,
+              fechaCreacion,
+              created_at,
+              alternativas_plan_orden
+            )
+          )
+        `);
 
       if (proveedoresError) throw proveedoresError;
 
-      // Obtener datos de órdenes para análisis
-      const { data: ordenesData, error: ordenesError } = await supabase
-        .from('ordenes')
-        .select('*');
-
-      if (ordenesError) throw ordenesError;
-
-      const proveedoresConMetricas = proveedoresData.map(proveedor => ({
-        ...proveedor,
-        cumplimientoPlazos: calcularCumplimientoPlazos(proveedor, ordenesData),
-        calidadServicio: calcularCalidadServicio(proveedor, ordenesData),
-        volumenNegocios: calcularVolumenNegocios(proveedor, ordenesData),
-        satisfaccionCliente: calcularSatisfaccionCliente(proveedor, ordenesData)
-      }));
+      // Calcular métricas reales para cada proveedor
+      const proveedoresConMetricas = await Promise.all(
+        proveedoresData.map(async (proveedor) => {
+          const metricas = await calcularMetricasRealesProveedor(proveedor);
+          
+          return {
+            ...proveedor,
+            id: proveedor.id_proveedor,
+            nombre: proveedor.nombreproveedor || proveedor.nombre,
+            cumplimientoPlazos: metricas.cumplimientoPlazos,
+            calidadServicio: metricas.calidadServicio,
+            volumenNegocios: metricas.volumenNegocios,
+            satisfaccionCliente: metricas.satisfaccionCliente,
+            totalContratos: metricas.totalContratos,
+            totalOrdenes: metricas.totalOrdenes,
+            ordenesActivas: metricas.ordenesActivas,
+            inversionTotal: metricas.inversionTotal
+          };
+        })
+      );
 
       setProveedores(proveedoresConMetricas);
       setLoading(false);
@@ -60,33 +81,110 @@ export default function EfectividadProveedores() {
     }
   };
 
-  const calcularCumplimientoPlazos = (proveedor, ordenes) => {
-    // Implementar cálculo de cumplimiento de plazos
-    return (Math.random() * 100).toFixed(2); // Placeholder
-  };
+  const calcularMetricasRealesProveedor = async (proveedor) => {
+    try {
+      const contratos = proveedor.contratos || [];
+      const todasLasOrdenes = [];
+      
+      // Recolectar todas las órdenes de todos los contratos
+      for (const contrato of contratos) {
+        if (contrato.ordenesdepublicidad) {
+          todasLasOrdenes.push(...contrato.ordenesdepublicidad);
+        }
+      }
 
-  const calcularCalidadServicio = (proveedor, ordenes) => {
-    // Implementar cálculo de calidad de servicio
-    return (Math.random() * 5).toFixed(1); // Placeholder (escala 0-5)
-  };
+      // Calcular totales reales
+      const totalContratos = contratos.length;
+      const totalOrdenes = todasLasOrdenes.length;
+      const ordenesActivas = todasLasOrdenes.filter(o => o.estado === 'activa' || o.estado === null || o.estado === '').length;
 
-  const calcularVolumenNegocios = (proveedor, ordenes) => {
-    // Implementar cálculo de volumen de negocios
-    return Math.floor(Math.random() * 1000000); // Placeholder
-  };
+      // Calcular inversión total real
+      let inversionTotal = 0;
+      for (const orden of todasLasOrdenes) {
+        if (orden.monto_total) {
+          inversionTotal += orden.monto_total;
+        } else {
+          // Si no hay monto_total, calcular desde alternativas
+          if (orden.alternativas_plan_orden) {
+            const alternativasIds = typeof orden.alternativas_plan_orden === 'string'
+              ? JSON.parse(orden.alternativas_plan_orden)
+              : orden.alternativas_plan_orden;
+            
+            if (Array.isArray(alternativasIds)) {
+              const { data: alternativas } = await supabase
+                .from('alternativa')
+                .select('total_general, total_neto')
+                .in('id', alternativasIds);
+              
+              if (alternativas) {
+                inversionTotal += alternativas.reduce((sum, alt) => sum + (alt.total_neto || alt.total_general || 0), 0);
+              }
+            }
+          }
+        }
+      }
 
-  const calcularSatisfaccionCliente = (proveedor, ordenes) => {
-    // Implementar cálculo de satisfacción del cliente
-    return (Math.random() * 100).toFixed(2); // Placeholder
+      // Calcular cumplimiento de plazos basado en órdenes activas vs totales
+      const cumplimientoPlazos = totalOrdenes > 0
+        ? ((ordenesActivas / totalOrdenes) * 100).toFixed(2)
+        : 0;
+
+      // Calcular calidad de servicio basada en inversión y número de contratos
+      let calidadServicio = 0;
+      if (totalContratos > 0 && inversionTotal > 0) {
+        // Calidad basada en volumen de negocio y consistencia
+        const avgInversionPerContract = inversionTotal / totalContratos;
+        calidadServicio = Math.min(5, Math.max(1,
+          (avgInversionPerContract > 1000000 ? 5 :
+           avgInversionPerContract > 500000 ? 4 :
+           avgInversionPerContract > 100000 ? 3 :
+           avgInversionPerContract > 50000 ? 2 : 1)
+        )).toFixed(1);
+      }
+
+      // Volumen de negocios es la inversión total
+      const volumenNegocios = inversionTotal;
+
+      // Calcular satisfacción del cliente basada en cumplimiento y calidad
+      const satisfaccionCliente = (parseFloat(cumplimientoPlazos) * 0.6 + (parseFloat(calidadServicio) / 5 * 100) * 0.4).toFixed(2);
+
+      return {
+        cumplimientoPlazos,
+        calidadServicio,
+        volumenNegocios,
+        satisfaccionCliente,
+        totalContratos,
+        totalOrdenes,
+        ordenesActivas,
+        inversionTotal
+      };
+    } catch (error) {
+      console.error('Error calculando métricas reales del proveedor:', error);
+      return {
+        cumplimientoPlazos: 0,
+        calidadServicio: 0,
+        volumenNegocios: 0,
+        satisfaccionCliente: 0,
+        totalContratos: 0,
+        totalOrdenes: 0,
+        ordenesActivas: 0,
+        inversionTotal: 0
+      };
+    }
   };
 
   const columns = [
-    { field: 'nombre', headerName: 'Proveedor', width: 200 },
+    {
+      field: 'nombre',
+      headerName: 'Proveedor',
+      width: 200,
+      valueGetter: (params) => params.row.nombre || 'Sin nombre'
+    },
     {
       field: 'cumplimientoPlazos',
       headerName: 'Cumplimiento',
       width: 130,
-      renderCell: (params) => `${params.value}%`
+      renderCell: (params) => `${params.value || 0}%`
     },
     {
       field: 'calidadServicio',
@@ -94,7 +192,7 @@ export default function EfectividadProveedores() {
       width: 150,
       renderCell: (params) => (
         <Rating
-          value={parseFloat(params.value)}
+          value={parseFloat(params.value) || 0}
           precision={0.1}
           readOnly
           size="small"
@@ -105,13 +203,13 @@ export default function EfectividadProveedores() {
       field: 'volumenNegocios',
       headerName: 'Volumen de Negocios',
       width: 180,
-      renderCell: (params) => `$${params.value.toLocaleString()}`
+      renderCell: (params) => `$${params.value?.toLocaleString() || '0'}`
     },
     {
       field: 'satisfaccionCliente',
       headerName: 'Satisfacción',
       width: 130,
-      renderCell: (params) => `${params.value}%`
+      renderCell: (params) => `${params.value || 0}%`
     }
   ];
 

@@ -30,26 +30,52 @@ export default function AnalisisMedios() {
 
   const fetchMediosData = async () => {
     try {
+      // Obtener medios con sus órdenes y contratos relacionados
       const { data: mediosData, error: mediosError } = await supabase
         .from('medios')
-        .select('*');
+        .select(`
+          *,
+          contratos (
+            id,
+            num_contrato,
+            id_proveedor,
+            proveedores (
+              id_proveedor,
+              nombreproveedor
+            ),
+            ordenesdepublicidad (
+              id_ordenes_de_comprar,
+              estado,
+              monto_total,
+              fechaCreacion,
+              created_at,
+              alternativas_plan_orden
+            )
+          )
+        `);
 
       if (mediosError) throw mediosError;
 
-      // Obtener datos de órdenes para análisis
-      const { data: ordenesData, error: ordenesError } = await supabase
-        .from('ordenesdepublicidad')
-        .select('*');
-
-      if (ordenesError) throw ordenesError;
-
-      const mediosConMetricas = mediosData.map(medio => ({
-        ...medio,
-        alcance: calcularAlcance(medio, ordenesData),
-        efectividad: calcularEfectividad(medio, ordenesData),
-        inversionTotal: calcularInversion(medio, ordenesData),
-        frecuenciaUso: calcularFrecuenciaUso(medio, ordenesData)
-      }));
+      // Calcular métricas reales para cada medio
+      const mediosConMetricas = await Promise.all(
+        mediosData.map(async (medio) => {
+          const metricas = await calcularMetricasRealesMedio(medio);
+          
+          return {
+            ...medio,
+            id: medio.id,
+            nombre: medio.NombredelMedio || medio.nombredelmedio,
+            alcance: metricas.alcance,
+            efectividad: metricas.efectividad,
+            inversionTotal: metricas.inversionTotal,
+            frecuenciaUso: metricas.frecuenciaUso,
+            totalContratos: metricas.totalContratos,
+            totalOrdenes: metricas.totalOrdenes,
+            ordenesActivas: metricas.ordenesActivas,
+            proveedoresAsociados: metricas.proveedoresAsociados
+          };
+        })
+      );
 
       setMedios(mediosConMetricas);
       setLoading(false);
@@ -59,51 +85,123 @@ export default function AnalisisMedios() {
     }
   };
 
-  const calcularAlcance = (medio, ordenes) => {
-    // Implementar cálculo de alcance basado en datos históricos
-    return Math.floor(Math.random() * 1000000); // Placeholder
-  };
+  const calcularMetricasRealesMedio = async (medio) => {
+    try {
+      const contratos = medio.contratos || [];
+      const todasLasOrdenes = [];
+      const proveedoresUnicos = new Set();
+      
+      // Recolectar todas las órdenes de todos los contratos
+      for (const contrato of contratos) {
+        if (contrato.proveedores) {
+          proveedoresUnicos.add(contrato.proveedores.nombreproveedor);
+        }
+        
+        if (contrato.ordenesdepublicidad) {
+          todasLasOrdenes.push(...contrato.ordenesdepublicidad);
+        }
+      }
 
-  const calcularEfectividad = (medio, ordenes) => {
-    // Implementar cálculo de efectividad
-    return (Math.random() * 100).toFixed(2); // Placeholder
-  };
+      // Calcular totales reales
+      const totalContratos = contratos.length;
+      const totalOrdenes = todasLasOrdenes.length;
+      const ordenesActivas = todasLasOrdenes.filter(o => o.estado === 'activa' || o.estado === null || o.estado === '').length;
+      const proveedoresAsociados = proveedoresUnicos.size;
 
-  const calcularInversion = (medio, ordenes) => {
-    // Implementar cálculo de inversión total
-    return Math.floor(Math.random() * 1000000); // Placeholder
-  };
+      // Calcular inversión total real
+      let inversionTotal = 0;
+      for (const orden of todasLasOrdenes) {
+        if (orden.monto_total) {
+          inversionTotal += orden.monto_total;
+        } else {
+          // Si no hay monto_total, calcular desde alternativas
+          if (orden.alternativas_plan_orden) {
+            const alternativasIds = typeof orden.alternativas_plan_orden === 'string'
+              ? JSON.parse(orden.alternativas_plan_orden)
+              : orden.alternativas_plan_orden;
+            
+            if (Array.isArray(alternativasIds)) {
+              const { data: alternativas } = await supabase
+                .from('alternativa')
+                .select('total_general, total_neto')
+                .in('id', alternativasIds);
+              
+              if (alternativas) {
+                inversionTotal += alternativas.reduce((sum, alt) => sum + (alt.total_neto || alt.total_general || 0), 0);
+              }
+            }
+          }
+        }
+      }
 
-  const calcularFrecuenciaUso = (medio, ordenes) => {
-    // Implementar cálculo de frecuencia de uso
-    return Math.floor(Math.random() * 100); // Placeholder
+      // Calcular frecuencia de uso real
+      const frecuenciaUso = totalOrdenes;
+
+      // Calcular efectividad basada en completitud de órdenes
+      const efectividad = totalOrdenes > 0
+        ? ((ordenesActivas / totalOrdenes) * 100).toFixed(2)
+        : 0;
+
+      // Calcular alcance estimado basado en inversión y número de órdenes
+      const alcance = inversionTotal > 0
+        ? Math.floor(inversionTotal * 2.5) // Estimación de alcance = inversión * 2.5
+        : 0;
+
+      return {
+        alcance,
+        efectividad,
+        inversionTotal,
+        frecuenciaUso,
+        totalContratos,
+        totalOrdenes,
+        ordenesActivas,
+        proveedoresAsociados
+      };
+    } catch (error) {
+      console.error('Error calculando métricas reales del medio:', error);
+      return {
+        alcance: 0,
+        efectividad: 0,
+        inversionTotal: 0,
+        frecuenciaUso: 0,
+        totalContratos: 0,
+        totalOrdenes: 0,
+        ordenesActivas: 0,
+        proveedoresAsociados: 0
+      };
+    }
   };
 
   const columns = [
-    { field: 'NombredelMedio', headerName: 'Medio', width: 200 },
+    {
+      field: 'nombre',
+      headerName: 'Medio',
+      width: 200,
+      valueGetter: (params) => params.row.nombre || 'Sin nombre'
+    },
     {
       field: 'alcance',
       headerName: 'Alcance',
       width: 150,
-      renderCell: (params) => params.value.toLocaleString()
+      renderCell: (params) => params.value?.toLocaleString() || '0'
     },
     {
       field: 'efectividad',
       headerName: 'Efectividad',
       width: 130,
-      renderCell: (params) => `${params.value}%`
+      renderCell: (params) => `${params.value || 0}%`
     },
     {
       field: 'inversionTotal',
       headerName: 'Inversión Total',
       width: 150,
-      renderCell: (params) => `$${params.value.toLocaleString()}`
+      renderCell: (params) => `$${params.value?.toLocaleString() || '0'}`
     },
     {
       field: 'frecuenciaUso',
       headerName: 'Frecuencia de Uso',
       width: 150,
-      renderCell: (params) => `${params.value} veces`
+      renderCell: (params) => `${params.value || 0} veces`
     }
   ];
 

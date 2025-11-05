@@ -54,7 +54,7 @@ const ReporteOrdenDeCompra = () => {
   useEffect(() => {
     if (filtros.cliente) {
       const campanasDelCliente = campanas.filter(
-        campana => campana.id_Cliente === filtros.cliente
+        campana => campana.id_cliente === filtros.cliente
       );
       setFilteredCampanas(campanasDelCliente);
       
@@ -89,7 +89,7 @@ const ReporteOrdenDeCompra = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('campania')
-        .select('id_campania, nombrecampania, presupuesto, id_Cliente')
+        .select('id_campania, nombrecampania, presupuesto, id_cliente')
         .order('nombrecampania');
 
       if (error) throw error;
@@ -126,7 +126,7 @@ const ReporteOrdenDeCompra = () => {
           alternativas_plan_orden
         `);
 
-      // Aplicar filtros
+      // Aplicar filtros si existen
       if (filtros.cliente) {
         query = query.eq('id_cliente', filtros.cliente);
       }
@@ -143,14 +143,12 @@ const ReporteOrdenDeCompra = () => {
       if (filtros.fechaInicio) {
         const fechaInicioFormateada = format(new Date(filtros.fechaInicio), 'yyyy-MM-dd');
         query = query.gte('created_at', fechaInicioFormateada);
-        console.log("Filtrando desde:", fechaInicioFormateada);
       }
 
       // Aplicar filtro de fecha fin
       if (filtros.fechaFin) {
         const fechaFinFormateada = format(new Date(filtros.fechaFin), 'yyyy-MM-dd');
         query = query.lte('created_at', fechaFinFormateada);
-        console.log("Filtrando hasta:", fechaFinFormateada);
       }
 
       const { data, error } = await query.order('created_at', { ascending: false });

@@ -171,20 +171,57 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    // Prevenir scroll automático al cargar el dashboard
-    const scrollY = window.scrollY;
-    const scrollX = window.scrollX;
+    // Prevenir scroll automático al cargar el dashboard - MÉTODO ROBUSTO
+    // 1. Guardar posición actual del scroll
+    const scrollY = window.scrollY || window.pageYOffset;
+    const scrollX = window.scrollX || window.pageXOffset;
     
+    // 2. Forzar scroll a la parte superior inmediatamente
+    window.scrollTo(0, 0);
+    
+    // 3. Prevenir cualquier scroll automático durante la carga
+    const preventScroll = (e) => {
+      e.preventDefault();
+      window.scrollTo(0, 0);
+    };
+    
+    // 4. Bloquear scroll temporalmente
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    window.addEventListener('scroll', preventScroll, { passive: false });
+    
+    // 5. Cargar datos del dashboard
     loadDashboardData();
 
-    // Restaurar posición del scroll después de cargar
+    // 6. Restaurar scroll después de cargar completamente
     setTimeout(() => {
-      window.scrollTo(scrollX, scrollY);
-    }, 100);
+      // Restaurar estilos de scroll
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      window.removeEventListener('scroll', preventScroll);
+      
+      // Forzar mantener posición en la parte superior
+      window.scrollTo(0, 0);
+      
+      // Doble aseguramiento después de un pequeño delay
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+      }, 50);
+    }, 200);
 
     // Actualización automática cada 5 minutos
-    const interval = setInterval(loadDashboardData, 300000);
-    return () => clearInterval(interval);
+    const interval = setInterval(() => {
+      loadDashboardData();
+      // Prevenir scroll en actualizaciones automáticas también
+      setTimeout(() => window.scrollTo(0, 0), 100);
+    }, 300000);
+    
+    return () => {
+      clearInterval(interval);
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      window.removeEventListener('scroll', preventScroll);
+    };
   }, []);
 
   // Memoizar datos para evitar re-renders innecesarios
