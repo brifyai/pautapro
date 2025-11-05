@@ -41,14 +41,7 @@ import { generateOrderPDF } from '../../utils/pdfGenerator';
 
 const ChatIA = ({ userRole = 'asistente' }) => {
   const navigate = useNavigate();
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      text: '¡Hola! Soy tu asistente IA ejecutivo de PautaPro. Puedo realizar **TODAS** las acciones manuales del sistema mediante instrucciones naturales.\n\n🤖 **Ejemplos:** "Crea una orden para Empresa XYZ por $1.000.000", "Agrega cliente TechCorp", "Busca proveedores de Santiago", "Genera reporte de órdenes"\n\n📋 **Gestiono:** Clientes, Proveedores, Medios, Soportes, Campañas, Contratos, Órdenes, Agencias (CRUD completo)\n\n¿Qué deseas hacer hoy?',
-      sender: 'bot',
-      timestamp: new Date()
-    }
-  ]);
+  const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(false);
@@ -1143,7 +1136,7 @@ const ChatIA = ({ userRole = 'asistente' }) => {
   };
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', maxHeight: '100vh' }}>
       {/* Header del chat - mismo diseño que Actividad Reciente */}
       <Typography variant="h6" gutterBottom className="text-gradient" sx={{ fontWeight: 600, mb: 3 }}>
         🤖 Asistente IA PautaPro
@@ -1157,7 +1150,9 @@ const ChatIA = ({ userRole = 'asistente' }) => {
         border: '2px solid rgba(102, 126, 234, 0.2)',
         borderRadius: 2,
         overflow: 'hidden',
-        background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)'
+        background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
+        maxHeight: 'calc(100vh - 200px)',
+        minHeight: '300px'
       }}>
         {/* Header interno del chat */}
         <Box sx={{
@@ -1194,26 +1189,28 @@ const ChatIA = ({ userRole = 'asistente' }) => {
           p: 2,
           overflow: 'auto',
           background: 'rgba(255,255,255,0.5)',
+          minHeight: 0,
           '&::-webkit-scrollbar': { width: '6px' },
           '&::-webkit-scrollbar-track': { background: 'rgba(0,0,0,0.05)' },
           '&::-webkit-scrollbar-thumb': { background: 'var(--gradient-primary)', borderRadius: '3px' }
         }}>
         {messages.map((message) => (
-          <Box key={message.id} sx={{ mb: 2 }}>
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'flex-start', 
-              gap: 1, 
-              justifyContent: message.sender === 'user' ? 'flex-end' : 'flex-start'
+          <Box key={message.id} sx={{ mb: 2, minWidth: 0 }}>
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 1,
+              justifyContent: message.sender === 'user' ? 'flex-end' : 'flex-start',
+              minWidth: 0
             }}>
               {message.sender === 'bot' && (
-                <Box sx={{ 
-                  width: 32, 
-                  height: 32, 
-                  borderRadius: '50%', 
-                  background: 'var(--gradient-primary)', 
-                  display: 'flex', 
-                  alignItems: 'center', 
+                <Box sx={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  background: 'var(--gradient-primary)',
+                  display: 'flex',
+                  alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0
                 }}>
@@ -1228,6 +1225,9 @@ const ChatIA = ({ userRole = 'asistente' }) => {
                 p: 1.5,
                 borderRadius: 2,
                 maxWidth: '80%',
+                minWidth: 0,
+                wordBreak: 'break-word',
+                overflowWrap: 'break-word',
                 ...(message.sender === 'user' && {
                   color: 'white !important',
                   '& .MuiTypography-root': {
@@ -1240,7 +1240,9 @@ const ChatIA = ({ userRole = 'asistente' }) => {
                   sx={{
                     fontSize: '0.85rem',
                     lineHeight: 1.4,
-                    whiteSpace: 'pre-line',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                    overflowWrap: 'break-word',
                     ...(message.sender === 'user' && {
                       color: 'white !important',
                       '& *': { color: 'white !important' }
@@ -1301,11 +1303,19 @@ const ChatIA = ({ userRole = 'asistente' }) => {
       
       {/* Botones de acción para orden pendiente */}
       {pendingOrder && !isProcessingOrder && (
-        <Box sx={{ px: 2, py: 1, background: 'rgba(76, 175, 80, 0.1)', borderTop: '1px solid rgba(76, 175, 80, 0.3)' }}>
-          <Typography variant="caption" sx={{ color: 'text.secondary', mb: 1, display: 'block', fontWeight: 600 }}>
+        <Box sx={{
+          px: 2,
+          py: 1,
+          background: 'rgba(76, 175, 80, 0.1)',
+          borderTop: '1px solid rgba(76, 175, 80, 0.3)',
+          flexShrink: 0,
+          maxHeight: '100px',
+          overflow: 'hidden'
+        }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary', mb: 1, display: 'block', fontWeight: 600, fontSize: '0.75rem' }}>
             ⏳ Orden Pendiente de Confirmación:
           </Typography>
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
             <Button
               size="small"
               variant="contained"
@@ -1316,6 +1326,7 @@ const ChatIA = ({ userRole = 'asistente' }) => {
                 fontSize: '0.75rem',
                 py: 0.5,
                 px: 2,
+                flexShrink: 0,
                 '&:hover': {
                   background: 'linear-gradient(135deg, #45a049, #3d8b40)',
                 }
@@ -1333,6 +1344,7 @@ const ChatIA = ({ userRole = 'asistente' }) => {
                 fontSize: '0.75rem',
                 py: 0.5,
                 px: 2,
+                flexShrink: 0,
                 '&:hover': {
                   background: 'rgba(244, 67, 54, 0.1)',
                   borderColor: '#d32f2f'
@@ -1341,7 +1353,7 @@ const ChatIA = ({ userRole = 'asistente' }) => {
             >
               ❌ Cancelar
             </Button>
-            <Typography variant="caption" sx={{ color: 'text.secondary', ml: 1 }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary', ml: 1, fontSize: '0.7rem' }}>
               O escribe "confirmar" o "cancelar"
             </Typography>
           </Box>
@@ -1353,9 +1365,12 @@ const ChatIA = ({ userRole = 'asistente' }) => {
         p: 2,
         borderTop: '1px solid rgba(102, 126, 234, 0.2)',
         background: 'rgba(255,255,255,0.8)',
-        borderRadius: '0 0 12px 12px'
+        borderRadius: '0 0 12px 12px',
+        flexShrink: 0,
+        maxHeight: '120px',
+        overflow: 'hidden'
       }}>
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', minHeight: 0 }}>
           <TextField
             fullWidth
             size="small"
@@ -1365,6 +1380,8 @@ const ChatIA = ({ userRole = 'asistente' }) => {
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             disabled={isLoading}
+            multiline
+            maxRows={3}
             sx={{
               '& .MuiOutlinedInput-root': {
                 background: 'white',
@@ -1372,7 +1389,9 @@ const ChatIA = ({ userRole = 'asistente' }) => {
               },
               '& .MuiOutlinedInput-input': {
                 padding: '8px 12px',
-                fontSize: '0.85rem'
+                fontSize: '0.85rem',
+                maxHeight: '80px',
+                overflow: 'auto'
               }
             }}
           />
