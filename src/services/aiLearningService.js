@@ -776,6 +776,24 @@ class AILearningService {
     
     console.log('📥 Datos de aprendizaje importados exitosamente');
   }
+
+  /**
+   * Inicializa el servicio de aprendizaje
+   */
+  async initialize() {
+    try {
+      console.log('🧠 Inicializando servicio de aprendizaje...');
+      
+      // El constructor ya inicializa el servicio
+      // Este método es para compatibilidad con otros servicios
+      
+      console.log('✅ Servicio de aprendizaje inicializado');
+      return true;
+    } catch (error) {
+      console.error('❌ Error inicializando servicio de aprendizaje:', error);
+      return false;
+    }
+  }
 }
 
 // Exportar como singleton

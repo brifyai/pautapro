@@ -28,16 +28,10 @@ import RentabilidadDashboard from './pages/rentabilidad/RentabilidadDashboard';
 import ListadoUsuarios from './pages/usuarios/ListadoUsuarios';
 import MiPerfil from './pages/perfil/MiPerfil';
 import ConfiguracionIA from './pages/configuracion/ConfiguracionIA';
-import ReporteOrdenDeCompra from './pages/reportes/ReporteOrdenDeCompra';
-import InformeInversion from './pages/reportes/InformeInversion';
-import ReporteInversionPorCliente from './pages/reportes/ReporteInversionPorCliente';
-import RendimientoCampanas from './pages/reportes/RendimientoCampanas';
-import AnalisisMedios from './pages/reportes/AnalisisMedios';
-import EfectividadProveedores from './pages/reportes/EfectividadProveedores';
-import ReporteDiarioOrdenes from './pages/reportes/ReporteDiarioOrdenes';
-import DetallePorAlternativa from './pages/reportes/DetallePorAlternativa';
-import InformeInversionClienteBruto from './pages/reportes/InformeInversionClienteBruto';
-// import ReporteVersionesOrdenes from './pages/reportes/ReporteVersionesOrdenes';
+// Reportes consolidados
+import ReporteInversion from './pages/reportes/ReporteInversion';
+import GestionOrdenes from './pages/reportes/GestionOrdenes';
+import DashboardAnalitico from './pages/reportes/DashboardAnalitico';
 import DashboardAnalytics from './pages/dashboard/DashboardAnalytics';
 // import CalendarioDisponibilidadMedios from './components/medios/CalendarioDisponibilidadMedios';
 import WorkflowWizard from './components/WorkflowWizard/WorkflowWizard';
@@ -340,87 +334,31 @@ function App() {
                     }
                   />
                   
-                  {/* Módulo de Reportes */}
+                  {/* Módulo de Reportes - Reportes Consolidados */}
                   <Route
-                    path="/reportes/ordendecompra"
+                    path="/reportes/inversion"
                     element={
                       <ProtectedRoute requiredModule="reportes" requiredPermission="ver_reportes">
-                        <ReporteOrdenDeCompra />
+                        <ReporteInversion />
                       </ProtectedRoute>
                     }
                   />
                   <Route
-                    path="/reportes/diarioordenes"
+                    path="/reportes/ordenes"
                     element={
                       <ProtectedRoute requiredModule="reportes" requiredPermission="ver_reportes">
-                        <ReporteDiarioOrdenes />
+                        <GestionOrdenes />
                       </ProtectedRoute>
                     }
                   />
                   <Route
-                    path="/reportes/informeinversion"
+                    path="/reportes/analitico"
                     element={
                       <ProtectedRoute requiredModule="reportes" requiredPermission="ver_reportes">
-                        <InformeInversion />
+                        <DashboardAnalitico />
                       </ProtectedRoute>
                     }
                   />
-                  <Route
-                    path="/reportes/inversionporcliente"
-                    element={
-                      <ProtectedRoute requiredModule="reportes" requiredPermission="ver_reportes">
-                        <ReporteInversionPorCliente />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/reportes/rendimientocampanas"
-                    element={
-                      <ProtectedRoute requiredModule="reportes" requiredPermission="ver_reportes">
-                        <RendimientoCampanas />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/reportes/analisismedios"
-                    element={
-                      <ProtectedRoute requiredModule="reportes" requiredPermission="ver_reportes">
-                        <AnalisisMedios />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/reportes/efectividadproveedores"
-                    element={
-                      <ProtectedRoute requiredModule="reportes" requiredPermission="ver_reportes">
-                        <EfectividadProveedores />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/reportes/detalleporalternativa"
-                    element={
-                      <ProtectedRoute requiredModule="reportes" requiredPermission="ver_reportes">
-                        <DetallePorAlternativa />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/reportes/informeinversionclientebruto"
-                    element={
-                      <ProtectedRoute requiredModule="reportes" requiredPermission="ver_reportes">
-                        <InformeInversionClienteBruto />
-                      </ProtectedRoute>
-                    }
-                  />
-                  {/* <Route
-                    path="/reportes/versiones"
-                    element={
-                      <ProtectedRoute requiredModule="reportes" requiredPermission="ver_reportes">
-                        <ReporteVersionesOrdenes />
-                      </ProtectedRoute>
-                    }
-                  /> */}
                   
                   {/* Módulo de Dashboard Analytics */}
                   <Route

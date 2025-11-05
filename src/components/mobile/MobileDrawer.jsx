@@ -134,11 +134,9 @@ const MobileDrawer = ({ open, onClose, user }) => {
       icon: <AssessmentIcon />,
       primary: true,
       submenu: [
-        { text: 'Análisis de Medios', path: '/reportes/analisis-medios' },
-        { text: 'Efectividad Proveedores', path: '/reportes/efectividad-proveedores' },
-        { text: 'Rendimiento Campañas', path: '/reportes/rendimiento-campanas' },
-        { text: 'Informe Inversión', path: '/reportes/informe-inversion' },
-        { text: 'Detalle por Alternativa', path: '/reportes/detalle-alternativa' }
+        { text: 'Reporte de Inversión', path: '/reportes/inversion' },
+        { text: 'Gestión de Órdenes', path: '/reportes/ordenes' },
+        { text: 'Dashboard Analítico', path: '/reportes/analitico' }
       ],
       expandable: true,
       menuKey: 'reportes'

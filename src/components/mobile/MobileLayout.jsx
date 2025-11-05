@@ -104,11 +104,10 @@ const MobileLayout = ({ children }) => {
       '/soportes': 'Soportes',
       '/ordenes/crear': 'Crear Orden',
       '/ordenes/revisar': 'Revisar Orden',
-      '/reportes/analisis-medios': 'Análisis de Medios',
-      '/reportes/efectividad-proveedores': 'Efectividad Proveedores',
-      '/reportes/rendimiento-campanas': 'Rendimiento Campañas',
-      '/reportes/informe-inversion': 'Informe Inversión',
-      '/reportes/detalle-alternativa': 'Detalle por Alternativa',
+      '/reportes/inversionunificado': 'Reporte de Inversión Unificado',
+      '/reportes/ordenesunificados': 'Gestión de Órdenes Unificada',
+      '/reportes/dashboardanalitico': 'Dashboard Analítico Unificado',
+      '/reportes/detalleporalternativa': 'Detalle por Alternativa',
       '/configuracion/ia': 'Configuración IA',
       '/agencias': 'Agencias',
       '/contratos': 'Contratos',
@@ -211,7 +210,7 @@ const MobileLayout = ({ children }) => {
               case 'home': navigate('/'); break;
               case 'clientes': navigate('/clientes'); break;
               case 'ordenes': navigate('/ordenes/crear'); break;
-              case 'reportes': navigate('/reportes/informe-inversion'); break;
+              case 'reportes': navigate('/reportes/inversion'); break;
               default: break;
             }
           }}

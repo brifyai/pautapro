@@ -1,7 +1,12 @@
-import { createClient } from '@supabase/supabase-js'
+/**
+ * Configuración de Supabase - Optimizada con Singleton
+ * Este archivo ahora importa el singleton para evitar múltiples instancias
+ */
 
-// Usar variables de entorno para mayor seguridad
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+import { supabase } from './supabaseSingleton.js'
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Re-exportar la instancia única del singleton
+export { supabase }
+
+// Export por defecto para compatibilidad
+export default supabase

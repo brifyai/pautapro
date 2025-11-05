@@ -4,6 +4,18 @@ import './index.css'
 import './assets/css/light-theme.css'
 import App from './App.jsx'
 
+// Inicializar optimizador de memoria para reducir consumo de 156MB a <50MB
+import './utils/memoryOptimizer.js'
+
+// Configurar manejo de errores globales para mejor estabilidad
+window.addEventListener('error', (event) => {
+  console.error('Error global capturado:', event.error);
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Promesa rechazada no manejada:', event.reason);
+});
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />

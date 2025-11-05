@@ -619,7 +619,6 @@ class ClientScoringService {
         .from('client_scoring')
         .upsert({
           client_id: scoreData.clientId,
-          model: scoreData.model,
           total_score: scoreData.totalScore,
           category: scoreData.category,
           category_color: scoreData.categoryColor,
@@ -645,7 +644,6 @@ class ClientScoringService {
       let query = supabase
         .from('client_scoring')
         .select('*')
-        .eq('model', model)
         .order('calculated_at', { ascending: false });
 
       if (clientId) {
@@ -690,7 +688,6 @@ class ClientScoringService {
       const { data, error } = await supabase
         .from('client_scoring')
         .select('*')
-        .eq('model', model)
         .order('total_score', { ascending: false })
         .limit(limit);
 

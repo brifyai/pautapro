@@ -735,6 +735,106 @@ export const supabaseAIService = {
         totalCampanas: 0
       };
     }
+  },
+
+  // ==================== MÉTODOS GENÉRICOS ====================
+
+  /**
+   * Método genérico para consultas SQL personalizadas
+   */
+  async query(table, columns = '*', filters = {}, options = {}) {
+    try {
+      let query = supabase.from(table).select(columns);
+      
+      // Aplicar filtros
+      Object.entries(filters).forEach(([key, value]) => {
+        if (typeof value === 'object' && value.order) {
+          query = query.order(key, { ascending: value.ascending !== false });
+        } else if (typeof value === 'object' && value.like) {
+          query = query.ilike(key, value.like);
+        } else if (typeof value === 'object' && value.in) {
+          query = query.in(key, value.in);
+        } else {
+          query = query.eq(key, value);
+        }
+      });
+
+      // Aplicar opciones adicionales
+      if (options.limit) query = query.limit(options.limit);
+      if (options.offset) query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
+      if (options.single) query = query.single();
+
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error(`Error en consulta genérica a ${table}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Método genérico para inserciones
+   */
+  async insert(table, data) {
+    try {
+      const { data: result, error } = await supabase
+        .from(table)
+        .insert(data)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return result;
+    } catch (error) {
+      console.error(`Error insertando en ${table}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Método genérico para actualizaciones
+   */
+  async update(table, data, filters) {
+    try {
+      let query = supabase.from(table).update(data);
+      
+      // Aplicar filtros
+      Object.entries(filters).forEach(([key, value]) => {
+        query = query.eq(key, value);
+      });
+
+      const { data: result, error } = await query.select();
+      
+      if (error) throw error;
+      return result;
+    } catch (error) {
+      console.error(`Error actualizando ${table}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Método genérico para eliminaciones
+   */
+  async delete(table, filters) {
+    try {
+      let query = supabase.from(table).delete();
+      
+      // Aplicar filtros
+      Object.entries(filters).forEach(([key, value]) => {
+        query = query.eq(key, value);
+      });
+
+      const { error } = await query;
+      
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error(`Error eliminando de ${table}:`, error);
+      throw error;
+    }
   }
 };
 

@@ -89,15 +89,9 @@ const HorizontalNav = () => {
       icon: 'fas fa-chart-bar',
       path: '/reportes',
       submenu: [
-        { label: 'Orden de Compra', path: '/reportes/ordendecompra' },
-        { label: 'Diario de Órdenes', path: '/reportes/diarioordenes' },
-        { label: 'Informe Inversión', path: '/reportes/informeinversion' },
-        { label: 'Inversión por Cliente', path: '/reportes/inversionporcliente' },
-        { label: 'Rendimiento Campañas', path: '/reportes/rendimientocampanas' },
-        { label: 'Análisis Medios', path: '/reportes/analisismedios' },
-        { label: 'Efectividad Proveedores', path: '/reportes/efectividadproveedores' },
-        { label: 'Detalle por Alternativa', path: '/reportes/detalleporalternativa' },
-        { label: 'Informe Inversión Cliente Bruto', path: '/reportes/informeinversionclientebruto' }
+        { label: 'Reporte de Inversión', path: '/reportes/inversion' },
+        { label: 'Gestión de Órdenes', path: '/reportes/ordenes' },
+        { label: 'Dashboard Analítico', path: '/reportes/analitico' }
       ]
     },
     {
