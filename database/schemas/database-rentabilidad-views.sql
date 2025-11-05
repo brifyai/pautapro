@@ -26,17 +26,17 @@ GROUP BY c.id_cliente, c.nombreCliente;
 
 -- Vista de rentabilidad por medio
 CREATE OR REPLACE VIEW vw_rentabilidad_medio AS
-SELECT 
+SELECT
     m.id,
-    m.nombredelmedio,
+    m.nombre_medio,
     COALESCE(SUM(dr.rentabilidad_neta), 0) as rentabilidad_total,
     COALESCE(SUM(dr.bonificacion_medio_monto), 0) as bonificaciones_total,
     COALESCE(SUM(dr.markup_monto), 0) as markup_total,
     COALESCE(SUM(dr.precio_informado_cliente), 0) as inversion_total,
-    CASE 
-        WHEN COALESCE(SUM(dr.precio_informado_cliente), 0) > 0 
-        THEN (COALESCE(SUM(dr.rentabilidad_neta), 0) / COALESCE(SUM(dr.precio_informado_cliente), 0)) * 100 
-        ELSE 0 
+    CASE
+        WHEN COALESCE(SUM(dr.precio_informado_cliente), 0) > 0
+        THEN (COALESCE(SUM(dr.rentabilidad_neta), 0) / COALESCE(SUM(dr.precio_informado_cliente), 0)) * 100
+        ELSE 0
     END as rentabilidad_porcentaje,
     COUNT(DISTINCT dr.id_orden) as numero_ordenes,
     COALESCE(AVG(hn.descuento_obtenido_porcentaje), 0) as descuento_promedio
@@ -47,14 +47,14 @@ LEFT JOIN alternativa a ON EXISTS (
 LEFT JOIN DetallesFinancierosOrden dr ON a.id = dr.id_alternativa
 LEFT JOIN HistoricoNegociacionMedios hn ON m.id = hn.id_medio
 WHERE dr.estado = 'activo' OR dr.estado IS NULL
-GROUP BY m.id, m.nombredelmedio;
+GROUP BY m.id, m.nombre_medio;
 
 -- Vista de oportunidades activas
 CREATE OR REPLACE VIEW vw_oportunidades_activas AS
-SELECT 
+SELECT
     or_.*,
     c.nombreCliente as nombre_cliente,
-    m.nombredelmedio as nombre_medio,
+    m.nombre_medio as nombre_medio,
     p.nombreProveedor as nombre_proveedor,
     u.nombre as nombre_asignado
 FROM OportunidadesRentabilidad or_

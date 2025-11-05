@@ -40,7 +40,6 @@ const Sidebar = ({ isOpen, onToggle }) => {
       icon: 'fas fa-calendar-alt',
       path: '/planificacion',
       submenu: [
-        { label: '🆕 Nueva Planificación', path: '/planificacion/new' },
         { label: '📋 Mis Planificaciones', path: '/planificacion' }
       ]
     },

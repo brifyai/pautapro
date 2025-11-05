@@ -490,8 +490,11 @@ const Dashboard = () => {
             icon={<AssistantIcon sx={{ fontSize: 28, color: 'white' }} />}
             titleColor="white"
             color="secondary"
+            sx={{ maxHeight: 600, overflow: 'hidden' }}
           >
-            <ChatIA userRole="gerente" />
+            <Box sx={{ height: 400, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+              <ChatIA userRole="gerente" />
+            </Box>
           </MobileCard>
         </Box>
 
@@ -858,8 +861,8 @@ const Dashboard = () => {
 
         {/* Chat IA Asistente */}
         <Grid item xs={12} sm={6} className="animate-slide-up" style={{ animationDelay: '0.9s' }}>
-          <Card className="modern-card" sx={{ height: '100%', minHeight: 400, display: 'flex', flexDirection: 'column' }}>
-            <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <Card className="modern-card" sx={{ height: '100%', minHeight: 400, maxHeight: 600, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden', p: 2 }}>
               <ChatIA userRole="gerente" />
             </CardContent>
           </Card>

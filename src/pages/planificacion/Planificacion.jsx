@@ -126,8 +126,9 @@ const Planificacion = () => {
 
   useEffect(() => {
     if (selectedCampana) {
+      console.log('✅ useEffect: selectedCampana cambió a:', selectedCampana);
       fetchTemasForCampana(selectedCampana.id_campania);
-      fetchPlanes();
+      fetchPlanes(selectedCampana);
     }
   }, [selectedCampana]);
 
@@ -205,7 +206,17 @@ const Planificacion = () => {
       const temaIds = campaniaTemas.map(ct => ct.id_temas);
       const { data: temasData, error: temasError } = await supabase
         .from('temas')
-        .select('*')
+        .select(`
+          id_tema,
+          nombre_tema,
+          id_medio,
+          id_calidad,
+          descripcion,
+          estado,
+          c_orden,
+          created_at,
+          updated_at
+        `)
         .in('id_tema', temaIds);
 
       if (temasError) throw temasError;
@@ -218,16 +229,25 @@ const Planificacion = () => {
 
       const temasTransformados = temasData?.map(tema => {
         const medio = mediosData.data?.find(m => m.id === tema.id_medio);
-        const calidad = calidadesData.data?.find(c => c.id === tema.id_Calidad);
+        const calidad = calidadesData.data?.find(c => c.id === tema.id_calidad);
         
         return {
           ...tema,
+          NombreTema: tema.nombre_tema, // Mapear nombre_tema a NombreTema
+          Duracion: tema.descripcion || '', // Usar descripción como duración si existe
+          color: '', // Campo vacío ya que no existe en el esquema
+          CodigoMegatime: '', // Campo vacío ya que no existe en el esquema
+          rubro: '', // Campo vacío ya que no existe en el esquema
+          cooperado: '', // Campo vacío ya que no existe en el esquema
+          id_Calidad: tema.id_calidad, // Mapear id_calidad a id_Calidad
           Calidad: calidad ? {
             id_calidad: calidad.id,
-            NombreCalidad: calidad.nombrecalidad
+            nombrecalidad: calidad.nombrecalidad
           } : null,
           Medios: medio ? {
             id_medio: medio.id,
+            nombre_medio: medio.nombre_medio,
+            nombredelmedio: medio.nombre_medio,
             NombredelMedio: medio.nombre_medio
           } : null
         };
@@ -241,22 +261,115 @@ const Planificacion = () => {
     }
   };
 
-  const fetchPlanes = async () => {
+  const fetchPlanes = async (campanaData = null) => {
+    const campanaParaBuscar = campanaData || selectedCampana;
+    
+    if (!campanaParaBuscar) {
+      console.log('❌ fetchPlanes: No hay campaña seleccionada');
+      setPlanes([]);
+      return;
+    }
+    
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('plan')
-        .select(`
-          *,
-          anios (id, years),
-          meses (id, nombre)
-        `)
-        .eq('id_campania', selectedCampana.id_campania);
+      console.log('🔍 fetchPlanes: Buscando planes para campaña:', campanaParaBuscar.id_campania);
+      console.log('🔍 fetchPlanes: Datos completos de campaña:', campanaParaBuscar);
+      
+      let planesEncontrados = [];
+      
+      // 🔥 MÉTODO CORRECTO: Buscar planes a través de la tabla de relaciones campana_planes
+      console.log('🔍 Buscando planes a través de relaciones campaña-planes...');
+      
+      // 1. Primero buscar las relaciones para esta campaña
+      const { data: relacionesDeCampania, error: errorRelaciones } = await supabase
+        .from('campana_planes')
+        .select('id_plan')
+        .eq('id_campania', campanaParaBuscar.id_campania);
+      
+      if (errorRelaciones) {
+        console.error('❌ Error buscando relaciones:', errorRelaciones);
+      } else {
+        console.log('📗 Relaciones encontradas para campaña', campanaParaBuscar.id_campania, ':', relacionesDeCampania?.length || 0);
+        
+        if (relacionesDeCampania && relacionesDeCampania.length > 0) {
+          // 2. Obtener los IDs de los planes relacionados
+          const idsPlanes = relacionesDeCampania.map(rel => rel.id_plan);
+          console.log('🎯 IDs de planes relacionados:', idsPlanes);
+          
+          // 3. Obtener los datos completos de esos planes
+          const { data: planesRelacionados, error: errorPlanesRelacionados } = await supabase
+            .from('plan')
+            .select(`
+              id,
+              id_cliente,
+              id_campania,
+              anio,
+              mes,
+              nombre_plan,
+              descripcion,
+              presupuesto,
+              estado,
+              estado2,
+              created_at,
+              updated_at,
+              anios (id, years),
+              meses (id, nombre)
+            `)
+            .in('id', idsPlanes);
+          
+          if (!errorPlanesRelacionados && planesRelacionados) {
+            planesEncontrados = planesRelacionados;
+            console.log('✅ Planes encontrados a través de relaciones:', planesRelacionados.length, planesRelacionados);
+          } else {
+            console.error('❌ Error obteniendo planes relacionados:', errorPlanesRelacionados);
+          }
+        } else {
+          console.log('📝 No hay relaciones para esta campaña en campana_planes');
+        }
+      }
+      
+      // 🔍 MÉTODO ALTERNATIVO: Si no hay relaciones, buscar por campo directo (fallback)
+      if (planesEncontrados.length === 0) {
+        console.log('🔄 Intentando búsqueda directa por id_campania...');
+        
+        const { data: planesPorCampania, error: errorCampania } = await supabase
+          .from('plan')
+          .select(`
+            id,
+            id_cliente,
+            id_campania,
+            anio,
+            mes,
+            nombre_plan,
+            descripcion,
+            presupuesto,
+            estado,
+            estado2,
+            created_at,
+            updated_at,
+            anios (id, years),
+            meses (id, nombre)
+          `)
+          .eq('id_campania', campanaParaBuscar.id_campania);
 
-      if (error) throw error;
-      setPlanes(data || []);
+        if (!errorCampania && planesPorCampania) {
+          planesEncontrados = planesPorCampania;
+          console.log('✅ Planes encontrados por id_campania directo:', planesPorCampania.length, planesPorCampania);
+        }
+      }
+      
+      console.log('✅ fetchPlanes: Planes finales encontrados:', planesEncontrados.length, planesEncontrados);
+      
+      // Si no hay planes, mostrar mensaje informativo
+      if (planesEncontrados.length === 0) {
+        console.log('⚠️ No hay planes para esta campaña. Puedes crear uno usando el botón "Nuevo Plan"');
+        console.log('💡 Sugerencia: Usa el botón "🔍 Diagnóstico" para ver todos los datos disponibles');
+      }
+      
+      setPlanes(planesEncontrados);
     } catch (error) {
-      console.error('Error al cargar planes:', error);
+      console.error('❌ Error fetching planes:', error);
+      setPlanes([]);
     } finally {
       setLoading(false);
     }
@@ -276,6 +389,114 @@ const Planificacion = () => {
       setMeses(mesesResult.data || []);
     } catch (error) {
       console.error('Error al cargar años y meses:', error);
+    }
+  };
+
+  // Función de diagnóstico para verificar datos existentes
+  const diagnosticarDatos = async () => {
+    console.log('🔍 === DIAGNÓSTICO COMPLETO DE DATOS ===');
+    
+    try {
+      // 1. Verificar todas las campañas
+      const { data: campanias, error: errorCampanias } = await supabase
+        .from('campania')
+        .select('*');
+      
+      console.log('📊 Campañas existentes:', campanias?.length || 0, campanias);
+      if (errorCampanias) console.error('❌ Error campañas:', errorCampanias);
+
+      // 2. Verificar todos los planes
+      const { data: planes, error: errorPlanes } = await supabase
+        .from('plan')
+        .select('*');
+      
+      console.log('📊 Planes existentes:', planes?.length || 0, planes);
+      if (errorPlanes) console.error('❌ Error planes:', errorPlanes);
+
+      // 3. Verificar relaciones campaña-planes
+      const { data: campanaPlanes, error: errorCampanaPlanes } = await supabase
+        .from('campana_planes')
+        .select('*');
+      
+      console.log('📊 Relaciones campaña-planes:', campanaPlanes?.length || 0, campanaPlanes);
+      if (errorCampanaPlanes) console.error('❌ Error relaciones:', errorCampanaPlanes);
+
+      // 4. Verificar planes por campaña específica
+      if (selectedCampana) {
+        console.log('🎯 Campaña seleccionada:', selectedCampana);
+        
+        // 4.1 🔍 NUEVO: Buscar planes a través de la tabla de relaciones campana_planes
+        console.log('🔍 Buscando planes a través de relaciones campaña-planes...');
+        const { data: relacionesDeCampania, error: errorRelaciones } = await supabase
+          .from('campana_planes')
+          .select('*')
+          .eq('id_campania', selectedCampana.id_campania);
+        
+        console.log('📗 Relaciones para campaña', selectedCampana.id_campania, ':', relacionesDeCampania?.length || 0, relacionesDeCampania);
+        
+        if (relacionesDeCampania && relacionesDeCampania.length > 0) {
+          // Obtener los planes relacionados a través de la tabla de relaciones
+          const idsPlanes = relacionesDeCampania.map(rel => rel.id_plan);
+          console.log('🎯 IDs de planes relacionados:', idsPlanes);
+          
+          const { data: planesRelacionados, error: errorPlanesRelacionados } = await supabase
+            .from('plan')
+            .select(`
+              id,
+              id_cliente,
+              id_campania,
+              anio,
+              mes,
+              nombre_plan,
+              descripcion,
+              presupuesto,
+              estado,
+              estado2,
+              created_at,
+              updated_at,
+              anios (id, years),
+              meses (id, nombre)
+            `)
+            .in('id', idsPlanes);
+          
+          console.log('✅ Planes encontrados a través de relaciones:', planesRelacionados?.length || 0, planesRelacionados);
+          
+          if (planesRelacionados && planesRelacionados.length > 0) {
+            console.log('🎉 SOLUCIÓN ENCONTRADA: Los planes están relacionados a través de la tabla campana_planes');
+            // Actualizar el estado con estos planes
+            setPlanes(planesRelacionados);
+            return; // Salir temprano ya que encontramos la solución
+          }
+        }
+
+        // 4.2 Buscar planes por id_campania directo
+        const { data: planesPorCampania, error: errorPlanesPorCampania } = await supabase
+          .from('plan')
+          .select('*')
+          .eq('id_campania', selectedCampana.id_campania);
+        
+        console.log('📊 Planes por id_campania directo:', planesPorCampania?.length || 0, planesPorCampania);
+        if (errorPlanesPorCampania) console.error('❌ Error planes por campaña:', errorPlanesPorCampania);
+
+        // 4.3 Verificar si hay planes con otros IDs de campaña
+        const { data: todosLosPlanesConCampania } = await supabase
+          .from('plan')
+          .select('id, id_campania, nombre_plan');
+        
+        console.log('📊 Todos los planes con sus id_campania:', todosLosPlanesConCampania);
+
+        // 4.4 Verificar estructura exacta de la tabla plan
+        const { data: estructuraPlan } = await supabase
+          .from('plan')
+          .select('*')
+          .limit(1);
+        
+        console.log('🏗️ Estructura de tabla plan (primer registro):', estructuraPlan);
+      }
+
+      console.log('🔍 === FIN DIAGNÓSTICO ===');
+    } catch (error) {
+      console.error('❌ Error en diagnóstico:', error);
     }
   };
 
@@ -299,6 +520,8 @@ const Planificacion = () => {
       
       const mediosConCampos = data.map(medio => ({
         ...medio,
+        nombredelmedio: medio.nombre_medio, // Mapear para compatibilidad
+        NombredelMedio: medio.nombre_medio, // Mapeo adicional para compatibilidad
         duracion: Boolean(medio.duracion),
         color: Boolean(medio.color),
         codigo_megatime: Boolean(medio.codigo_megatime),
@@ -320,15 +543,39 @@ const Planificacion = () => {
 
   const fetchCalidades = async () => {
     try {
-      const { data, error } = await supabase
+      // Intentar con diferentes nombres de tabla que podrían existir
+      let data, error;
+      
+      // Primero intentar con 'calidad' (minúscula)
+      ({ data, error } = await supabase
         .from('calidad')
         .select('id, nombrecalidad')
-        .order('nombrecalidad');
+        .order('nombrecalidad'));
 
-      if (error) throw error;
-      setCalidades(data || []);
+      if (error) {
+        // Si falla, intentar con 'Calidad' (mayúscula)
+        ({ data, error } = await supabase
+          .from('Calidad')
+          .select('id, NombreCalidad')
+          .order('NombreCalidad'));
+      }
+
+      if (error) {
+        console.warn('No se encontró tabla de calidad, usando array vacío');
+        data = [];
+      }
+      
+      // Mapear para compatibilidad con el componente
+      const calidadesMapeadas = data?.map(calidad => ({
+        ...calidad,
+        nombrecalidad: calidad.nombrecalidad || calidad.NombreCalidad,
+        NombreCalidad: calidad.NombreCalidad || calidad.nombrecalidad
+      })) || [];
+      
+      setCalidades(calidadesMapeadas);
     } catch (error) {
       console.error('Error al cargar calidades:', error);
+      setCalidades([]); // Establecer array vacío en caso de error
     }
   };
 
@@ -350,8 +597,10 @@ const Planificacion = () => {
   };
 
   const handleConfirmSelection = () => {
+    console.log('🔄 handleConfirmSelection: Confirmando selección de campaña:', tempSelectedCampana);
     setSelectedCampana(tempSelectedCampana);
     setOpenCampanaModal(false);
+    // El useEffect se encargará de cargar temas y planes cuando selectedCampana cambie
   };
 
   const handleCloseCampanaModal = () => {
@@ -409,7 +658,7 @@ const Planificacion = () => {
         .from('campana_planes')
         .insert([{
           id_campania: selectedCampana.id_campania,
-          id_plan: planData.id_plan
+          id_plan: planData.id
         }]);
 
       if (relError) {
@@ -418,7 +667,7 @@ const Planificacion = () => {
       }
 
       // Update plans list
-      await fetchPlanes();
+      await fetchPlanes(selectedCampana);
 
       // Close modal and reset form
       setOpenNuevoPlanModal(false);
@@ -459,7 +708,7 @@ const Planificacion = () => {
 
       if (error) throw error;
 
-      await fetchPlanes();
+      await fetchPlanes(selectedCampana);
       
       Swal.fire({
         icon: 'success',
@@ -505,7 +754,7 @@ const Planificacion = () => {
 
       if (error) throw error;
 
-      await fetchPlanes();
+      await fetchPlanes(selectedCampana);
       setOpenEditPlanModal(false);
       
       Swal.fire({
@@ -651,7 +900,8 @@ const Planificacion = () => {
     try {
       setLoading(true);
 
-      if (!tempSelectedCampana?.id_campania) {
+      const campaniaActual = selectedCampana || tempSelectedCampana;
+      if (!campaniaActual?.id_campania) {
         throw new Error('No hay una campaña seleccionada');
       }
 
@@ -663,62 +913,62 @@ const Planificacion = () => {
         const { error: updateError } = await supabase
           .from('temas')
           .update({
-            NombreTema: nuevoTema.NombreTema,
-            Duracion: nuevoTema.Duracion || null,
-            CodigoMegatime: nuevoTema.CodigoMegatime || null,
-            id_Calidad: nuevoTema.id_Calidad ? parseInt(nuevoTema.id_Calidad) : null,
-            color: nuevoTema.color || null,
-            cooperado: nuevoTema.cooperado || '',
-            rubro: nuevoTema.rubro || null,
-            id_medio: id_medio
+            nombre_tema: nuevoTema.NombreTema,
+            id_medio: id_medio,
+            id_calidad: nuevoTema.id_Calidad ? parseInt(nuevoTema.id_Calidad) : null
           })
           .eq('id_tema', selectedTema.id_tema);
 
-        if (updateError) throw updateError;
+        if (updateError) {
+          console.error('Error actualizando tema:', updateError);
+          throw updateError;
+        }
+
+        console.log('Tema actualizado exitosamente');
 
       } else {
-        // Código existente para crear nuevo tema
-        const { data: maxIdData, error: maxIdError } = await supabase
-          .from('temas')
-          .select('id_tema')
-          .order('id_tema', { ascending: false })
-          .limit(1);
-
-        if (maxIdError) throw maxIdError;
-
-        const nextId = maxIdData.length > 0 ? maxIdData[0].id_tema + 1 : 1;
-
+        // Crear nuevo tema usando auto-incremento de la base de datos
         const temaDataToInsert = {
-          id_tema: nextId,
-          NombreTema: nuevoTema.NombreTema,
-          Duracion: nuevoTema.Duracion || null,
-          CodigoMegatime: nuevoTema.CodigoMegatime || null,
-          id_Calidad: nuevoTema.id_Calidad ? parseInt(nuevoTema.id_Calidad) : null,
-          color: nuevoTema.color || null,
-          cooperado: nuevoTema.cooperado || '',
-          rubro: nuevoTema.rubro || null,
-          estado: '1',
-          id_medio: id_medio
+          nombre_tema: nuevoTema.NombreTema,
+          id_medio: id_medio,
+          id_calidad: nuevoTema.id_Calidad ? parseInt(nuevoTema.id_Calidad) : null,
+          estado: true,
+          c_orden: false
         };
 
-        const { error: temaError } = await supabase
+        console.log('Insertando tema:', temaDataToInsert);
+
+        const { data: insertedTema, error: temaError } = await supabase
           .from('temas')
-          .insert([temaDataToInsert]);
+          .insert([temaDataToInsert])
+          .select()
+          .single();
 
-        if (temaError) throw temaError;
+        if (temaError) {
+          console.error('Error insertando tema:', temaError);
+          throw temaError;
+        }
 
+        console.log('Tema insertado:', insertedTema);
+
+        // Crear relación con la campaña
         const { error: campaniaTemasError } = await supabase
           .from('campania_temas')
           .insert([{
-            id_campania: tempSelectedCampana.id_campania,
-            id_temas: nextId
+            id_campania: campaniaActual.id_campania,
+            id_temas: insertedTema.id_tema
           }]);
 
-        if (campaniaTemasError) throw campaniaTemasError;
+        if (campaniaTemasError) {
+          console.error('Error creando relación campaña-tema:', campaniaTemasError);
+          throw campaniaTemasError;
+        }
+
+        console.log('Relación campaña-tema creada exitosamente');
       }
 
       // Actualizar la lista de temas
-      await fetchTemasForCampana(tempSelectedCampana.id_campania);
+      await fetchTemasForCampana(campaniaActual.id_campania);
 
       Swal.fire({
         icon: 'success',
@@ -802,7 +1052,7 @@ const Planificacion = () => {
                 cliente.razonsocial?.toLowerCase().includes(searchTerm.toLowerCase())
                 )
                 .map((cliente) => (
-                <TableRow key={cliente.id_cliente}>
+                <TableRow key={`cliente-${cliente.id_cliente}`}>
                   <TableCell>{cliente.nombrecliente}</TableCell>
                   <TableCell>{cliente.razonsocial}</TableCell>
                   <TableCell>{cliente.rut}</TableCell>
@@ -889,7 +1139,7 @@ const Planificacion = () => {
                         <TableBody>
                           {campanas.map((campana) => (
                             <TableRow
-                              key={campana.id_campania}
+                              key={`campania-${campana.id_campania}`}
                               onClick={() => handleCampanaClick(campana)}
                               sx={{
                                 cursor: 'pointer',
@@ -1258,10 +1508,17 @@ const Planificacion = () => {
                   <Button
                     variant="contained"
                     color="primary"
-                    startIcon={<AddIcon />}
+                    startIcon={<AddIcon sx={{ color: 'white' }} />}
                     onClick={() => setOpenNuevoPlanModal(true)}
                   >
                     Nuevo Plan
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    onClick={diagnosticarDatos}
+                    sx={{ ml: 2 }}
+                  >
+                    🔍 Diagnóstico
                   </Button>
                 </Box>
                 <TableContainer>
@@ -1455,12 +1712,12 @@ const Planificacion = () => {
           Cancelar
           </Button>
           <Button
-          variant="contained"
-          onClick={handleCreatePlan}
-          disabled={loading || !nuevoPlan.nombre_plan || !nuevoPlan.anio || !nuevoPlan.mes}
-          startIcon={<AddIcon />}
+            variant="contained"
+            onClick={handleCreatePlan}
+            disabled={loading || !nuevoPlan.nombre_plan || !nuevoPlan.anio || !nuevoPlan.mes}
+            startIcon={<AddIcon />}
           >
-          {loading ? <CircularProgress size={24} /> : 'Crear Plan'}
+            {loading ? <CircularProgress size={24} /> : 'Crear Plan'}
           </Button>
         </DialogActions>
         </Dialog>
@@ -1508,13 +1765,13 @@ const Planificacion = () => {
                 <CalendarMonthIcon />
               </InputAdornment>
               }
-              >
+            >
               {anios.map((anio) => (
               <MenuItem key={anio.id} value={anio.id}>
                 {anio.years}
               </MenuItem>
               ))}
-              </Select>
+            </Select>
             </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -1529,13 +1786,13 @@ const Planificacion = () => {
                 <EventNoteIcon />
               </InputAdornment>
               }
-              >
+            >
               {meses.map((mes) => (
               <MenuItem key={mes.Id} value={mes.Id}>
                 {mes.Nombre}
               </MenuItem>
               ))}
-              </Select>
+            </Select>
             </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -1550,14 +1807,14 @@ const Planificacion = () => {
                 <FlagIcon />
               </InputAdornment>
               }
-              >
+            >
               <MenuItem value="P">Pendiente</MenuItem>
               <MenuItem value="C">Cerrado</MenuItem>
-              </Select>
+            </Select>
             </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
+            <FormControl fullWidth>
               <InputLabel>Estado 2</InputLabel>
               <Select
                 value={editingPlan.estado2}
@@ -1569,11 +1826,11 @@ const Planificacion = () => {
                 </InputAdornment>
                 }
               >
-                <MenuItem value="">Sin estado</MenuItem>
-                <MenuItem value="aprobado">Aprobado</MenuItem>
-                <MenuItem value="cancelado">Cancelado</MenuItem>
-              </Select>
-              </FormControl>
+              <MenuItem value="">Sin estado</MenuItem>
+              <MenuItem value="aprobado">Aprobado</MenuItem>
+              <MenuItem value="cancelado">Cancelado</MenuItem>
+            </Select>
+            </FormControl>
             </Grid>
           </Grid>
           </Box>
@@ -1587,12 +1844,12 @@ const Planificacion = () => {
           Cancelar
           </Button>
           <Button
-          variant="contained"
-          onClick={handleUpdatePlan}
-          disabled={loading}
-          startIcon={<CheckCircleIcon />}
+            variant="contained"
+            onClick={handleUpdatePlan}
+            disabled={loading}
+            startIcon={<CheckCircleIcon />}
           >
-          {loading ? 'Guardando...' : 'Guardar Cambios'}
+            {loading ? 'Guardando...' : 'Guardar Cambios'}
           </Button>
         </DialogActions>
         </Dialog>

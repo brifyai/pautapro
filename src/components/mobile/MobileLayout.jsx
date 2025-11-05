@@ -52,10 +52,41 @@ const MobileLayout = ({ children }) => {
     };
 
     getUserSession();
- 
-    // Simular notificaciones (puedes conectar esto a un servicio real)
-    const mockNotifications = Math.floor(Math.random() * 5);
-    setNotifications(mockNotifications);
+
+    // Obtener notificaciones reales de actividades recientes
+    const getNotifications = async () => {
+      try {
+        // Obtener actividades recientes de las últimas 24 horas
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        const [clientesRecientes, campanasRecientes, ordenesRecientes] = await Promise.all([
+          supabase
+            .from('clientes')
+            .select('id_cliente')
+            .gte('created_at', yesterday.toISOString()),
+          supabase
+            .from('campania')
+            .select('id_campania')
+            .gte('created_at', yesterday.toISOString()),
+          supabase
+            .from('ordenes')
+            .select('id')
+            .gte('created_at', yesterday.toISOString())
+        ]);
+
+        const totalActividades = (clientesRecientes.data?.length || 0) +
+                                (campanasRecientes.data?.length || 0) +
+                                (ordenesRecientes.data?.length || 0);
+
+        setNotifications(totalActividades);
+      } catch (error) {
+        console.error('Error obteniendo notificaciones:', error);
+        setNotifications(0);
+      }
+    };
+
+    getNotifications();
   }, []);
 
   const toggleDrawer = () => {
@@ -131,7 +162,7 @@ const MobileLayout = ({ children }) => {
               <SearchIcon />
             </IconButton>
 
-            <IconButton color="inherit">
+            <IconButton color="inherit" onClick={() => navigate('/dashboard')}>
               <Badge badgeContent={notifications} color="error">
                 <NotificationsIcon />
               </Badge>

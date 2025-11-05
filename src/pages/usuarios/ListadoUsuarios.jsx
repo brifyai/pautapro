@@ -835,6 +835,19 @@ const ListadoUsuarios = () => {
   if (isMobile) {
     return (
       <>
+        {/* Header móvil simple */}
+        <Box sx={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          p: 2,
+          textAlign: 'center',
+          mb: 2
+        }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+            👥 Usuarios
+          </Typography>
+        </Box>
+
         <Box sx={{ p: 2 }}>
           {/* Barra de búsqueda móvil */}
           <Box sx={{ mb: 2 }}>
@@ -1112,25 +1125,6 @@ const ListadoUsuarios = () => {
   // VERSIÓN ESCRITORIO (original)
   return (
     <div className="agencias-container animate-fade-in">
-
-      {/* Breadcrumbs ocultos */}
-      <Box sx={{ p: 3, pb: 0, display: 'none' }}>
-        <Breadcrumbs
-          separator={<HomeIcon fontSize="small" />}
-          aria-label="breadcrumb"
-          sx={{ mb: 2 }}
-        >
-          <Link
-            component="button"
-            variant="body2"
-            onClick={() => navigate('/dashboard')}
-            sx={{ color: 'var(--gradient-primary)', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
-          >
-            Dashboard
-          </Link>
-          <Typography color="text.primary" sx={{ fontWeight: 600 }}>Usuarios</Typography>
-        </Breadcrumbs>
-      </Box>
 
       {/* Única fila: Campos de filtro y botones */}
       <Box sx={{
