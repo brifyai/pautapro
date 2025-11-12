@@ -166,12 +166,17 @@ const Login = () => {
             </div>
           </Link>
           <nav className="nav-links" style={{ display: 'flex !important' }}>
-            <Link to="/" className="nav-link">Inicio</Link>
-            <Link to="/register" className="nav-btn nav-btn-secondary">Registrarse</Link>
-            <a href="http://localhost:5173/register" className="nav-btn nav-btn-primary">
-              <span>Iniciar Sesión</span>
-            </a>
+            <a href="#about" className="nav-link">Somos</a>
+            <a href="#features" className="nav-link">Funcionalidades</a>
+            <a href="#pricing" className="nav-link">Precios</a>
+            <a href="#final-cta" className="nav-link">Contacto</a>
           </nav>
+          <div className="nav-actions" style={{ display: 'flex !important' }}>
+            <Link to="/login" className="nav-btn nav-btn-secondary">Iniciar Sesión</Link>
+            <a href="http://localhost:5173/register" className="nav-btn nav-btn-primary">
+              <span>Registrarse</span>
+            </a>
+          </div>
         </div>
       </header>
 

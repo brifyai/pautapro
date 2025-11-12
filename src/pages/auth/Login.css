@@ -29,6 +29,8 @@ html body .login-page .nav-links {
 body.login-page .nav-actions {
     display: flex !important;
     align-items: center !important;
+    gap: 0.5rem !important;
+    margin-left: auto !important;
 }
 
 .login-page .nav-link,
