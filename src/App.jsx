@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useTheme, useMediaQuery } from '@mui/material';
 import MobileWrapper from './components/mobile/MobileWrapper';
+import Home from './pages/Home/Home';
 import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import ForgotPassword from './pages/auth/ForgotPassword';
 import Dashboard from './pages/dashboard/Dashboard';
 import RevisarOrden from './pages/ordenes/RevisarOrden';
 import Clientes from './pages/clientes/Clientes';
@@ -59,7 +62,12 @@ function App() {
     // Inicializar monitoreo de rendimiento
     performanceMonitorService.startMonitoring();
 
-    const handleStorageChange = () => {
+    const handleStorageChange = (event) => {
+      // Evitar ejecución durante HMR o cambios no relacionados con autenticación
+      if (event && event.type === 'storage' && event.key === null) {
+        return; // Ignorar cambios de storage generados por HMR
+      }
+
       const user = localStorage.getItem('user');
       const isAuth = !!user;
 
@@ -82,7 +90,14 @@ function App() {
         }
       }
 
-      setIsAuthenticated(isAuth);
+      // Solo actualizar si realmente cambió el estado de autenticación
+      setIsAuthenticated(prevIsAuth => {
+        if (prevIsAuth !== isAuth) {
+          console.log('🔄 Estado de autenticación cambió:', prevIsAuth, '->', isAuth);
+          return isAuth;
+        }
+        return prevIsAuth;
+      });
     };
 
     // Verificar autenticación inicial
@@ -123,9 +138,7 @@ function App() {
                     <HorizontalNav />
                   </>
                 )}
-                <div className="app-container">
-                  {!isMobile && <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />}
-                  <main className={isMobile ? "app-content mobile-content" : "app-content"}>
+                <div className="app-container">                  <main className={isMobile ? "app-content mobile-content" : "app-content"}>
                   <MobileWrapper>
                     <Routes>
                   {/* Rutas públicas con protección básica */}
@@ -447,7 +460,7 @@ function App() {
                     }
                   />
 
-                  {/* Rutas por defecto */}
+                  {/* Rutas por defecto - REDIRIGIR AL DASHBOARD */}
                   <Route path="/" element={<Navigate to="/dashboard" replace />} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                     </Routes>
@@ -457,8 +470,12 @@ function App() {
             </>
           ) : (
             <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/home" element={<Home />} />
               <Route path="/login" element={<Login />} />
-              <Route path="*" element={<Navigate to="/login" replace />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           )}
         </div>
