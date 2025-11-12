@@ -36,6 +36,12 @@ import Privacy from './pages/legal/Privacy';
 import Terms from './pages/legal/Terms';
 import Security from './pages/legal/Security';
 import ServiceTerms from './pages/legal/ServiceTerms';
+
+// Páginas de producto
+import Features from './pages/features/Features';
+import Pricing from './pages/pricing/Pricing';
+import Integrations from './pages/integrations/Integrations';
+import Api from './pages/api/Api';
 // Reportes consolidados
 import ReporteInversion from './pages/reportes/ReporteInversion';
 import GestionOrdenes from './pages/reportes/GestionOrdenes';
@@ -480,11 +486,29 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
+              {/* Redirecciones de compatibilidad - URLs legales en inglés a español (DEBEN IR ANTES) */}
+              <Route path="/privacy" element={<Navigate to="/privacidad" replace />} />
+              <Route path="/terms" element={<Navigate to="/terminos" replace />} />
+              <Route path="/security" element={<Navigate to="/seguridad" replace />} />
+              
+              {/* Redirecciones de compatibilidad - URLs de producto en inglés a español (DEBEN IR ANTES) */}
+              <Route path="/features" element={<Navigate to="/caracteristicas" replace />} />
+              <Route path="/pricing" element={<Navigate to="/precios" replace />} />
+              <Route path="/integrations" element={<Navigate to="/integraciones" replace />} />
+              <Route path="/api" element={<Navigate to="/api-desarrollador" replace />} />
+              
               {/* Páginas legales - acceso público */}
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/security" element={<Security />} />
+              <Route path="/privacidad" element={<Privacy />} />
+              <Route path="/terminos" element={<Terms />} />
+              <Route path="/seguridad" element={<Security />} />
               <Route path="/condiciones-servicio" element={<ServiceTerms />} />
+              
+              {/* Páginas de producto - acceso público */}
+              <Route path="/caracteristicas" element={<Features />} />
+              <Route path="/precios" element={<Pricing />} />
+              <Route path="/integraciones" element={<Integrations />} />
+              <Route path="/api-desarrollador" element={<Api />} />
+              
               {/* Redirección de compatibilidad - URL antigua a nueva */}
               <Route path="/compliance" element={<Navigate to="/condiciones-servicio" replace />} />
               <Route path="*" element={<Navigate to="/" replace />} />

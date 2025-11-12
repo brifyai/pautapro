@@ -21,9 +21,14 @@ const Header = ({ setIsAuthenticated, onToggleSidebar, onLogout }) => {
   // Roles: admin puede ver Gestión de Usuarios y Configuración IA; ejecutivo no.
   const isAdmin = useMemo(() => {
     const role = (user?.rol || '').toLowerCase();
-    return role.includes('admin') || role.includes('director') || role.includes('gerente') ||
-           (typeof user?.rol_nivel === 'number' && user.rol_nivel >= 80) ||
-           (user?.puede_ver_usuarios && user?.puede_configurar);
+    
+    // Permitir acceso para usuario específico o con rol administrativo
+    const isSpecificUser = user?.email === 'camiloalegriabarra@gmail.com';
+    const hasAdminRole = role.includes('admin') || role.includes('director') || role.includes('gerente');
+    const hasHighLevel = typeof user?.rol_nivel === 'number' && user.rol_nivel >= 80;
+    const hasConfigPermissions = user?.puede_ver_usuarios && user?.puede_configurar;
+    
+    return isSpecificUser || hasAdminRole || hasHighLevel || hasConfigPermissions;
   }, [user]);
 
   useEffect(() => {
