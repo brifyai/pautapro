@@ -13,6 +13,7 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [touched, setTouched] = useState({});
+  const [scrolled, setScrolled] = useState(false);
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -25,6 +26,14 @@ const Login = () => {
       navigate(from, { replace: true });
     }
   }, [navigate, from]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const validateField = (name, value) => {
     let error = '';
@@ -146,80 +155,46 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <Link to="/" className="back-to-home">
-        <i className="fas fa-arrow-left"></i>
-        Volver al inicio
-      </Link>
-      
-      <div className="login-wrapper">
-        {/* Left Side - Branding */}
-        <div className="login-left">
-          <div className="floating-elements">
-            <div className="floating-element element-1"></div>
-            <div className="floating-element element-2"></div>
-            <div className="floating-element element-3"></div>
-            <div className="floating-element element-4"></div>
-            <div className="floating-element element-5"></div>
-          </div>
-          
-          <div className="branding-content">
-            <div className="brand-logo">
+    <div className="login-page">
+      {/* Header siguiendo el estilo de la página principal */}
+      <header className={`startup-nav ${scrolled ? 'scrolled' : ''}`}>
+        <div className="nav-container">
+          <Link to="/" className="brand-link">
+            <div className="navbar-brand">
+              <span className="brand-text">PautaPro</span>
             </div>
-            
-            <h1 className="brand-title">
-              Bienvenido a PautaPro
-            </h1>
-            
-            <p className="brand-subtitle">
-              La plataforma de gestión de pauta publicitaria más avanzada del mercado. Optimiza tus campañas y maximiza tu ROI.
-            </p>
-            
-            <div className="brand-features">
-              <div className="brand-feature">
-                <div className="feature-icon">
-                  <i className="fas fa-chart-line"></i>
-                </div>
-                <div className="feature-text">
-                  <h4>Análisis Avanzado</h4>
-                  <p>Métricas en tiempo real y reportes detallados</p>
-                </div>
-              </div>
-              
-              <div className="brand-feature">
-                <div className="feature-icon">
-                  <i className="fas fa-shield-alt"></i>
-                </div>
-                <div className="feature-text">
-                  <h4>Seguridad Total</h4>
-                  <p>Protección de datos de nivel empresarial</p>
-                </div>
-              </div>
-              
-              <div className="brand-feature">
-                <div className="feature-icon">
-                  <i className="fas fa-users"></i>
-                </div>
-                <div className="feature-text">
-                  <h4>Colaboración</h4>
-                  <p>Trabaja en equipo con herramientas integradas</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          </Link>
+          <nav className="nav-links">
+            <Link to="/" className="nav-link">Inicio</Link>
+            <Link to="/register" className="nav-btn nav-btn-secondary">Registrarse</Link>
+            <a href="http://localhost:5173/register" className="nav-btn nav-btn-primary">
+              <span>Iniciar Sesión</span>
+            </a>
+          </nav>
         </div>
+      </header>
 
-        {/* Right Side - Login Form */}
-        <div className="login-right">
+      {/* Sección principal centrada */}
+      <main className="login-hero-section section-container">
+        <div className="login-content">
+          {/* Badge */}
+          <div className="hero-badge">
+            <span role="img" aria-label="lock">🔒</span>
+            Acceso seguro a tu cuenta
+          </div>
+
+          {/* Título */}
+          <h1 className="hero-title">
+            <span className="hero-highlight">Bienvenido de vuelta</span>
+          </h1>
+
+          {/* Descripción */}
+          <p className="hero-description">
+            Ingresa tus credenciales para acceder a tu dashboard y continuar optimizando tus campañas publicitarias.
+          </p>
+
+          {/* Formulario de Login */}
           <div className="login-form-container">
-            <div className="login-header">
-              <div className="login-logo">P</div>
-              <h2 className="login-title">Inicia sesión</h2>
-              <p className="login-subtitle">
-                ¡Bienvenido de vuelta! Por favor ingresa tus credenciales.
-              </p>
-            </div>
-
             <form className="login-form" onSubmit={handleSubmit}>
               {errors.submit && (
                 <div className="error-message">
@@ -316,7 +291,7 @@ const Login = () => {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };
