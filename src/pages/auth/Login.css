@@ -518,6 +518,7 @@ body {
 /* ===== SUBMIT BUTTON ===== */
 .submit-btn {
     width: 100%;
+    min-height: 44px; /* Altura mínima consistente */
     padding: 0.875rem;
     background: var(--gradient-primary);
     color: #ffffff !important;
@@ -530,6 +531,9 @@ body {
     position: relative;
     overflow: hidden;
     box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .submit-btn:hover {
