@@ -3,6 +3,84 @@
 /* Importar estilos base de la página principal */
 @import url('../Home/Home.css');
 
+/* ===== FORCE FULL NAVIGATION MENU VISIBILITY ===== */
+
+/* Override any mobile hiding rules */
+.login-page .startup-nav .nav-links,
+body.login-page .nav-links,
+html body .login-page .nav-links {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+    position: relative !important;
+    background: transparent !important;
+    flex-direction: row !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    opacity: 1 !important;
+}
+
+.login-page .nav-actions,
+body.login-page .nav-actions {
+    display: flex !important;
+    align-items: center !important;
+}
+
+.login-page .nav-link,
+.login-page .nav-btn,
+body.login-page .nav-link,
+body.login-page .nav-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+}
+
+.login-page .mobile-menu-toggle,
+body.login-page .mobile-menu-toggle {
+    display: none !important;
+}
+
+/* Force menu to be visible at all screen sizes */
+@media (max-width: 768px) {
+    .login-page .startup-nav .nav-links,
+    body.login-page .nav-links,
+    html body .login-page .nav-links {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        flex-wrap: nowrap !important;
+        position: relative !important;
+        background: transparent !important;
+        flex-direction: row !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        top: auto !important;
+        left: auto !important;
+        right: auto !important;
+        opacity: 1 !important;
+        width: auto !important;
+    }
+    
+    .login-page .nav-link,
+    .login-page .nav-btn {
+        font-size: 0.85rem !important;
+        padding: 0.4rem 0.6rem !important;
+        white-space: nowrap !important;
+    }
+    
+    .login-page .nav-btn-secondary {
+        min-width: 80px !important;
+    }
+    
+    .login-page .nav-btn-primary {
+        min-width: 80px !important;
+    }
+}
+
 /* ===== LOGIN PAGE SPECIFIC STYLES ===== */
 .login-page {
     background: #000000;
@@ -149,6 +227,12 @@
 .checkbox-input:checked {
     background: linear-gradient(135deg, #00D4FF 0%, #7C3AED 100%);
     border-color: #00D4FF;
+}
+
+.checkbox-label {
+    color: #ffffff !important;
+    font-size: 0.9rem;
+    cursor: pointer;
 }
 
 .forgot-link {

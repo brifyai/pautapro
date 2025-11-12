@@ -14,6 +14,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [touched, setTouched] = useState({});
   const [scrolled, setScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -156,7 +157,7 @@ const Login = () => {
 
   return (
     <div className="login-page">
-      {/* Header siguiendo el estilo de la página principal */}
+      {/* Header siguiendo el estilo de la página principal - sin botón hamburguesa */}
       <header className={`startup-nav ${scrolled ? 'scrolled' : ''}`}>
         <div className="nav-container">
           <Link to="/" className="brand-link">
@@ -164,7 +165,7 @@ const Login = () => {
               <span className="brand-text">PautaPro</span>
             </div>
           </Link>
-          <nav className="nav-links">
+          <nav className="nav-links" style={{ display: 'flex !important' }}>
             <Link to="/" className="nav-link">Inicio</Link>
             <Link to="/register" className="nav-btn nav-btn-secondary">Registrarse</Link>
             <a href="http://localhost:5173/register" className="nav-btn nav-btn-primary">
