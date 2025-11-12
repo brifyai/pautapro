@@ -93,7 +93,7 @@ input, textarea, [contenteditable] {
   transform: scale(1.1);
 }
 
-/* Drawer móvil */
+/* Drawer móvil con efecto fade */
 .mobile-drawer {
   width: var(--mobile-drawer-width) !important;
 }
@@ -102,6 +102,30 @@ input, textarea, [contenteditable] {
   width: var(--mobile-drawer-width) !important;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
   color: white !important;
+  /* Efecto fade mejorado */
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  will-change: opacity, transform;
+  /* Mejor rendimiento */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Backdrop con efecto fade */
+.mobile-drawer .MuiBackdrop-root {
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  will-change: opacity;
+}
+
+/* Estados del drawer para efecto fade */
+.mobile-drawer.MuiDrawer-modal .MuiDrawer-paper {
+  opacity: 0;
+  transform: translateX(-100%);
+}
+
+.mobile-drawer.MuiDrawer-modal.MuiDrawer-open .MuiDrawer-paper {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 /* Cards móviles */

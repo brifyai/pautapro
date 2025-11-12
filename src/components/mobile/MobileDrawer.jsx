@@ -41,6 +41,14 @@ const MobileDrawer = ({ open, onClose, user }) => {
     reportes: false,
     configuracion: false
   });
+  const [animationKey, setAnimationKey] = useState(0);
+
+  // Reiniciar animación cuando se abre el drawer
+  React.useEffect(() => {
+    if (open) {
+      setAnimationKey(prev => prev + 1);
+    }
+  }, [open]);
 
   const handleLogout = async () => {
     try {
@@ -172,15 +180,26 @@ const MobileDrawer = ({ open, onClose, user }) => {
       anchor="left"
       open={open}
       onClose={onClose}
+      transitionDuration={300}
       sx={{
         '& .MuiDrawer-paper': {
           width: '280px',
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           color: 'white'
+        },
+        '& .MuiBackdrop-root': {
+          backgroundColor: 'rgba(0, 0, 0, 0.5)'
         }
       }}
       PaperProps={{
-        className: 'mobile-drawer-paper'
+        className: 'mobile-drawer-paper',
+        sx: {
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          height: '100vh',
+          zIndex: 1200
+        }
       }}
     >
       {/* Header del Drawer */}
@@ -213,9 +232,9 @@ const MobileDrawer = ({ open, onClose, user }) => {
       </Box>
 
       {/* Lista de navegación */}
-      <List sx={{ flex: 1, pt: 1 }}>
-        {menuItems.map((item) => (
-          <React.Fragment key={item.text}>
+      <List sx={{ flex: 1, pt: 1 }} key={animationKey}>
+        {menuItems.map((item, index) => (
+          <React.Fragment key={`${item.text}-${animationKey}`}>
             <ListItem disablePadding>
               <ListItemButton
                 onClick={() => {
@@ -232,7 +251,10 @@ const MobileDrawer = ({ open, onClose, user }) => {
                   },
                   backgroundColor: isActive(item.path) || (item.expandable && isSubmenuActive(item.submenu))
                     ? 'rgba(255,255,255,0.2)'
-                    : 'transparent'
+                    : 'transparent',
+                  // Efecto fade escalonado para items
+                  opacity: 0,
+                  animation: `mobileDrawerFadeIn 0.4s ease-in-out ${index * 0.05}s forwards`
                 }}
               >
                 <ListItemIcon sx={{ color: 'white', minWidth: '40px' }}>

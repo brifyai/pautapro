@@ -8,6 +8,14 @@ const Home = () => {
     const [activeDemoTab, setActiveDemoTab] = useState('dashboard');
     const [activeSection, setActiveSection] = useState('dashboard');
 
+    // No bloquear el scroll del body para que el menú se comporte como overlay normal
+    useEffect(() => {
+        // El menú móvil debe aparecer como overlay sin afectar el scroll de la página
+        return () => {
+            // Cleanup
+        };
+    }, [isMenuOpen]);
+
     useEffect(() => {
         const handleScroll = () => {
             setScrolled(window.scrollY > 20);
@@ -263,6 +271,20 @@ const Home = () => {
         },
     ];
 
+    // Cerrar menú al hacer clic fuera
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (isMenuOpen && !event.target.closest('.nav-links') && !event.target.closest('.mobile-menu-toggle')) {
+                setIsMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isMenuOpen]);
+
     return (
         <div className="pautapro-home">
             <header className={`startup-nav ${scrolled ? 'scrolled' : ''}`}>
@@ -280,30 +302,77 @@ const Home = () => {
                     <nav className={`nav-links ${isMenuOpen ? 'mobile-open' : ''}`}>
                         <a href="#about" className="nav-link" onClick={(e) => {
                             e.preventDefault();
-                            document.getElementById('about').scrollIntoView({ behavior: 'smooth' });
+                            e.stopPropagation();
+                            const element = document.getElementById('about');
                             setIsMenuOpen(false);
+                            if (element) {
+                                setTimeout(() => {
+                                    element.scrollIntoView({ behavior: 'smooth' });
+                                }, 300);
+                            }
                         }}>Somos</a>
                         <a href="#features" className="nav-link" onClick={(e) => {
                             e.preventDefault();
-                            document.getElementById('features').scrollIntoView({ behavior: 'smooth' });
+                            e.stopPropagation();
+                            const element = document.getElementById('features');
                             setIsMenuOpen(false);
+                            if (element) {
+                                setTimeout(() => {
+                                    element.scrollIntoView({ behavior: 'smooth' });
+                                }, 300);
+                            }
                         }}>Funcionalidades</a>
                         <a href="#pricing" className="nav-link" onClick={(e) => {
                             e.preventDefault();
-                            document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+                            e.stopPropagation();
+                            const element = document.getElementById('pricing');
                             setIsMenuOpen(false);
+                            if (element) {
+                                setTimeout(() => {
+                                    element.scrollIntoView({ behavior: 'smooth' });
+                                }, 300);
+                            }
                         }}>Precios</a>
                         <a href="#final-cta" className="nav-link" onClick={(e) => {
                             e.preventDefault();
-                            document.getElementById('final-cta')?.scrollIntoView({ behavior: 'smooth' });
+                            e.stopPropagation();
+                            const element = document.getElementById('final-cta');
                             setIsMenuOpen(false);
+                            if (element) {
+                                setTimeout(() => {
+                                    element.scrollIntoView({ behavior: 'smooth' });
+                                }, 300);
+                            }
                         }}>Contacto</a>
+                        {isMenuOpen && (
+                            <>
+                                <Link to="/login" className="nav-btn-mobile nav-btn-mobile-secondary" onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setIsMenuOpen(false);
+                                    setTimeout(() => {
+                                        window.location.href = '/login';
+                                    }, 100);
+                                }}>
+                                    Iniciar Sesión
+                                </Link>
+                                <a href="http://localhost:5173/register" className="nav-btn-mobile nav-btn-mobile-primary" onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setIsMenuOpen(false);
+                                    setTimeout(() => {
+                                        window.location.href = 'http://localhost:5173/register';
+                                    }, 100);
+                                }}>
+                                    Registrarse
+                                </a>
+                            </>
+                        )}
                     </nav>
                     <div className="nav-actions">
                         <Link to="/login" className="nav-btn nav-btn-secondary">Iniciar Sesión</Link>
                         <a href="http://localhost:5173/register" className="nav-btn nav-btn-primary">
                             <span style={{color: '#ffffff !important'}}>Registrarse</span>
-                            <span className="btn-arrow" style={{color: '#ffffff !important'}}>→</span>
                         </a>
                     </div>
                 </div>

@@ -292,7 +292,7 @@
     /* Sizing & Radius */
     --radius: 12px;
     --container-width: 1200px;
-    --header-height: 50px;
+    --header-height: 67px;
     
     /* Transitions */
     --transition: all 0.3s ease-in-out;
@@ -330,6 +330,9 @@ body {
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
     box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+    display: flex;
+    align-items: center;
+    overflow: visible;
 }
 
 .startup-nav.scrolled {
@@ -343,16 +346,18 @@ body {
     margin: 0 auto;
     padding: 0 2rem;
     height: 100%;
-    display: flex;
-    align-items: center;
+    display: flex !important;
+    align-items: center !important;
     justify-content: space-between;
     flex-wrap: nowrap;
+    position: relative;
 }
 
 .brand-link {
     display: inline-flex;
     align-items: center;
-    margin-left: -160px;
+    margin-left: 0px;
+    margin-right: 1rem;
 }
 
 .navbar-brand {
@@ -402,44 +407,50 @@ header.startup-nav .nav-container .brand-link .brand-text {
 }
 
 .nav-links {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem;
     flex-wrap: nowrap;
     white-space: nowrap;
-    margin-top: 8px;
-    margin-left: 30px;
+    margin-left: 10px;
 }
 
 .nav-link {
-    display: inline-flex;
-    align-items: center;
+    display: inline-flex !important;
+    align-items: center !important;
     color: #000000 !important; /* Forzar negro */
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 1rem;
+    text-decoration: none !important;
+    font-weight: 400 !important;
+    font-size: 1.1rem !important;
     transition: color 0.3s ease;
     white-space: nowrap;
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 6px !important;
+    min-height: 40px !important;
+    background: transparent !important;
 }
 /* Asegurar estados en negro para los links del header público */
 .nav-link:visited,
 .nav-link:active {
     color: #000000 !important;
+    background: rgba(0, 0, 0, 0.05) !important;
 }
 
 .nav-link:hover {
     color: #000000 !important; /* Mantener negro al hacer hover */
+    background: rgba(0, 0, 0, 0.1) !important;
+    transform: translateY(-1px) !important;
 }
 
 .nav-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    transform: translateX(130px);
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem;
+    transform: translateX(20px);
 }
 
 .nav-btn {
-    padding: 0.5rem 1.2rem;
+    padding: 0.5rem 1rem !important;
     border-radius: var(--radius);
     font-weight: 500;
     font-size: 0.9rem;
@@ -450,12 +461,14 @@ header.startup-nav .nav-container .brand-link .brand-text {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+    min-height: 36px;
 }
 
 .nav-btn-secondary {
     background: transparent;
     color: #000000 !important; /* Forzar negro para "Iniciar Sesión" */
     border-color: rgba(17, 24, 39, 0.18);
+    min-width: 120px !important;
 }
 
 .nav-btn-secondary:hover {
@@ -467,11 +480,15 @@ header.startup-nav .nav-container .brand-link .brand-text {
 .nav-btn-primary {
     background: linear-gradient(135deg, #4c1d95 0%, #3b0764 100%);
     color: #ffffff !important;
+    transform: translateX(-3px);
+    padding: 0.5rem 1.2rem !important;
+    min-width: 110px !important;
 }
 
 .nav-btn-primary:hover {
     opacity: 0.9;
     box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+    transform: translateX(-3px) scale(1.05);
 }
 
 /* Forzar color blanco en botones primarios - reglas específicas */
@@ -544,6 +561,12 @@ header.startup-nav .nav-container .brand-link .brand-text {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     z-index: 1000;
     gap: 1.5rem;
+    
+    /* Mejorado: Efecto fade más suave para el menú desplegable */
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-links.mobile-open .nav-link {
@@ -551,7 +574,19 @@ header.startup-nav .nav-container .brand-link .brand-text {
     font-size: 1.1rem;
     padding: 0.75rem 0;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    
+    /* Efecto fade para cada elemento del menú */
+    opacity: 0;
+    transform: translateY(20px);
+    animation: menuItemFadeIn 0.3s ease-out forwards;
 }
+
+.nav-links.mobile-open .nav-link:nth-child(1) { animation-delay: 0.1s; }
+.nav-links.mobile-open .nav-link:nth-child(2) { animation-delay: 0.15s; }
+.nav-links.mobile-open .nav-link:nth-child(3) { animation-delay: 0.2s; }
+.nav-links.mobile-open .nav-link:nth-child(4) { animation-delay: 0.25s; }
+.nav-links.mobile-open .nav-link:nth-child(5) { animation-delay: 0.3s; }
+.nav-links.mobile-open .nav-link:nth-child(6) { animation-delay: 0.35s; }
 
 .nav-links.mobile-open .nav-link:last-child {
     border-bottom: none;
@@ -568,6 +603,14 @@ header.startup-nav .nav-container .brand-link .brand-text {
 
 .mobile-menu-toggle.active .hamburger-line:nth-child(3) {
     transform: rotate(45deg) translate(-5px, -6px);
+}
+
+/* Animación fade para elementos individuales del menú */
+@keyframes menuItemFadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ===== HERO SECTION ===== */
@@ -2325,10 +2368,233 @@ header.startup-nav .nav-container .brand-link .brand-text {
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
-    .nav-actions { display: none; }
-    .nav-links { display: none; }
-    .mobile-menu-toggle { display: flex; flex-direction: column; background: none; border: none; gap: 5px; margin-left: 40px; }
-    .hamburger-line { display: block; width: 24px; height: 2px; background: #000000; }
+    .startup-nav {
+        overflow: visible !important;
+    }
+    
+    .nav-actions { display: none !important; }
+    .nav-links {
+        display: none !important;
+        position: fixed;
+        top: 67px;
+        left: 0;
+        right: 0;
+        width: 85vw;
+        max-width: 320px;
+        background: #ffffff;
+        flex-direction: column;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        border-left: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 0 0 0 16px;
+        max-height: none;
+        overflow-y: visible;
+        transform: translateX(0);
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    }
+    
+    /* Estado inicial del menú (cerrado) */
+    .nav-links:not(.mobile-open) {
+        opacity: 0;
+        transform: translateX(-100%) translateY(-10px);
+        pointer-events: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .nav-links.mobile-open {
+        display: flex !important;
+        opacity: 1;
+        transform: translateX(0) translateY(0);
+        pointer-events: auto;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .mobile-menu-toggle {
+        display: flex !important;
+        flex-direction: column;
+        background: none;
+        border: none;
+        gap: 4px;
+        margin-left: auto;
+        margin-right: 1rem;
+        z-index: 1000;
+        padding: 8px;
+        cursor: pointer;
+    }
+    
+    .hamburger-line {
+        display: block !important;
+        width: 22px;
+        height: 2px;
+        background: #000000 !important;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-container {
+        padding: 0 1rem;
+        justify-content: space-between;
+    }
+    
+    .brand-link {
+        margin-left: 0;
+        margin-right: auto;
+    }
+    
+    .brand-text {
+        font-size: 1.4rem !important;
+        font-weight: 700 !important;
+    }
+    
+    .nav-links .nav-link {
+        color: #1f2937;
+        font-size: 1rem;
+        padding: 0.875rem 0;
+        border-bottom: 1px solid #f3f4f6;
+        text-align: left;
+        text-decoration: none;
+        font-weight: 500;
+        display: block;
+        transition: background-color 0.2s ease;
+    }
+    
+    .nav-links .nav-link:last-child {
+        border-bottom: none;
+    }
+    
+    .nav-links .nav-link:hover {
+        background-color: #f9fafb;
+    }
+    
+    .nav-links .nav-btn-mobile {
+        display: block;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        margin: 0.5rem 0;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-decoration: none;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .nav-links .nav-btn-mobile-secondary {
+        background: transparent;
+        color: #1f2937;
+        border: 2px solid #1f2937;
+    }
+    
+    .nav-links .nav-btn-mobile-secondary:hover {
+        background: #1f2937;
+        color: #ffffff !important;
+    }
+    
+    .nav-links .nav-btn-mobile-primary {
+        background: linear-gradient(135deg, #4c1d95 0%, #3b0764 100%);
+        color: #ffffff !important; /* Texto blanco para "Registrarse" */
+        border: 2px solid transparent;
+    }
+    
+    .nav-links .nav-btn-mobile-primary:hover {
+        background: linear-gradient(135deg, #5a23a6 0%, #4a1a73 100%);
+        color: #ffffff !important;
+    }
+    
+    /* Mostrar botones de acción en móvil cuando el menú está abierto */
+    .nav-links.mobile-open .nav-btn-mobile {
+        display: block !important;
+    }
+    
+    /* Estilos adicionales para botones móviles */
+    .nav-links .nav-btn-mobile {
+        margin: 0.5rem 0;
+        padding: 0.875rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        
+        /* Efecto fade mejorado para los botones del menú móvil */
+        opacity: 0;
+        transform: translateY(20px);
+        animation: mobileButtonFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .nav-links .nav-btn-mobile:nth-child(1) {
+        animation-delay: 0.15s;
+    }
+
+    .nav-links .nav-btn-mobile:nth-child(2) {
+        animation-delay: 0.25s;
+    }
+
+    /* Animación keyframe mejorada para el efecto fade de los botones */
+    @keyframes mobileButtonFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+        }
+        60% {
+            transform: translateY(-5px) scale(1.02);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
+    /* Efecto adicional para transiciones de hover suaves */
+    .nav-links .nav-btn-mobile:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Animación para cerrar el menú suavemente */
+    @keyframes menuFadeOut {
+        from {
+            opacity: 1;
+            transform: translateX(0) translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(-100%) translateY(-10px);
+        }
+    }
+    
+    /* Aplicar animación de salida cuando se cierra el menú */
+    .nav-links:not(.mobile-open) {
+        animation: menuFadeOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    
+    .nav-links .nav-btn-mobile-secondary {
+        background: transparent;
+        color: #1f2937;
+        border: 2px solid #1f2937;
+    }
+    
+    .nav-links .nav-btn-mobile-secondary:hover {
+        background: #1f2937;
+        color: #ffffff !important;
+    }
+    
+    .nav-links .nav-btn-mobile-primary {
+        background: linear-gradient(135deg, #4c1d95 0%, #3b0764 100%);
+        color: #ffffff !important; /* Texto blanco para "Registrarse" */
+        border: 2px solid transparent;
+    }
+    
+    .nav-links .nav-btn-mobile-primary:hover {
+        background: linear-gradient(135deg, #5a23a6 0%, #4a1a73 100%);
+        color: #ffffff !important;
+        transform: translateY(-1px);
+    }
+    
     .hero-title { font-size: 2.5rem; }
     .hero-description { font-size: 1rem; }
     .features-grid { grid-template-columns: 1fr; gap: 1.5rem; }
@@ -2363,15 +2629,6 @@ header.startup-nav .nav-container .brand-link .brand-text {
     .pautapro-iframe {
         height: 400px;
         border-radius: 12px;
-    }
-
-    /* Navigation mobile improvements */
-    .startup-nav .brand-link {
-        transform: none;
-        margin-left: 0;
-    }
-    .brand-text {
-        font-size: 1.5rem !important;
     }
 
     /* Features mobile improvements */
@@ -2618,6 +2875,25 @@ header.startup-nav .nav-container .brand-link .brand-text {
     }
 }
 
+/* Ajustes adicionales para menú móvil en pantallas muy pequeñas */
+@media (max-width: 480px) {
+    .nav-links {
+        width: 90vw;
+        max-width: 280px;
+        padding: 1.2rem;
+    }
+
+    .nav-links .nav-link {
+        font-size: 0.95rem;
+        padding: 0.75rem 0;
+    }
+
+    .nav-links .nav-btn-mobile {
+        padding: 0.75rem 1.2rem;
+        font-size: 0.9rem;
+    }
+}
+
 @media (max-width: 1024px) {
     .features-grid { grid-template-columns: repeat(2, 1fr); }
     .feature-card { padding: 2rem; }
@@ -2639,7 +2915,7 @@ header.startup-nav .nav-container .brand-link .brand-text {
 }
 /* Offset logo 30px to the left */
 .startup-nav .brand-link {
-  transform: translateX(-50px);
+  transform: translateX(0px);
 }
 
 /* Reset on small screens to avoid clipping */
@@ -3393,7 +3669,7 @@ header.startup-nav .nav-container .brand-link .brand-text {
         width: 200px;
         height: 200px;
         top: 45%;
-        order: 3;
+        order: 2;
         position: static;
         transform: none;
     }
@@ -3421,7 +3697,7 @@ header.startup-nav .nav-container .brand-link .brand-text {
         transform: translateX(-50%);
         order: 1;
         position: static;
-        transform: none;
+        transform: none !important;
     }
 
     .clients-module {

@@ -518,8 +518,8 @@ body {
 /* ===== SUBMIT BUTTON ===== */
 .submit-btn {
     width: 100%;
-    min-height: 44px; /* Altura mínima consistente */
-    padding: 0.875rem;
+    height: 52px; /* Altura fija para evitar estiramiento */
+    padding: 0;
     background: var(--gradient-primary);
     color: #ffffff !important;
     border: none;
@@ -534,6 +534,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
 }
 
 .submit-btn:hover {
