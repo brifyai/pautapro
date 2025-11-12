@@ -16,6 +16,14 @@ const ForgotPassword = () => {
   
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const validateField = (name, value) => {
     let error = '';
     
@@ -104,80 +112,120 @@ const ForgotPassword = () => {
 
   if (isSubmitted) {
     return (
-      <div className="login-container">
-        <Link to="/login" className="back-to-home">
-          <i className="fas fa-arrow-left"></i>
-          Volver al login
-        </Link>
-        
-        <div className="login-wrapper">
-          {/* Left Side - Branding */}
-          <div className="login-left">
-            <div className="floating-elements">
-              <div className="floating-element element-1"></div>
-              <div className="floating-element element-2"></div>
-              <div className="floating-element element-3"></div>
-              <div className="floating-element element-4"></div>
-              <div className="floating-element element-5"></div>
-            </div>
-            
-            <div className="branding-content">
-              <div className="brand-logo">
+      <div className="login-page">
+        {/* Header siguiendo el estilo de la página principal */}
+        <header className={`startup-nav ${scrolled ? 'scrolled' : ''}`}>
+          <div className="nav-container">
+            <button className="mobile-menu-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+              <div className="hamburger-line"></div>
+              <div className="hamburger-line"></div>
+              <div className="hamburger-line"></div>
+            </button>
+            <Link to="/" className="brand-link">
+              <div className="navbar-brand">
+                <span className="brand-text">PautaPro</span>
               </div>
-              
-              <h1 className="brand-title">
-                Revisa tu correo
-              </h1>
-              
-              <p className="brand-subtitle">
-                Hemos enviado instrucciones para restablecer tu contraseña al correo electrónico proporcionado.
-              </p>
-              
-              <div className="brand-features">
-                <div className="brand-feature">
-                  <div className="feature-icon">
-                    <i className="fas fa-envelope"></i>
-                  </div>
-                  <div className="feature-text">
-                    <h4>Correo Enviado</h4>
-                    <p>Revisa tu bandeja de entrada</p>
-                  </div>
-                </div>
-                
-                <div className="brand-feature">
-                  <div className="feature-icon">
-                    <i className="fas fa-clock"></i>
-                  </div>
-                  <div className="feature-text">
-                    <h4>Tiempo de Espera</h4>
-                    <p>Puede tardar unos minutos</p>
-                  </div>
-                </div>
-                
-                <div className="brand-feature">
-                  <div className="feature-icon">
-                    <i className="fas fa-spam"></i>
-                  </div>
-                  <div className="feature-text">
-                    <h4>Revisa Spam</h4>
-                    <p>También revisa tu carpeta de spam</p>
-                  </div>
-                </div>
-              </div>
+            </Link>
+            <nav className={`nav-links ${isMenuOpen ? 'mobile-open' : ''}`} style={{ display: 'flex !important' }}>
+              <a href="#about" className="nav-link" onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const element = document.getElementById('about');
+                setIsMenuOpen(false);
+                if (element) {
+                  setTimeout(() => {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                  }, 300);
+                }
+              }}>Somos</a>
+              <a href="#features" className="nav-link" onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const element = document.getElementById('features');
+                setIsMenuOpen(false);
+                if (element) {
+                  setTimeout(() => {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                  }, 300);
+                }
+              }}>Funcionalidades</a>
+              <a href="#pricing" className="nav-link" onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const element = document.getElementById('pricing');
+                setIsMenuOpen(false);
+                if (element) {
+                  setTimeout(() => {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                  }, 300);
+                }
+              }}>Precios</a>
+              <a href="#final-cta" className="nav-link" onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const element = document.getElementById('final-cta');
+                setIsMenuOpen(false);
+                if (element) {
+                  setTimeout(() => {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                  }, 300);
+                }
+              }}>Contacto</a>
+              {isMenuOpen && (
+                <>
+                  <Link to="/login" className="nav-btn-mobile nav-btn-mobile-secondary" onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsMenuOpen(false);
+                    setTimeout(() => {
+                      window.location.href = '/login';
+                    }, 100);
+                  }}>
+                    Iniciar Sesión
+                  </Link>
+                  <a href="http://localhost:5173/register" className="nav-btn-mobile nav-btn-mobile-primary" onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsMenuOpen(false);
+                    setTimeout(() => {
+                      window.location.href = 'http://localhost:5173/register';
+                    }, 100);
+                  }}>
+                    Registrarse
+                  </a>
+                </>
+              )}
+            </nav>
+            <div className="nav-actions" style={{ display: 'flex !important' }}>
+              <Link to="/login" className="nav-btn nav-btn-secondary">Iniciar Sesión</Link>
+              <a href="http://localhost:5173/register" className="nav-btn nav-btn-primary">
+                <span>Registrarse</span>
+              </a>
             </div>
           </div>
+        </header>
 
-          {/* Right Side - Success Message */}
-          <div className="login-right">
+        {/* Sección principal centrada */}
+        <main className="login-hero-section section-container">
+          <div className="login-content">
+            {/* Badge */}
+            <div className="hero-badge">
+              <span role="img" aria-label="check">✅</span>
+              Correo enviado correctamente
+            </div>
+
+            {/* Título */}
+            <h1 className="hero-title">
+              <span className="hero-highlight">Revisa tu correo</span>
+            </h1>
+
+            {/* Descripción */}
+            <p className="hero-description">
+              Hemos enviado instrucciones para restablecer tu contraseña al correo electrónico proporcionado.
+            </p>
+
+            {/* Formulario de éxito */}
             <div className="login-form-container">
-              <div className="login-header">
-                <div className="login-logo">✓</div>
-                <h2 className="login-title">Correo Enviado</h2>
-                <p className="login-subtitle">
-                  Te hemos enviado un enlace para restablecer tu contraseña.
-                </p>
-              </div>
-
               <div className="success-message" style={{ 
                 background: 'rgba(16, 185, 129, 0.1)', 
                 border: '1px solid rgba(16, 185, 129, 0.3)',
@@ -187,7 +235,7 @@ const ForgotPassword = () => {
                 textAlign: 'center'
               }}>
                 <i className="fas fa-check-circle" style={{ 
-                  color: 'var(--success-color)', 
+                  color: '#10b981', 
                   fontSize: 'var(--font-size-xl)',
                   marginBottom: 'var(--spacing-sm)'
                 }}></i>
@@ -210,7 +258,7 @@ const ForgotPassword = () => {
                     style={{ 
                       background: 'none', 
                       border: 'none', 
-                      color: 'var(--primary-color)', 
+                      color: '#00D4FF', 
                       cursor: 'pointer',
                       padding: 0
                     }}
@@ -230,7 +278,7 @@ const ForgotPassword = () => {
               </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
     );
   }
@@ -329,74 +377,27 @@ const ForgotPassword = () => {
         </div>
       </header>
 
-      <div className="login-wrapper">
-        {/* Left Side - Branding */}
-        <div className="login-left">
-          <div className="floating-elements">
-            <div className="floating-element element-1"></div>
-            <div className="floating-element element-2"></div>
-            <div className="floating-element element-3"></div>
-            <div className="floating-element element-4"></div>
-            <div className="floating-element element-5"></div>
+      {/* Sección principal centrada */}
+      <main className="login-hero-section section-container">
+        <div className="login-content">
+          {/* Badge */}
+          <div className="hero-badge">
+            <span role="img" aria-label="lock">🔒</span>
+            Recuperación de contraseña segura
           </div>
-          
-          <div className="branding-content">
-            <div className="brand-logo">
-            </div>
-            
-            <h1 className="brand-title">
-              ¿Olvidaste tu contraseña?
-            </h1>
-            
-            <p className="brand-subtitle">
-              No te preocupes, te ayudaremos a recuperarla. Solo ingresa tu correo electrónico y te enviaremos instrucciones para restablecerla.
-            </p>
-            
-            <div className="brand-features">
-              <div className="brand-feature">
-                <div className="feature-icon">
-                  <i className="fas fa-shield-alt"></i>
-                </div>
-                <div className="feature-text">
-                  <h4>Seguro</h4>
-                  <p>Proceso de recuperación seguro y encriptado</p>
-                </div>
-              </div>
-              
-              <div className="brand-feature">
-                <div className="feature-icon">
-                  <i className="fas fa-bolt"></i>
-                </div>
-                <div className="feature-text">
-                  <h4>Rápido</h4>
-                  <p>Recupera el acceso en minutos</p>
-                </div>
-              </div>
-              
-              <div className="brand-feature">
-                <div className="feature-icon">
-                  <i className="fas fa-life-ring"></i>
-                </div>
-                <div className="feature-text">
-                  <h4>Soporte</h4>
-                  <p>Ayuda disponible si lo necesitas</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Right Side - Forgot Password Form */}
-        <div className="login-right">
+          {/* Título */}
+          <h1 className="hero-title">
+            <span className="hero-highlight">¿Olvidaste tu contraseña?</span>
+          </h1>
+
+          {/* Descripción */}
+          <p className="hero-description">
+            No te preocupes, te ayudaremos a recuperarla. Solo ingresa tu correo electrónico y te enviaremos instrucciones para restablecerla.
+          </p>
+
+          {/* Formulario de recuperación */}
           <div className="login-form-container">
-            <div className="login-header">
-              <div className="login-logo">?</div>
-              <h2 className="login-title">Restablecer Contraseña</h2>
-              <p className="login-subtitle">
-                Ingresa tu correo electrónico para recibir las instrucciones.
-              </p>
-            </div>
-
             <form className="login-form" onSubmit={handleSubmit}>
               {errors.submit && (
                 <div className="error-message">
@@ -447,7 +448,7 @@ const ForgotPassword = () => {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

@@ -268,74 +268,27 @@ const Register = () => {
         </div>
       </header>
 
-      <div className="login-wrapper">
-        {/* Left Side - Branding */}
-        <div className="login-left">
-          <div className="floating-elements">
-            <div className="floating-element element-1"></div>
-            <div className="floating-element element-2"></div>
-            <div className="floating-element element-3"></div>
-            <div className="floating-element element-4"></div>
-            <div className="floating-element element-5"></div>
+      {/* Sección principal centrada */}
+      <main className="login-hero-section section-container">
+        <div className="login-content">
+          {/* Badge */}
+          <div className="hero-badge">
+            <span role="img" aria-label="user-plus">✨</span>
+            Únete a la revolución publicitaria
           </div>
-          
-          <div className="branding-content">
-            <div className="brand-logo">
-            </div>
-            
-            <h1 className="brand-title">
-              Únete a PautaPro
-            </h1>
-            
-            <p className="brand-subtitle">
-              Comienza a optimizar tus campañas publicitarias con la plataforma más avanzada del mercado. Regístrate en minutos.
-            </p>
-            
-            <div className="brand-features">
-              <div className="brand-feature">
-                <div className="feature-icon">
-                  <i className="fas fa-rocket"></i>
-                </div>
-                <div className="feature-text">
-                  <h4>Inicio Rápido</h4>
-                  <p>Configura tu cuenta en menos de 5 minutos</p>
-                </div>
-              </div>
-              
-              <div className="brand-feature">
-                <div className="feature-icon">
-                  <i className="fas fa-gift"></i>
-                </div>
-                <div className="feature-text">
-                  <h4>Prueba Gratuita</h4>
-                  <p>14 días gratis, sin compromiso</p>
-                </div>
-              </div>
-              
-              <div className="brand-feature">
-                <div className="feature-icon">
-                  <i className="fas fa-headset"></i>
-                </div>
-                <div className="feature-text">
-                  <h4>Soporte 24/7</h4>
-                  <p>Ayuda whenever la necesites</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Right Side - Register Form */}
-        <div className="login-right">
+          {/* Título */}
+          <h1 className="hero-title">
+            <span className="hero-highlight">Crea tu cuenta</span>
+          </h1>
+
+          {/* Descripción */}
+          <p className="hero-description">
+            Comienza a optimizar tus campañas y hacer crecer tu agencia con PautaPro.
+          </p>
+
+          {/* Formulario de Registro */}
           <div className="login-form-container">
-            <div className="login-header">
-              <div className="login-logo">R</div>
-              <h2 className="login-title">Crear Cuenta</h2>
-              <p className="login-subtitle">
-                Completa el formulario para comenzar tu prueba gratuita.
-              </p>
-            </div>
-
             <form className="login-form" onSubmit={handleSubmit}>
               {errors.submit && (
                 <div className="error-message">
@@ -486,7 +439,7 @@ const Register = () => {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };
