@@ -234,7 +234,7 @@ const ForgotPassword = () => {
   }
 
   return (
-    <div className="login-container">
+    <div className="login-page">
       <Link to="/login" className="back-to-home">
         <i className="fas fa-arrow-left"></i>
         Volver al login
