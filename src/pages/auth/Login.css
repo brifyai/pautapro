@@ -41,9 +41,10 @@ body.login-page .nav-btn {
     align-items: center !important;
 }
 
+/* Habilitar menú móvil en todas las páginas */
 .login-page .mobile-menu-toggle,
 body.login-page .mobile-menu-toggle {
-    display: none !important;
+    display: block !important;
 }
 
 /* Force menu to be visible at all screen sizes */
