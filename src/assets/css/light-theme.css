@@ -296,7 +296,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 p, span, label {
-  color: #475569 !important;
+  color: #000000 !important;
   font-weight: 400 !important;
 }
 
@@ -807,30 +807,30 @@ input:focus, textarea:focus, select:focus {
 }
 
 .navbar-nav .nav-link {
-  color: #64748b !important;
+  color: #000000 !important;
 }
 
 .navbar-nav .nav-link:hover {
-  color: #2563eb !important;
+  color: #000000 !important;
 }
 
 .navbar-nav .nav-link.active {
-  color: #2563eb !important;
+  color: #000000 !important;
 }
 
 /* Sidebar Specific */
 .sidebar-nav .menu-link {
-  color: #64748b !important;
+  color: #000000 !important;
 }
 
 .sidebar-nav .menu-link:hover {
   background-color: rgba(37, 99, 235, 0.08) !important;
-  color: #2563eb !important;
+  color: #000000 !important;
 }
 
 .sidebar-nav .menu-link.active {
   background-color: rgba(37, 99, 235, 0.08) !important;
-  color: #2563eb !important;
+  color: #000000 !important;
 }
 
 /* Form Elements */
@@ -1063,4 +1063,72 @@ hr {
   padding: 8px 12px !important;
   font-size: 14px !important;
   backdrop-filter: blur(10px) !important;
+}
+/* === Overrides: HorizontalNav desktop forced white labels over corporate gradient === */
+@media (min-width: 1025px) {
+  /* Fondo degradado corporativo para el nav horizontal en desktop */
+  .horizontal-nav {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-bottom-color: transparent !important;
+  }
+
+  /* Forzar texto blanco para todos los niveles del menú superior */
+  .horizontal-nav .nav-container .nav-item-wrapper .nav-link,
+  .horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle,
+  .horizontal-nav .nav-container .nav-item-wrapper .nav-link span,
+  .horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle span,
+  .horizontal-nav .nav-link,
+  .horizontal-nav .dropdown-toggle,
+  .horizontal-nav .nav-link span,
+  .horizontal-nav .dropdown-toggle span {
+    color: #ffffff !important;
+  }
+
+  /* Estados */
+  .horizontal-nav .nav-link:hover,
+  .horizontal-nav .dropdown-toggle:hover,
+  .horizontal-nav .nav-link.active,
+  .horizontal-nav .dropdown-toggle.active {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+  }
+
+  /* Mantener dropdowns legibles (texto oscuro sobre fondo blanco) */
+  .dropdown-menu-portal .dropdown-menu,
+  .dropdown-menu-portal .dropdown-menu * ,
+  .dropdown-menu-portal .dropdown-menu .dropdown-link {
+    color: #111827 !important;
+    background: #ffffff !important;
+  }
+}
+/* === FINAL OVERRIDES: HorizontalNav desktop -> texto blanco forzado === */
+@media (min-width: 1025px) {
+  /* Fondo degradado corporativo y texto blanco en todo el menú superior */
+  .horizontal-nav {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  }
+  .horizontal-nav * {
+    color: #ffffff !important;
+  }
+
+  /* Mantener dropdowns legibles (se renderizan fuera del nav en document.body) */
+  .dropdown-menu-portal .dropdown-menu,
+  .dropdown-menu-portal .dropdown-menu * {
+    color: #111827 !important;
+    background: #ffffff !important;
+  }
+}
+/* === ABSOLUTE FINAL OVERRIDE: letras blancas en menú dashboard (todas las resoluciones) === */
+.horizontal-nav {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+.horizontal-nav, 
+.horizontal-nav * {
+  color: #ffffff !important;
+}
+/* Mantener dropdowns legibles (se renderizan fuera del nav con portal) */
+.dropdown-menu-portal .dropdown-menu,
+.dropdown-menu-portal .dropdown-menu * {
+  color: #111827 !important;
+  background: #ffffff !important;
 }

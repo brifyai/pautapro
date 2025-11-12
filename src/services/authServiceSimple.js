@@ -353,6 +353,7 @@ export const authServiceSimple = {
         user.puede_ver_soportes = true;
         user.puede_ver_contratos = true;
         user.puede_ver_rentabilidad = true; // ✅ AGREGADO
+        user.puede_ver_mensajes = true; // ✅ AGREGADO
         
         // Guardar en localStorage
         localStorage.setItem('user', JSON.stringify(user));

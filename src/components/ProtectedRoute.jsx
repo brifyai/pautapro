@@ -7,7 +7,7 @@ const ProtectedRoute = ({
   requiredPermission = null,
   requiredModule = null,
   requiredRole = null,
-  fallbackPath = '/dashboard'
+  fallbackPath = '/'
 }) => {
   // Obtener usuario actual
   const currentUser = authServiceSimple.getCurrentUser();

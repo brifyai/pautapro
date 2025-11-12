@@ -29,7 +29,7 @@ import { supabase } from '../config/supabase';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 
-const UserDataPopup = ({ open, onClose }) => {
+const UserDataPopup = ({ open, onClose, initialEditing = false }) => {
   const navigate = useNavigate();
   const [usuario, setUsuario] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -58,6 +58,13 @@ const UserDataPopup = ({ open, onClose }) => {
       });
     }
   }, [usuario]);
+
+  // Permitir abrir el popup directamente en modo edición (Cambiar Contraseña / Mis Datos)
+  useEffect(() => {
+    if (open) {
+      setIsEditing(!!initialEditing);
+    }
+  }, [open, initialEditing]);
 
   const fetchUsuario = async () => {
     try {

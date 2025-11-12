@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    
+    <!-- Página principal -->
+    <url>
+        <loc>https://pautapro.cl/</loc>
+        <lastmod>2024-11-12</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.0</priority>
+        <xhtml:link rel="alternate" hreflang="es-CL" href="https://pautapro.cl/" />
+    </url>
+    
+    <!-- Login -->
+    <url>
+        <loc>https://pautapro.cl/login</loc>
+        <lastmod>2024-11-12</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+        <xhtml:link rel="alternate" hreflang="es-CL" href="https://pautapro.cl/login" />
+    </url>
+    
+    <!-- Registro -->
+    <url>
+        <loc>https://pautapro.cl/auth/register</loc>
+        <lastmod>2024-11-12</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+        <xhtml:link rel="alternate" hreflang="es-CL" href="https://pautapro.cl/auth/register" />
+    </url>
+    
+    <!-- Demo -->
+    <url>
+        <loc>https://pautapro.cl/demo</loc>
+        <lastmod>2024-11-12</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+        <xhtml:link rel="alternate" hreflang="es-CL" href="https://pautapro.cl/demo" />
+    </url>
+    
+    <!-- Características -->
+    <url>
+        <loc>https://pautapro.cl/features</loc>
+        <lastmod>2024-11-12</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+        <xhtml:link rel="alternate" hreflang="es-CL" href="https://pautapro.cl/features" />
+    </url>
+    
+    <!-- Precios -->
+    <url>
+        <loc>https://pautapro.cl/pricing</loc>
+        <lastmod>2024-11-12</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.9</priority>
+        <xhtml:link rel="alternate" hreflang="es-CL" href="https://pautapro.cl/pricing" />
+    </url>
+    
+    <!-- Nosotros -->
+    <url>
+        <loc>https://pautapro.cl/about</loc>
+        <lastmod>2024-11-12</lastmod>
+        <changefreq>quarterly</changefreq>
+        <priority>0.6</priority>
+        <xhtml:link rel="alternate" hreflang="es-CL" href="https://pautapro.cl/about" />
+    </url>
+    
+    <!-- Contacto -->
+    <url>
+        <loc>https://pautapro.cl/contact</loc>
+        <lastmod>2024-11-12</lastmod>
+        <changefreq>quarterly</changefreq>
+        <priority>0.6</priority>
+        <xhtml:link rel="alternate" hreflang="es-CL" href="https://pautapro.cl/contact" />
+    </url>
+    
+    <!-- Blog -->
+    <url>
+        <loc>https://pautapro.cl/blog</loc>
+        <lastmod>2024-11-12</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+        <xhtml:link rel="alternate" hreflang="es-CL" href="https://pautapro.cl/blog" />
+    </url>
+    
+    <!-- Centro de Ayuda -->
+    <url>
+        <loc>https://pautapro.cl/help</loc>
+        <lastmod>2024-11-12</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.5</priority>
+        <xhtml:link rel="alternate" hreflang="es-CL" href="https://pautapro.cl/help" />
+    </url>
+    
+    <!-- Privacidad -->
+    <url>
+        <loc>https://pautapro.cl/privacy</loc>
+        <lastmod>2024-11-12</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.3</priority>
+        <xhtml:link rel="alternate" hreflang="es-CL" href="https://pautapro.cl/privacy" />
+    </url>
+    
+    <!-- Términos -->
+    <url>
+        <loc>https://pautapro.cl/terms</loc>
+        <lastmod>2024-11-12</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.3</priority>
+        <xhtml:link rel="alternate" hreflang="es-CL" href="https://pautapro.cl/terms" />
+    </url>
+    
+</urlset>

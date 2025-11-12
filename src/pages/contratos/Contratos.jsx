@@ -468,6 +468,13 @@ const Contratos = () => {
 
     return (
         <div className="agencias-container contratos-wrapper animate-fade-in">
+            {!isMobile && (
+                <div className="modern-header animate-slide-down">
+                    <div className="modern-title" style={{ fontSize: '1rem', marginTop: '14px', lineHeight: '1' }}>
+                        📄 LISTADO DE CONTRATOS
+                    </div>
+                </div>
+            )}
             {/* Versión móvil - Cards creativos */}
             {isMobile ? (
                 <>

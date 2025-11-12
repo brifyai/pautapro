@@ -129,3 +129,58 @@
   padding:20px;
 
 }
+
+/* FORZAR TEXTO NEGRO EN NAVEGACIÓN - Máxima especificidad */
+.public-nav .nav-container .nav-item-wrapper .nav-link,
+.public-nav .nav-container .nav-item-wrapper .nav-link *,
+.public-nav .nav-container .nav-item-wrapper .dropdown-toggle,
+.public-nav .nav-container .nav-item-wrapper .dropdown-toggle *,
+.public-nav .nav-link span,
+.public-nav .dropdown-toggle span,
+.dropdown-menu-portal .dropdown-menu .dropdown-link,
+.dropdown-menu-portal .dropdown-menu .dropdown-link *,
+.public-nav .nav-container .nav-item-wrapper .nav-link span,
+.public-nav .nav-container .nav-item-wrapper .dropdown-toggle span {
+  color: #000000 !important;
+}
+
+/* Estados hover y activos */
+.public-nav .nav-container .nav-item-wrapper .nav-link:hover,
+.public-nav .nav-container .nav-item-wrapper .nav-link:hover *,
+.public-nav .nav-container .nav-item-wrapper .nav-link.active,
+.public-nav .nav-container .nav-item-wrapper .nav-link.active *,
+.public-nav .nav-container .nav-item-wrapper .dropdown-toggle:hover,
+.public-nav .nav-container .nav-item-wrapper .dropdown-toggle:hover *,
+.public-nav .nav-container .nav-item-wrapper .dropdown-toggle.active,
+.public-nav .nav-container .nav-item-wrapper .dropdown-toggle.active *,
+.dropdown-menu-portal .dropdown-menu .dropdown-link:hover,
+.dropdown-menu-portal .dropdown-menu .dropdown-link:hover *,
+.public-nav .nav-container .nav-item-wrapper .nav-link:hover span,
+.public-nav .nav-container .nav-item-wrapper .dropdown-toggle:hover span {
+  color: #000000 !important;
+}
+
+/* Forzar negro en todos los elementos de texto del menú */
+.public-nav *,
+.public-nav .nav-container *,
+.public-nav .nav-item-wrapper *,
+.public-nav .nav-link *,
+.public-nav .dropdown-toggle * {
+  color: #000000 !important;
+}
+
+/* Excepción para iconos - mantenerlos azules si se desea */
+.public-nav .nav-link i,
+.public-nav .dropdown-toggle i,
+.public-nav .nav-link i:first-child,
+.public-nav .dropdown-toggle i:first-child {
+  color: #2563eb !important;
+}
+
+/* Forzar específicamente los spans de texto */
+.public-nav span,
+.public-nav .nav-link span,
+.public-nav .dropdown-toggle span {
+  color: #000000 !important;
+  font-weight: 500 !important;
+}

@@ -48,6 +48,7 @@ import {
 import ChatIA from '../../components/chat/ChatIA';
 
 ChartJS.register(ArcElement, ChartTooltip, Legend, CategoryScale, LinearScale, BarElement);
+ChartJS.register(ArcElement, ChartTooltip, Legend, CategoryScale, LinearScale, BarElement);
 
 // Variable global para proteger contra cargas múltiples
 let dashboardLoadedGlobally = false;
@@ -456,7 +457,10 @@ const Dashboard = () => {
 
   useEffect(() => {
     // EJECUTAR SOLO UNA VEZ - sin dependencias que causen re-ejecución
-    
+
+    // Al entrar al dashboard, permitir una nueva carga (p.ej. al volver desde Crear Orden)
+    dashboardLoadedGlobally = false;
+     
     // Prevenir scroll automático al cargar el dashboard - MÉTODO ROBUSTO
     // 1. Guardar posición actual del scroll
     const scrollY = window.scrollY || window.pageYOffset;

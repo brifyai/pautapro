@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import './HorizontalNav.css';
 import UserDataPopup from '../UserDataPopup';
@@ -11,47 +11,57 @@ const HorizontalNav = () => {
   const itemRefs = useRef({});
   const navRef = useRef(null);
 
+  // Helpers desktop + estado activo por ruta
+  const isDesktop = () => window.matchMedia('(min-width: 1025px)').matches;
+  const location = useLocation();
+
+  const isActiveItem = useCallback((item) => {
+    if (item.path) {
+      return location.pathname.startsWith(item.path);
+    }
+    if (item.submenu && item.submenu.length) {
+      return item.submenu.some(s => location.pathname.startsWith(s.path));
+    }
+    return false;
+  }, [location.pathname]);
+
+  const openSubmenu = useCallback((menuId) => {
+    if (!isDesktop()) return;
+    setExpandedMenus({ [menuId]: true });
+
+    if (itemRefs.current[menuId]) {
+      const rect = itemRefs.current[menuId].getBoundingClientRect();
+      setDropdownPositions(prev => ({
+        ...prev,
+        [menuId]: {
+          top: rect.bottom,
+          left: rect.left
+        }
+      }));
+    }
+  }, []);
+
   const menuItems = [
     {
       id: 'dashboard',
       label: 'Dashboard',
       icon: 'fas fa-chart-line',
-      path: '/dashboard',
       submenu: [
         { label: 'Dashboard General', path: '/dashboard' },
         { label: 'Dashboard Rentabilidad', path: '/rentabilidad' }
       ]
     },
     {
-      id: 'ordenes',
-      label: 'Órdenes',
-      icon: 'fas fa-file-invoice',
-      path: '/ordenes/revisar',
-      submenu: [
-        { label: 'Crear Orden', path: '/ordenes/crear' },
-        { label: 'Revisar Órdenes', path: '/ordenes/revisar' }
-      ]
-    },
-    {
-      id: 'planificacion',
-      label: 'Planificación',
-      icon: 'fas fa-calendar-alt',
-      path: '/planificacion',
-      submenu: [
-        { label: 'Mis Planificaciones', path: '/planificacion' }
-      ]
+      id: 'clientes',
+      label: 'Clientes',
+      icon: 'fas fa-users',
+      path: '/clientes'
     },
     {
       id: 'campanas',
       label: 'Campañas',
       icon: 'fas fa-bullhorn',
       path: '/campanas'
-    },
-    {
-      id: 'clientes',
-      label: 'Clientes',
-      icon: 'fas fa-users',
-      path: '/clientes'
     },
     {
       id: 'proveedores',
@@ -62,7 +72,7 @@ const HorizontalNav = () => {
     {
       id: 'agencias',
       label: 'Agencias',
-      icon: 'fas fa-store',
+      icon: 'fas fa-landmark',
       path: '/agencias'
     },
     {
@@ -74,8 +84,23 @@ const HorizontalNav = () => {
     {
       id: 'soportes',
       label: 'Soportes',
-      icon: 'fas fa-headset',
+      icon: 'fas fa-broadcast-tower',
       path: '/soportes'
+    },
+    {
+      id: 'ordenes',
+      label: 'Órdenes',
+      icon: 'fas fa-file-invoice',
+      submenu: [
+        { label: 'Crear Orden', path: '/ordenes/crear' },
+        { label: 'Revisar Orden', path: '/ordenes/revisar' }
+      ]
+    },
+    {
+      id: 'planificacion',
+      label: 'Planificación',
+      icon: 'fas fa-project-diagram',
+      path: '/planificacion'
     },
     {
       id: 'contratos',
@@ -87,7 +112,6 @@ const HorizontalNav = () => {
       id: 'reportes',
       label: 'Reportes',
       icon: 'fas fa-chart-bar',
-      path: '/reportes',
       submenu: [
         { label: 'Reporte de Inversión', path: '/reportes/inversion' },
         { label: 'Gestión de Órdenes', path: '/reportes/ordenes' },
@@ -97,9 +121,9 @@ const HorizontalNav = () => {
     {
       id: 'usuarios',
       label: 'Usuarios',
-      icon: 'fas fa-user-tie',
+      icon: 'fas fa-user-check',
       path: '/usuarios'
-    }
+    },
   ];
 
   const toggleSubmenu = useCallback((menuId) => {
@@ -148,28 +172,32 @@ const HorizontalNav = () => {
 
   return (
     <>
-      <nav className="horizontal-nav" ref={navRef}>
+      <nav className="horizontal-nav nav-dashboard" ref={navRef}>
         <div className="nav-container">
           {menuItems.map((item) => (
             <div
               key={item.id}
               className="nav-item-wrapper"
               ref={(el) => { itemRefs.current[item.id] = el; }}
+              onMouseEnter={() => { if (item.submenu && item.submenu.length && isDesktop()) openSubmenu(item.id); }}
             >
               {!item.submenu || item.submenu.length === 0 ? (
-                <Link to={item.path} className="nav-link">
-                  <i className={`${item.icon}`}></i>
+                <Link
+                  to={item.path}
+                  className={`nav-link ${isActiveItem(item) ? 'active' : ''}`}
+                >
                   <span>{item.label}</span>
                 </Link>
               ) : (
                 <button
-                  className={`nav-link dropdown-toggle ${expandedMenus[item.id] ? 'active' : ''}`}
+                  className={`nav-link dropdown-toggle ${(expandedMenus[item.id] || isActiveItem(item)) ? 'active' : ''}`}
                   onClick={() => toggleSubmenu(item.id)}
                   type="button"
+                  onMouseEnter={() => openSubmenu(item.id)}
+                  onFocus={() => openSubmenu(item.id)}
                 >
-                  <i className={`${item.icon}`}></i>
                   <span>{item.label}</span>
-                  <i className="fas fa-chevron-down"></i>
+                  <span className="caret">▾</span>
                 </button>
               )}
             </div>
@@ -191,7 +219,7 @@ const HorizontalNav = () => {
                   zIndex: 9999
                 }}
               >
-                <div className="dropdown-menu show">
+                <div className="dropdown-menu show" onMouseLeave={() => closeAllMenus()}>
                   {item.submenu.map((subItem, index) => (
                     <Link
                       key={index}

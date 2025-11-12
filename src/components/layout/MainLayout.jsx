@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import ModernNavbar from './ModernNavbar';
-import CollapsibleSidebar from './CollapsibleSidebar';
+import HorizontalNav from './HorizontalNav';
 import BreadcrumbNav from './BreadcrumbNav';
 
 const MainLayout = ({ children }) => {
@@ -12,20 +11,13 @@ const MainLayout = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navbar superior */}
-      <ModernNavbar
-        onToggleSidebar={toggleSidebar}
-        sidebarCollapsed={sidebarCollapsed}
-      />
+      {/* Navbar horizontal (restaurado) */}
+      <HorizontalNav />
 
       <div className="flex">
-        {/* Sidebar lateral */}
-        <CollapsibleSidebar collapsed={sidebarCollapsed} />
 
         {/* Contenido principal */}
-        <main className={`flex-1 transition-all duration-300 ${
-          sidebarCollapsed ? 'ml-16' : 'ml-64'
-        }`}>
+        <main className="flex-1 transition-all duration-300 ml-0">
           <div className="p-6">
             {/* Breadcrumb navigation */}
             <BreadcrumbNav />

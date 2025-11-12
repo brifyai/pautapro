@@ -1,0 +1,116 @@
+/* FORZAR TEXTO NEGRO EN NAVEGACIÓN - PRIORIDAD MÁXIMA */
+/* Este archivo se carga después de todos los demás CSS para sobreescribir cualquier regla */
+
+.horizontal-nav .nav-container .nav-item-wrapper .nav-link,
+.horizontal-nav .nav-container .nav-item-wrapper .nav-link *,
+.horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle,
+.horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle *,
+.horizontal-nav .nav-link span,
+.horizontal-nav .dropdown-toggle span,
+.dropdown-menu-portal .dropdown-menu .dropdown-link,
+.dropdown-menu-portal .dropdown-menu .dropdown-link *,
+.horizontal-nav .nav-container .nav-item-wrapper .nav-link span,
+.horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle span,
+.horizontal-nav span,
+.horizontal-nav .nav-link span,
+.horizontal-nav .dropdown-toggle span,
+.horizontal-nav .nav-container *,
+.horizontal-nav .nav-item-wrapper *,
+.horizontal-nav .nav-link *,
+.horizontal-nav .dropdown-toggle *,
+.horizontal-nav *,
+.horizontal-nav .nav-container .nav-item-wrapper .nav-link:hover,
+.horizontal-nav .nav-container .nav-item-wrapper .nav-link:hover *,
+.horizontal-nav .nav-container .nav-item-wrapper .nav-link.active,
+.horizontal-nav .nav-container .nav-item-wrapper .nav-link.active *,
+.horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle:hover,
+.horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle:hover *,
+.horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle.active,
+.horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle.active *,
+.dropdown-menu-portal .dropdown-menu .dropdown-link:hover,
+.dropdown-menu-portal .dropdown-menu .dropdown-link:hover *,
+.horizontal-nav .nav-container .nav-item-wrapper .nav-link:hover span,
+.horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle:hover span {
+  color: #000000 !important;
+  font-weight: 500 !important;
+}
+
+/* Excepción para iconos - mantenerlos azules si se desea */
+.horizontal-nav .nav-link i,
+.horizontal-nav .dropdown-toggle i,
+.horizontal-nav .nav-link i:first-child,
+.horizontal-nav .dropdown-toggle i:first-child {
+  color: #2563eb !important;
+}
+
+/* Forzar específicamente los spans de texto */
+.horizontal-nav span,
+.horizontal-nav .nav-link span,
+.horizontal-nav .dropdown-toggle span {
+  color: #000000 !important;
+  font-weight: 500 !important;
+}
+
+/* Forzar texto negro en todos los elementos del menú */
+.horizontal-nav .nav-container .nav-item-wrapper .nav-link,
+.horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle,
+.horizontal-nav .nav-container .nav-item-wrapper .nav-link span,
+.horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle span {
+  color: #000000 !important;
+}
+
+/* Estados hover y activos */
+.horizontal-nav .nav-container .nav-item-wrapper .nav-link:hover,
+.horizontal-nav .nav-container .nav-item-wrapper .nav-link:hover span,
+.horizontal-nav .nav-container .nav-item-wrapper .nav-link.active,
+.horizontal-nav .nav-container .nav-item-wrapper .nav-link.active span,
+.horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle:hover,
+.horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle:hover span,
+.horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle.active,
+.horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle.active span {
+  color: #000000 !important;
+}
+
+/* Dropdown links */
+.dropdown-menu-portal .dropdown-menu .dropdown-link,
+.dropdown-menu-portal .dropdown-menu .dropdown-link:hover {
+  color: #000000 !important;
+}
+
+/* Forzar negro en todos los elementos de texto del menú */
+.horizontal-nav * {
+  color: #000000 !important;
+}
+
+/* Excepción para iconos */
+.horizontal-nav i,
+.horizontal-nav .nav-link i,
+.horizontal-nav .dropdown-toggle i {
+  color: #2563eb !important;
+}
+
+/* Forzar negro en elementos específicos */
+.horizontal-nav .nav-link,
+.horizontal-nav .dropdown-toggle,
+.horizontal-nav .nav-link span,
+.horizontal-nav .dropdown-toggle span,
+.horizontal-nav .nav-container .nav-item-wrapper .nav-link,
+.horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle {
+  color: #000000 !important;
+}
+
+/* Estados hover */
+.horizontal-nav .nav-link:hover,
+.horizontal-nav .dropdown-toggle:hover,
+.horizontal-nav .nav-link:hover span,
+.horizontal-nav .dropdown-toggle:hover span {
+  color: #000000 !important;
+}
+
+/* Estados active */
+.horizontal-nav .nav-link.active,
+.horizontal-nav .dropdown-toggle.active,
+.horizontal-nav .nav-link.active span,
+.horizontal-nav .dropdown-toggle.active span {
+  color: #000000 !important;
+}

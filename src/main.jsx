@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import './assets/css/light-theme.css'
+
 import App from './App.jsx'
 
 // Inicializar optimizador de memoria para reducir consumo de 156MB a <50MB
@@ -18,7 +19,5 @@ window.addEventListener('unhandledrejection', (event) => {
 });
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
+  <App />
 )

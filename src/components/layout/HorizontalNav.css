@@ -74,7 +74,7 @@
   gap: 6px;
   padding: 0 14px;
   height: 100%;
-  color: #4b5563;
+  color: #ffffff;
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -87,12 +87,12 @@
 }
 
 .nav-link:hover {
-  color: #2563eb;
+  color: #ffffff;
   background-color: #f9fafb;
 }
 
 .nav-link.active {
-  color: #2563eb;
+  color: #ffffff;
   border-bottom-color: #2563eb;
 }
 
@@ -113,7 +113,7 @@
   gap: 6px;
   padding: 0 14px;
   height: 100%;
-  color: #4b5563;
+  color: #ffffff;
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -126,12 +126,12 @@
 }
 
 .dropdown-toggle:hover {
-  color: #2563eb;
+  color: #ffffff;
   background-color: #f9fafb;
 }
 
 .dropdown-toggle.active {
-  color: #2563eb;
+  color: #ffffff;
   border-bottom-color: #2563eb;
 }
 
@@ -184,7 +184,7 @@
   align-items: center;
   justify-content: flex-start;
   padding: 10px 16px;
-  color: #4b5563;
+  color: #ffffff;
   text-decoration: none;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -203,7 +203,7 @@
 }
 
 .dropdown-link:hover {
-  color: #2563eb;
+  color: #ffffff;
   background-color: #f9fafb;
 }
 
@@ -284,4 +284,266 @@
   .dropdown-toggle i:first-child {
     font-size: 11px;
   }
+}
+
+/* Forzar texto negro con mayor especificidad */
+.horizontal-nav .nav-container .nav-item-wrapper .nav-link {
+  color: #ffffff !important;
+}
+
+.horizontal-nav .nav-container .nav-item-wrapper .nav-link:hover {
+  color: #ffffff !important;
+}
+
+.horizontal-nav .nav-container .nav-item-wrapper .nav-link.active {
+  color: #ffffff !important;
+}
+
+.horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle {
+  color: #ffffff !important;
+}
+
+.horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle:hover {
+  color: #ffffff !important;
+}
+
+.horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle.active {
+  color: #ffffff !important;
+}
+
+.dropdown-menu-portal .dropdown-menu .dropdown-link {
+  color: #ffffff !important;
+}
+
+.dropdown-menu-portal .dropdown-menu .dropdown-link:hover {
+  color: #ffffff !important;
+}
+
+/* Forzar texto en spans */
+.horizontal-nav .nav-link span,
+.horizontal-nav .dropdown-toggle span {
+  color: #ffffff !important;
+}
+
+/* Forzar texto en dropdowns */
+.dropdown-menu-portal .dropdown-menu .dropdown-link {
+  color: #ffffff !important;
+}
+
+.dropdown-menu-portal .dropdown-menu .dropdown-link:hover {
+  color: #ffffff !important;
+}
+/* === Desktop redesign overrides (horizontal menu) === */
+@media (min-width: 1025px) {
+  .horizontal-nav {
+    top: 80px !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  }
+
+  .horizontal-nav .nav-container {
+    height: 56px !important;
+    gap: 4px;
+    padding: 0 20px;
+  }
+
+  .horizontal-nav .nav-link,
+  .horizontal-nav .dropdown-toggle {
+    position: relative;
+    padding: 0 16px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    border-radius: 10px;
+    color: #111827 !important;
+    transition: background-color .2s ease, color .2s ease;
+  }
+
+  .horizontal-nav .nav-link i,
+  .horizontal-nav .dropdown-toggle i:first-child {
+    color: #2563eb !important;
+    font-size: 15px;
+  }
+
+  /* Indicador activo con subrayado degradado */
+  .horizontal-nav .nav-link::after,
+  .horizontal-nav .dropdown-toggle::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 6px;
+    height: 2px;
+    background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%);
+    border-radius: 2px;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .2s ease;
+  }
+
+  .horizontal-nav .nav-link:hover::after,
+  .horizontal-nav .dropdown-toggle:hover::after,
+  .horizontal-nav .nav-link.active::after,
+  .horizontal-nav .dropdown-toggle.active::after {
+    transform: scaleX(1);
+  }
+
+  .horizontal-nav .nav-link:hover,
+  .horizontal-nav .dropdown-toggle:hover {
+    background: #f3f4f6;
+  }
+
+  /* Estilo del dropdown como tarjeta */
+  .dropdown-menu-portal .dropdown-menu {
+    min-width: 240px;
+    border-radius: 12px !important;
+    padding: 6px 0 !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12) !important;
+    border: 1px solid #e5e7eb !important;
+    background: #fff !important;
+  }
+
+  .dropdown-menu-portal .dropdown-menu .dropdown-link {
+    padding: 10px 18px !important;
+    font-size: 13px !important;
+    color: #111827 !important;
+  }
+
+  .dropdown-menu-portal .dropdown-menu .dropdown-link:hover {
+    background: #f3f4f6 !important;
+  }
+
+  /* Accesibilidad: foco visible */
+  .horizontal-nav .nav-link:focus-visible,
+  .horizontal-nav .dropdown-toggle:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.35);
+    outline-offset: 2px;
+  }
+}
+/* === Desktop corporate gradient override === */
+@media (min-width: 1025px) {
+  .horizontal-nav {
+    background: var(--gradient-primary) !important; /* mismo degradado que móvil */
+    backdrop-filter: blur(8px);
+  }
+
+  /* Forzar texto e íconos en blanco sobre degradado */
+  .horizontal-nav .nav-container .nav-item-wrapper .nav-link,
+  .horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle,
+  .horizontal-nav .nav-link span,
+  .horizontal-nav .dropdown-toggle span,
+  .horizontal-nav .nav-link i,
+  .horizontal-nav .dropdown-toggle i {
+    color: #ffffff !important;
+  }
+
+  /* Hover coherente sobre degradado */
+  .horizontal-nav .nav-link:hover,
+  .horizontal-nav .dropdown-toggle:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+  }
+
+  /* Subrayado activo en blanco */
+  .horizontal-nav .nav-link::after,
+  .horizontal-nav .dropdown-toggle::after {
+    background: linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 100%) !important;
+  }
+
+  /* Estado activo mantiene color blanco (sobre reglas previas que forzaban negro) */
+  .horizontal-nav .nav-link.active,
+  .horizontal-nav .dropdown-toggle.active {
+    color: #ffffff !important;
+  }
+}
+/* === Desktop force white text override (placed at end of cascade) === */
+@media (min-width: 1025px) {
+  .horizontal-nav .nav-container .nav-item-wrapper .nav-link,
+  .horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle,
+  .horizontal-nav .nav-link span,
+  .horizontal-nav .dropdown-toggle span {
+    color: #ffffff !important;
+  }
+  .horizontal-nav .nav-link.active,
+  .horizontal-nav .dropdown-toggle.active {
+    color: #ffffff !important;
+  }
+  .horizontal-nav .nav-link:hover,
+  .horizontal-nav .dropdown-toggle:hover {
+    color: #ffffff !important;
+  }
+}
+/* === Final desktop overrides to ensure white labels and readable dropdowns === */
+@media (min-width: 1025px) {
+  /* Fondo degradado fijo (sin depender de variables globales) */
+  .horizontal-nav {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  }
+
+  /* Forzar texto blanco en los botones del menú (nivel 1) */
+  .horizontal-nav .nav-container .nav-item-wrapper .nav-link,
+  .horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle,
+  .horizontal-nav .nav-container .nav-item-wrapper .nav-link span,
+  .horizontal-nav .nav-container .nav-item-wrapper .dropdown-toggle span {
+    color: #ffffff !important;
+  }
+  .horizontal-nav .nav-link.active,
+  .horizontal-nav .dropdown-toggle.active,
+  .horizontal-nav .nav-link:hover,
+  .horizontal-nav .dropdown-toggle:hover {
+    color: #ffffff !important;
+  }
+
+  /* Dropdown debe mantenerse legible (texto oscuro sobre fondo blanco) */
+  .dropdown-menu-portal .dropdown-menu .dropdown-link {
+    color: #111827 !important;
+  }
+}
+/* === FINAL DASHBOARD OVERRIDE: forzar letras blancas en menú del dashboard === */
+.nav-dashboard {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+.nav-dashboard .nav-link,
+.nav-dashboard .dropdown-toggle,
+.nav-dashboard .nav-link span,
+.nav-dashboard .dropdown-toggle span {
+  color: #ffffff !important;
+}
+.nav-dashboard .nav-link:hover,
+.nav-dashboard .dropdown-toggle:hover,
+.nav-dashboard .nav-link.active,
+.nav-dashboard .dropdown-toggle.active {
+  color: #ffffff !important;
+  background: rgba(255,255,255,0.12) !important;
+}
+/* Los dropdowns del portal deben quedar legibles (texto oscuro sobre fondo blanco) */
+.dropdown-menu-portal .dropdown-menu,
+.dropdown-menu-portal .dropdown-menu * {
+  color: #111827 !important;
+  background: #ffffff !important;
+}
+/* Caret (flecha) para botones desplegables */
+.horizontal-nav .dropdown-toggle .caret {
+  margin-left: 6px;
+  font-size: 11px;
+  line-height: 1;
+  color: #ffffff !important;
+  opacity: 0.9;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.horizontal-nav .dropdown-toggle.active .caret {
+  transform: rotate(180deg);
+}
+
+/* Mejor hover sobre fondo degradado del dashboard */
+.nav-dashboard .nav-link:hover,
+.nav-dashboard .dropdown-toggle:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Asegurar interacciones del dropdown renderizado en portal */
+.dropdown-menu-portal {
+  z-index: 9999;
+}
+.dropdown-menu-portal .dropdown-menu {
+  pointer-events: auto;
 }

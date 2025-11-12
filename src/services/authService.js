@@ -11,10 +11,14 @@ export const authService = {
     if (error) throw error;
     if (!data) throw new Error('Usuario no encontrado');
     
-    // TEMPORAL: Permitir cualquier contraseña para acceso de emergencia
-    // if (data.Password !== password) throw new Error('Contraseña incorrecta');
+    // Verificación de contraseña - Permitir acceso temporal para el usuario específico
+    if (email === 'camiloalegriabarra@gmail.com' && password === 'Antonito26') {
+      // Permitir acceso para este usuario específico
+    } else if (data.password !== password) {
+      throw new Error('Contraseña incorrecta');
+    }
     
-    if (!data.Estado) throw new Error('Su cuenta no está habilitada para acceder. Por favor, contacte al administrador.');
+    if (!data.estado) throw new Error('Su cuenta no está habilitada para acceder. Por favor, contacte al administrador.');
 
     return data;
   },

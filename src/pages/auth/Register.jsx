@@ -1,49 +1,71 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import './Login.css';
 
-const Login = () => {
+const Register = () => {
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
     password: '',
-    rememberMe: false
+    confirmPassword: '',
+    acceptTerms: false
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [touched, setTouched] = useState({});
   
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const from = location.state?.from?.pathname || '/dashboard';
 
   useEffect(() => {
     const user = localStorage.getItem('user');
     if (user) {
-      navigate(from, { replace: true });
+      navigate('/dashboard', { replace: true });
     }
-  }, [navigate, from]);
+  }, [navigate]);
 
   const validateField = (name, value) => {
     let error = '';
     
     switch (name) {
+      case 'name':
+        if (!value) {
+          error = 'El nombre es requerido';
+        } else if (value.length < 3) {
+          error = 'El nombre debe tener al menos 3 caracteres';
+        }
+        break;
+        
       case 'email':
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!value) {
-          error = 'Email is required';
+          error = 'El correo electrónico es requerido';
         } else if (!emailRegex.test(value)) {
-          error = 'Please enter a valid email';
+          error = 'Por favor ingresa un correo electrónico válido';
         }
         break;
         
       case 'password':
         if (!value) {
-          error = 'Password is required';
+          error = 'La contraseña es requerida';
         } else if (value.length < 6) {
-          error = 'Password must be at least 6 characters';
+          error = 'La contraseña debe tener al menos 6 caracteres';
+        }
+        break;
+        
+      case 'confirmPassword':
+        if (!value) {
+          error = 'Por favor confirma tu contraseña';
+        } else if (value !== formData.password) {
+          error = 'Las contraseñas no coinciden';
+        }
+        break;
+        
+      case 'acceptTerms':
+        if (!value) {
+          error = 'Debes aceptar los términos y condiciones';
         }
         break;
         
@@ -101,19 +123,20 @@ const Login = () => {
     // Validate all fields
     const newErrors = {};
     Object.keys(formData).forEach(key => {
-      if (key !== 'rememberMe') {
-        const error = validateField(key, formData[key]);
-        if (error) {
-          newErrors[key] = error;
-        }
+      const error = validateField(key, formData[key]);
+      if (error) {
+        newErrors[key] = error;
       }
     });
     
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       setTouched({
+        name: true,
         email: true,
-        password: true
+        password: true,
+        confirmPassword: true,
+        acceptTerms: true
       });
       return;
     }
@@ -121,35 +144,31 @@ const Login = () => {
     setIsLoading(true);
     
     try {
-      const user = await authService.login(formData.email, formData.password);
+      const user = await authService.register(formData.name, formData.email, formData.password);
       localStorage.setItem('user', JSON.stringify(user));
-      if (formData.rememberMe) {
-        localStorage.setItem('rememberMe', 'true');
-      }
-      navigate(from, { replace: true });
+      navigate('/dashboard', { replace: true });
     } catch (error) {
       setErrors({
-        submit: error.message || 'Login failed. Please try again.'
+        submit: error.message || 'Error al crear la cuenta. Por favor intenta nuevamente.'
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSocialLogin = (provider) => {
-    // Implement social login logic here
-    console.log(`Login with ${provider}`);
-  };
-
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
   return (
     <div className="login-container">
-      <Link to="/" className="back-to-home">
+      <Link to="/login" className="back-to-home">
         <i className="fas fa-arrow-left"></i>
-        Volver al inicio
+        Volver al login
       </Link>
       
       <div className="login-wrapper">
@@ -168,55 +187,55 @@ const Login = () => {
             </div>
             
             <h1 className="brand-title">
-              Bienvenido a PautaPro
+              Únete a PautaPro
             </h1>
             
             <p className="brand-subtitle">
-              La plataforma de gestión de pauta publicitaria más avanzada del mercado. Optimiza tus campañas y maximiza tu ROI.
+              Comienza a optimizar tus campañas publicitarias con la plataforma más avanzada del mercado. Regístrate en minutos.
             </p>
             
             <div className="brand-features">
               <div className="brand-feature">
                 <div className="feature-icon">
-                  <i className="fas fa-chart-line"></i>
+                  <i className="fas fa-rocket"></i>
                 </div>
                 <div className="feature-text">
-                  <h4>Análisis Avanzado</h4>
-                  <p>Métricas en tiempo real y reportes detallados</p>
+                  <h4>Inicio Rápido</h4>
+                  <p>Configura tu cuenta en menos de 5 minutos</p>
                 </div>
               </div>
               
               <div className="brand-feature">
                 <div className="feature-icon">
-                  <i className="fas fa-shield-alt"></i>
+                  <i className="fas fa-gift"></i>
                 </div>
                 <div className="feature-text">
-                  <h4>Seguridad Total</h4>
-                  <p>Protección de datos de nivel empresarial</p>
+                  <h4>Prueba Gratuita</h4>
+                  <p>14 días gratis, sin compromiso</p>
                 </div>
               </div>
               
               <div className="brand-feature">
                 <div className="feature-icon">
-                  <i className="fas fa-users"></i>
+                  <i className="fas fa-headset"></i>
                 </div>
                 <div className="feature-text">
-                  <h4>Colaboración</h4>
-                  <p>Trabaja en equipo con herramientas integradas</p>
+                  <h4>Soporte 24/7</h4>
+                  <p>Ayuda whenever la necesites</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Side - Login Form */}
+        {/* Right Side - Register Form */}
         <div className="login-right">
           <div className="login-form-container">
             <div className="login-header">
-              <div className="login-logo">P</div>
-              <h2 className="login-title">Inicia sesión</h2>
+              <div className="login-logo">R</div>
+              <h2 className="login-title">Crear Cuenta</h2>
               <p className="login-subtitle">
-                ¡Bienvenido de vuelta! Por favor ingresa tus credenciales.
+                Completa el formulario para comenzar tu prueba gratuita.
               </p>
             </div>
 
@@ -227,6 +246,26 @@ const Login = () => {
                   {errors.submit}
                 </div>
               )}
+
+              <div className="form-group">
+                <input
+                  type="text"
+                  name="name"
+                  className={`form-input ${errors.name ? 'error' : ''}`}
+                  placeholder="Nombre completo"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  onBlur={handleBlur}
+                  disabled={isLoading}
+                />
+                <i className="fas fa-user input-icon"></i>
+                {errors.name && (
+                  <div className="error-message">
+                    <i className="fas fa-exclamation-circle"></i>
+                    {errors.name}
+                  </div>
+                )}
+              </div>
 
               <div className="form-group">
                 <input
@@ -276,23 +315,57 @@ const Login = () => {
                 )}
               </div>
 
+              <div className="form-group">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  name="confirmPassword"
+                  className={`form-input ${errors.confirmPassword ? 'error' : ''}`}
+                  placeholder="Confirmar contraseña"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  onBlur={handleBlur}
+                  disabled={isLoading}
+                />
+                <i className="fas fa-lock input-icon"></i>
+                <button
+                  type="button"
+                  className="input-toggle"
+                  onClick={toggleConfirmPasswordVisibility}
+                  disabled={isLoading}
+                >
+                  <i className={`fas fa-${showConfirmPassword ? 'eye-slash' : 'eye'}`}></i>
+                </button>
+                {errors.confirmPassword && (
+                  <div className="error-message">
+                    <i className="fas fa-exclamation-circle"></i>
+                    {errors.confirmPassword}
+                  </div>
+                )}
+              </div>
+
               <div className="form-options">
                 <label className="remember-me">
                   <input
                     type="checkbox"
-                    name="rememberMe"
+                    name="acceptTerms"
                     className="checkbox-input"
-                    checked={formData.rememberMe}
+                    checked={formData.acceptTerms}
                     onChange={handleInputChange}
+                    onBlur={handleBlur}
                     disabled={isLoading}
                   />
-                  <span className="checkbox-label">Recordar sesión</span>
+                  <span className="checkbox-label">
+                    Acepto los <Link to="/terms" className="forgot-link">términos y condiciones</Link>
+                  </span>
                 </label>
-                
-                <Link to="/forgot-password" className="forgot-link">
-                  ¿No recuerdas tu contraseña?
-                </Link>
               </div>
+
+              {errors.acceptTerms && (
+                <div className="error-message">
+                  <i className="fas fa-exclamation-circle"></i>
+                  {errors.acceptTerms}
+                </div>
+              )}
 
               <button
                 type="submit"
@@ -300,7 +373,7 @@ const Login = () => {
                 disabled={isLoading}
               >
                 <span className="btn-text">
-                  {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+                  {isLoading ? 'Creando cuenta...' : 'Crear Cuenta'}
                 </span>
                 <div className="spinner"></div>
               </button>
@@ -308,9 +381,9 @@ const Login = () => {
 
             <div className="signup-link">
               <span className="signup-text">
-                ¿Nuevo en PautaPro?{' '}
-                <Link to="/register">
-                  Crear Cuenta
+                ¿Ya tienes una cuenta?{' '}
+                <Link to="/login">
+                  Inicia sesión
                 </Link>
               </span>
             </div>
@@ -321,4 +394,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

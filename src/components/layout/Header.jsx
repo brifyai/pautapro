@@ -1,14 +1,30 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { authServiceSimple } from '../../services/authServiceSimple';
 import './Header.css';
+import UserDataPopup from "../UserDataPopup";
 
 const Header = ({ setIsAuthenticated, onToggleSidebar, onLogout }) => {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [userDataOpen, setUserDataOpen] = useState(false);
+  const [initialEditing, setInitialEditing] = useState(false);
+  const openUserData = (editing = false) => {
+    setInitialEditing(!!editing);
+    setUserDataOpen(true);
+    setShowMenu(false);
+  };
+
+  // Roles: admin puede ver Gestión de Usuarios y Configuración IA; ejecutivo no.
+  const isAdmin = useMemo(() => {
+    const role = (user?.rol || '').toLowerCase();
+    return role.includes('admin') || role.includes('director') || role.includes('gerente') ||
+           (typeof user?.rol_nivel === 'number' && user.rol_nivel >= 80) ||
+           (user?.puede_ver_usuarios && user?.puede_configurar);
+  }, [user]);
 
   useEffect(() => {
     const currentUser = authServiceSimple.getCurrentUser();
@@ -139,19 +155,31 @@ const Header = ({ setIsAuthenticated, onToggleSidebar, onLogout }) => {
                 <span>Mi Perfil</span>
               </div>
 
-              <div className="menu-item" onClick={() => { navigate('/configuracion'); setShowMenu(false); }}>
-                <i className="fas fa-cog"></i>
-                <span>Configuración IA</span>
+              <div className="menu-item" onClick={() => { openUserData(false); }}>
+                <i className="fas fa-id-card"></i>
+                <span>Mis Datos</span>
               </div>
 
-              {user?.puede_ver_usuarios && (
+              <div className="menu-item" onClick={() => { openUserData(true); }}>
+                <i className="fas fa-key"></i>
+                <span>Cambiar Contraseña</span>
+              </div>
+
+              {isAdmin && (
+                <div className="menu-item" onClick={() => { navigate('/configuracion'); setShowMenu(false); }}>
+                  <i className="fas fa-cog"></i>
+                  <span>Configuración IA</span>
+                </div>
+              )}
+
+              {isAdmin && (
                 <div className="menu-item" onClick={() => { navigate('/usuarios'); setShowMenu(false); }}>
                   <i className="fas fa-users-cog"></i>
                   <span>Gestión de Usuarios</span>
                 </div>
               )}
 
-              {user?.puede_ver_mensajes && (
+              {(user?.puede_ver_mensajes || authServiceSimple.hasPermission(user, 'ver_mensajes')) && (
                 <div className="menu-item" onClick={() => { navigate('/mensajes'); setShowMenu(false); }}>
                   <i className="fas fa-envelope"></i>
                   <span>Mensajes</span>
@@ -166,6 +194,7 @@ const Header = ({ setIsAuthenticated, onToggleSidebar, onLogout }) => {
           )}
         </div>
       </div>
+      <UserDataPopup open={userDataOpen} onClose={() => setUserDataOpen(false)} initialEditing={initialEditing} />
     </header>
   );
 };
