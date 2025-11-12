@@ -31,6 +31,11 @@ import RentabilidadDashboard from './pages/rentabilidad/RentabilidadDashboard';
 import ListadoUsuarios from './pages/usuarios/ListadoUsuarios';
 import MiPerfil from './pages/perfil/MiPerfil';
 import ConfiguracionIA from './pages/configuracion/ConfiguracionIA';
+// Páginas legales
+import Privacy from './pages/legal/Privacy';
+import Terms from './pages/legal/Terms';
+import Security from './pages/legal/Security';
+import ServiceTerms from './pages/legal/ServiceTerms';
 // Reportes consolidados
 import ReporteInversion from './pages/reportes/ReporteInversion';
 import GestionOrdenes from './pages/reportes/GestionOrdenes';
@@ -475,6 +480,13 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
+              {/* Páginas legales - acceso público */}
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/security" element={<Security />} />
+              <Route path="/condiciones-servicio" element={<ServiceTerms />} />
+              {/* Redirección de compatibilidad - URL antigua a nueva */}
+              <Route path="/compliance" element={<Navigate to="/condiciones-servicio" replace />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           )}

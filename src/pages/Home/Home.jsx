@@ -1364,7 +1364,7 @@ const Home = () => {
                                     <li><Link to="/privacy">Privacidad</Link></li>
                                     <li><Link to="/terms">Términos</Link></li>
                                     <li><Link to="/security">Seguridad</Link></li>
-                                    <li><Link to="/compliance">Cumplimiento</Link></li>
+                                    <li><Link to="/condiciones-servicio">Condiciones de servicio</Link></li>
                                 </ul>
                             </div>
                         </div>
