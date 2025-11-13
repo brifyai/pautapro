@@ -267,7 +267,7 @@ const MiPerfil = () => {
           </Grid>
           <Grid item xs={12} md={6}>
             <Typography variant="subtitle1" color="textSecondary">Perfil</Typography>
-            <Typography variant="body1">{usuario.rol || 'Usuario'}</Typography>
+            <Typography variant="body1">{usuario.perfil || usuario.rol || 'Usuario'}</Typography>
           </Grid>
           <Grid item xs={12} md={6}>
             <Typography variant="subtitle1" color="textSecondary">Grupo</Typography>
