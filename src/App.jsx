@@ -485,6 +485,7 @@ function App() {
 
                   {/* Rutas por defecto - REDIRIGIR AL DASHBOARD */}
                   <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  {/* Ruta catch-all para SPA - IMPORTANTE para evitar 404 en refresh */}
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                     </Routes>
                   </MobileWrapper>
