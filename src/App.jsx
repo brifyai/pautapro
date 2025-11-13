@@ -422,11 +422,13 @@ function App() {
                     }
                   />
                   
-                  {/* Panel de Administración de API - Temporalmente sin protección para debugging */}
+                  {/* Panel de Administración de API - Solo para administradores */}
                   <Route
                     path="/admin/api"
                     element={
-                      <ApiAdmin />
+                      <ProtectedRoute requiredRole="admin">
+                        <ApiAdmin />
+                      </ProtectedRoute>
                     }
                   />
                   
