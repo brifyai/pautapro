@@ -61,7 +61,7 @@ SET
     WHEN id_cliente = 49 THEN 'Av. La Reina 10101, La Reina, Santiago'
     WHEN id_cliente = 50 THEN 'Calle Príncipe de Gales 10203, La Reina, Santiago'
     ELSE 'Dirección por confirmar, Santiago, Chile'
-  END,
+  END
 WHERE direccion IS NULL OR direccion = '' OR LENGTH(TRIM(direccion)) = 0;
 
 -- Para clientes que no tienen fecha de creación, asignar fechas aleatorias en los últimos 2 años
