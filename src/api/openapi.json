@@ -1,0 +1,909 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "PautaPro API",
+    "description": "API Empresarial para Integración de Sistemas de Gestión Publicitaria",
+    "version": "2.0.0",
+    "contact": {
+      "name": "API Support",
+      "email": "api-support@pautapro.com",
+      "url": "https://developers.pautapro.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.pautapro.com/v2",
+      "description": "Servidor de Producción"
+    },
+    {
+      "url": "https://api-staging.pautapro.com/v2",
+      "description": "Servidor de Staging"
+    },
+    {
+      "url": "http://localhost:3001/api/v2",
+      "description": "Servidor de Desarrollo Local"
+    }
+  ],
+  "security": [
+    {
+      "ApiKeyAuth": []
+    },
+    {
+      "BearerAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "API Key para autenticación empresarial"
+      },
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Token JWT para usuarios autenticados"
+      }
+    },
+    "schemas": {
+      "Cliente": {
+        "type": "object",
+        "required": ["nombrecliente", "rut", "email"],
+        "properties": {
+          "id_cliente": {
+            "type": "integer",
+            "description": "ID único del cliente",
+            "example": 12345
+          },
+          "nombrecliente": {
+            "type": "string",
+            "description": "Nombre del cliente",
+            "example": "Empresa ABC SpA"
+          },
+          "nombrefantasia": {
+            "type": "string",
+            "description": "Nombre de fantasía",
+            "example": "ABC Corp"
+          },
+          "razonsocial": {
+            "type": "string",
+            "description": "Razón social",
+            "example": "Empresa ABC Sociedad por Acciones"
+          },
+          "rut": {
+            "type": "string",
+            "description": "RUT del cliente",
+            "example": "12.345.678-9"
+          },
+          "id_region": {
+            "type": "integer",
+            "description": "ID de la región",
+            "example": 7
+          },
+          "id_comuna": {
+            "type": "integer",
+            "description": "ID de la comuna",
+            "example": 123
+          },
+          "direccion": {
+            "type": "string",
+            "description": "Dirección del cliente",
+            "example": "Av. Providencia 1234, Santiago"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email del cliente",
+            "example": "contacto@empresaabc.com"
+          },
+          "telcelular": {
+            "type": "string",
+            "description": "Teléfono celular",
+            "example": "+56912345678"
+          },
+          "giro": {
+            "type": "string",
+            "description": "Giro comercial",
+            "example": "Servicios de consultoría"
+          },
+          "id_grupo": {
+            "type": "integer",
+            "description": "ID del grupo empresarial",
+            "example": 10
+          },
+          "id_tipo_cliente": {
+            "type": "integer",
+            "description": "ID del tipo de cliente",
+            "example": 1
+          },
+          "nombrerepresentantelegal": {
+            "type": "string",
+            "description": "Nombre del representante legal",
+            "example": "Juan"
+          },
+          "rut_representante": {
+            "type": "string",
+            "description": "RUT del representante legal",
+            "example": "98.765.432-1"
+          },
+          "estado": {
+            "type": "boolean",
+            "description": "Estado del cliente",
+            "example": true
+          },
+          "fechacreacion": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de creación",
+            "example": "2024-11-13T17:29:40.340Z"
+          }
+        }
+      },
+      "Orden": {
+        "type": "object",
+        "required": ["id_cliente", "numero_orden", "tipo_orden"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "ID único de la orden",
+            "example": 67890
+          },
+          "id_cliente": {
+            "type": "integer",
+            "description": "ID del cliente",
+            "example": 12345
+          },
+          "id_campania": {
+            "type": "integer",
+            "description": "ID de la campaña",
+            "example": 987
+          },
+          "numero_orden": {
+            "type": "string",
+            "description": "Número de orden único",
+            "example": "ORD-2024-001234"
+          },
+          "tipo_orden": {
+            "type": "string",
+            "description": "Tipo de orden",
+            "example": "digital",
+            "enum": ["digital", "tv", "radio", "print", "outdoor"]
+          },
+          "descripcion": {
+            "type": "string",
+            "description": "Descripción de la orden",
+            "example": "Campaña de lanzamiento producto X"
+          },
+          "observaciones": {
+            "type": "string",
+            "description": "Observaciones adicionales",
+            "example": "Cliente requiere aprobación previa"
+          },
+          "fecha_inicio": {
+            "type": "string",
+            "format": "date",
+            "description": "Fecha de inicio",
+            "example": "2024-11-15"
+          },
+          "fecha_termino": {
+            "type": "string",
+            "format": "date",
+            "description": "Fecha de término",
+            "example": "2024-12-15"
+          },
+          "total": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Total de la orden",
+            "example": 1500000.00
+          },
+          "iva": {
+            "type": "number",
+            "format": "decimal",
+            "description": "IVA de la orden",
+            "example": 285000.00
+          },
+          "descuento": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Descuento aplicado",
+            "example": 50000.00
+          },
+          "recargo": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Recargo aplicado",
+            "example": 0.00
+          },
+          "estado": {
+            "type": "string",
+            "description": "Estado de la orden",
+            "example": "pendiente",
+            "enum": ["pendiente", "activa", "completada", "cancelada"]
+          },
+          "fecha_creacion": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha de creación",
+            "example": "2024-11-13T17:29:40.340Z"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Mensaje de error",
+            "example": "Cliente no encontrado"
+          },
+          "code": {
+            "type": "string",
+            "description": "Código de error específico",
+            "example": "CLIENT_NOT_FOUND"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Detalles adicionales del error",
+            "example": ["El campo email es obligatorio", "El RUT debe tener un formato válido"]
+          }
+        }
+      },
+      "PaginationMeta": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "Página actual",
+            "example": 1
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Límite de elementos por página",
+            "example": 50
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total de elementos",
+            "example": 1250
+          },
+          "total_pages": {
+            "type": "integer",
+            "description": "Total de páginas",
+            "example": 25
+          }
+        }
+      },
+      "Webhook": {
+        "type": "object",
+        "properties": {
+          "evento": {
+            "type": "string",
+            "description": "Tipo de evento",
+            "example": "orden.creada"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp del evento",
+            "example": "2024-11-13T17:29:40.340Z"
+          },
+          "data": {
+            "type": "object",
+            "description": "Datos del evento"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/clientes": {
+      "get": {
+        "summary": "Listar clientes",
+        "description": "Obtiene una lista paginada de clientes con filtros avanzados",
+        "tags": ["Clientes"],
+        "security": ["ApiKeyAuth"],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Número de página",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Límite de elementos por página",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Término de búsqueda",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "estado",
+            "in": "query",
+            "description": "Filtrar por estado",
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de clientes obtenida exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Cliente"
+                      }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parámetros inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Límite de requests excedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear nuevo cliente",
+        "description": "Crea un nuevo cliente en el sistema",
+        "tags": ["Clientes"],
+        "security": ["ApiKeyAuth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["nombrecliente", "rut", "email"],
+                "properties": {
+                  "nombrecliente": {
+                    "type": "string"
+                  },
+                  "rut": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "nombrefantasia": {
+                    "type": "string"
+                  },
+                  "razonsocial": {
+                    "type": "string"
+                  },
+                  "direccion": {
+                    "type": "string"
+                  },
+                  "telefono": {
+                    "type": "string"
+                  },
+                  "giro": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Cliente creado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Cliente creado exitosamente"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Cliente"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos de entrada inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "RUT duplicado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clientes/{id}": {
+      "get": {
+        "summary": "Obtener cliente específico",
+        "description": "Obtiene los detalles de un cliente específico",
+        "tags": ["Clientes"],
+        "security": ["ApiKeyAuth"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID del cliente",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cliente obtenido exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Cliente"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cliente no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Actualizar cliente",
+        "description": "Actualiza los datos de un cliente específico",
+        "tags": ["Clientes"],
+        "security": ["ApiKeyAuth"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID del cliente",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombrecliente": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "direccion": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cliente actualizado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Cliente"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cliente no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar cliente",
+        "description": "Elimina un cliente del sistema (soft delete)",
+        "tags": ["Clientes"],
+        "security": ["ApiKeyAuth"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID del cliente",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cliente eliminado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Cliente eliminado exitosamente"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "No se puede eliminar cliente con órdenes activas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ordenes": {
+      "get": {
+        "summary": "Listar órdenes",
+        "description": "Obtiene una lista paginada de órdenes con filtros avanzados",
+        "tags": ["Órdenes"],
+        "security": ["ApiKeyAuth"],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Número de página",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Límite de elementos por página",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          },
+          {
+            "name": "estado",
+            "in": "query",
+            "description": "Filtrar por estado",
+            "schema": {
+              "type": "string",
+              "enum": ["pendiente", "activa", "completada", "cancelada"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de órdenes obtenida exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Orden"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear nueva orden",
+        "description": "Crea una nueva orden en el sistema",
+        "tags": ["Órdenes"],
+        "security": ["ApiKeyAuth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["id_cliente", "numero_orden", "tipo_orden"],
+                "properties": {
+                  "id_cliente": {
+                    "type": "integer"
+                  },
+                  "numero_orden": {
+                    "type": "string"
+                  },
+                  "tipo_orden": {
+                    "type": "string",
+                    "enum": ["digital", "tv", "radio", "print", "outdoor"]
+                  },
+                  "descripcion": {
+                    "type": "string"
+                  },
+                  "total": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Orden creada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Orden"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reportes/rentabilidad": {
+      "get": {
+        "summary": "Análisis de rentabilidad",
+        "description": "Genera reporte de análisis de rentabilidad por período",
+        "tags": ["Reportes"],
+        "security": ["ApiKeyAuth"],
+        "parameters": [
+          {
+            "name": "fecha_desde",
+            "in": "query",
+            "required": true,
+            "description": "Fecha de inicio (YYYY-MM-DD)",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "fecha_hasta",
+            "in": "query",
+            "required": true,
+            "description": "Fecha de fin (YYYY-MM-DD)",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "agrupacion",
+            "in": "query",
+            "description": "Tipo de agrupación",
+            "schema": {
+              "type": "string",
+              "enum": ["cliente", "agencia", "medio", "campaña"],
+              "default": "cliente"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reporte de rentabilidad generado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "periodo": {
+                          "type": "object",
+                          "properties": {
+                            "fecha_desde": {
+                              "type": "string",
+                              "format": "date"
+                            },
+                            "fecha_hasta": {
+                              "type": "string",
+                              "format": "date"
+                            }
+                          }
+                        },
+                        "metricas_generales": {
+                          "type": "object",
+                          "properties": {
+                            "total_ingresos": {
+                              "type": "number"
+                            },
+                            "total_ordenes": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "datos": {
+                          "type": "array"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Clientes",
+      "description": "Operaciones relacionadas con clientes"
+    },
+    {
+      "name": "Órdenes",
+      "description": "Operaciones relacionadas con órdenes"
+    },
+    {
+      "name": "Reportes",
+      "description": "Generación de reportes y análisis"
+    },
+    {
+      "name": "Analytics",
+      "description": "Métricas y analytics en tiempo real"
+    },
+    {
+      "name": "Webhooks",
+      "description": "Gestión de webhooks y notificaciones"
+    }
+  ]
+}
