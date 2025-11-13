@@ -11,13 +11,13 @@ SELECT id, nombreperfil, descripcion FROM perfiles ORDER BY id;
 
 -- 3. Insertar perfiles estándar usando el campo correcto 'nombreperfil'
 INSERT INTO perfiles (nombreperfil, descripcion) VALUES
-('Director', 'Director con acceso completo a todas las funcionalidades del sistema', NOW(), NOW()),
-('Gerente', 'Gerente con acceso a gestión y reportes avanzados', NOW(), NOW()),
-('Financiero', 'Acceso especializado a presupuestos, facturación y reportes financieros', NOW(), NOW()),
-('Supervisor', 'Supervisor con acceso a supervisión de campañas y equipos', NOW(), NOW()),
-('Planificador', 'Planificador con acceso a creación y gestión de campañas publicitarias', NOW(), NOW()),
-('Asistente', 'Asistente con acceso básico a funciones administrativas', NOW(), NOW()),
-('Administrador', 'Administrador del sistema con permisos elevados', NOW(), NOW())
+('Director', 'Director con acceso completo a todas las funcionalidades del sistema'),
+('Gerente', 'Gerente con acceso a gestión y reportes avanzados'),
+('Financiero', 'Acceso especializado a presupuestos, facturación y reportes financieros'),
+('Supervisor', 'Supervisor con acceso a supervisión de campañas y equipos'),
+('Planificador', 'Planificador con acceso a creación y gestión de campañas publicitarias'),
+('Asistente', 'Asistente con acceso básico a funciones administrativas'),
+('Administrador', 'Administrador del sistema con permisos elevados')
 ON CONFLICT (nombreperfil) DO NOTHING;
 
 -- 4. Verificar perfiles después de inserción
