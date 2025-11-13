@@ -43,91 +43,72 @@ const MiPerfil = () => {
     try {
       // Obtener el usuario del localStorage
       const userLocal = JSON.parse(localStorage.getItem('user'));
-      if (!userLocal?.id) {
-        console.warn('No se encontró el usuario en localStorage');
-        // Usar datos básicos del localStorage aunque no tenga ID
+      console.log('🔍 Usuario en localStorage:', userLocal);
+
+      if (!userLocal) {
+        console.warn('❌ No hay usuario en localStorage');
         setUsuario({
-          nombre: userLocal?.nombre || 'Usuario',
-          email: userLocal?.email || 'sin@email.com',
-          apellido: userLocal?.apellido || '',
-          telefono: userLocal?.telefono || '',
-          rol: userLocal?.rol || 'Usuario'
-        });
-        setFormData({
-          Nombre: userLocal?.nombre || '',
-          Apellido: userLocal?.apellido || '',
-          Email: userLocal?.email || '',
-          Password: ''
+          nombre: 'Usuario',
+          email: 'sin@email.com',
+          apellido: '',
+          telefono: '',
+          rol: 'Usuario',
+          estado: false
         });
         setLoading(false);
         return;
       }
 
-      // Intentar buscar el usuario en Supabase usando el ID
-      try {
-        const { data: userData, error } = await supabase
-          .from('usuarios')
-          .select(`
-            id,
-            nombre,
-            email,
-            estado,
-            fechaCreacion,
-            fechadeultimamodificacion,
-            Perfiles:id_perfil (
-              id,
-              nombreperfil
-            ),
-            Grupos:id_grupo (
-              id_grupo,
-              nombre_grupo
-            )
-          `)
-          .eq('id', userLocal.id)
-          .single();
+      // Usar datos del localStorage directamente (más confiable)
+      const usuarioData = {
+        id: userLocal.id || userLocal.id_usuario,
+        nombre: userLocal.nombre || 'Usuario',
+        email: userLocal.email || 'sin@email.com',
+        apellido: userLocal.apellido || '',
+        telefono: userLocal.telefono || '',
+        rol: userLocal.rol || userLocal.perfil || 'Usuario',
+        estado: userLocal.estado !== undefined ? userLocal.estado : true,
+        perfil: userLocal.perfil || userLocal.rol || 'Usuario',
+        id_perfil: userLocal.id_perfil || 1
+      };
 
-        if (!error && userData) {
-          // Combinar datos de Supabase con datos locales
-          const usuarioCompleto = {
-            ...userData,
-            apellido: userLocal.apellido || '',
-            nombre_completo: userLocal.nombre_completo || `${userData.nombre} ${userLocal.apellido || ''}`,
-            rol: userData.Perfiles?.nombreperfil || userLocal.rol || '',
-            telefono: userLocal.telefono || ''
-          };
+      console.log('✅ Datos del usuario preparados:', usuarioData);
 
-          setUsuario(usuarioCompleto);
-          setFormData({
-            Nombre: userData.nombre || '',
-            Apellido: userLocal.apellido || '',
-            Email: userData.email || '',
-            Password: ''
-          });
-        } else {
-          throw error || new Error('No se encontraron datos del usuario');
+      setUsuario(usuarioData);
+      setFormData({
+        Nombre: usuarioData.nombre || '',
+        Apellido: usuarioData.apellido || '',
+        Email: usuarioData.email || '',
+        Password: ''
+      });
+
+      // Intentar actualizar desde Supabase solo si tenemos ID
+      if (usuarioData.id) {
+        try {
+          console.log('🔄 Intentando actualizar desde Supabase...');
+          const { data: userData, error } = await supabase
+            .from('usuarios')
+            .select('estado, perfil, id_perfil')
+            .eq('id', usuarioData.id)
+            .single();
+
+          if (!error && userData) {
+            console.log('✅ Datos actualizados desde BD:', userData);
+            // Actualizar solo campos específicos de la BD
+            setUsuario(prev => ({
+              ...prev,
+              estado: userData.estado,
+              perfil: userData.perfil,
+              id_perfil: userData.id_perfil
+            }));
+          }
+        } catch (dbError) {
+          console.warn('⚠️ No se pudo actualizar desde BD, usando localStorage:', dbError.message);
         }
-      } catch (dbError) {
-        console.warn('Error en base de datos, usando datos locales:', dbError);
-        // Usar solo datos del localStorage si falla la BD
-        const usuarioLocalData = {
-          nombre: userLocal?.nombre || 'Usuario',
-          email: userLocal?.email || 'sin@email.com',
-          apellido: userLocal?.apellido || '',
-          telefono: userLocal?.telefono || '',
-          rol: userLocal?.rol || 'Usuario',
-          estado: true
-        };
-
-        setUsuario(usuarioLocalData);
-        setFormData({
-          Nombre: userLocal?.nombre || '',
-          Apellido: userLocal?.apellido || '',
-          Email: userLocal?.email || '',
-          Password: ''
-        });
       }
+
     } catch (error) {
-      console.error('Error general cargando usuario:', error);
+      console.error('💥 Error general cargando usuario:', error);
       // Último recurso: mostrar datos mínimos
       setUsuario({
         nombre: 'Usuario',
@@ -135,7 +116,7 @@ const MiPerfil = () => {
         apellido: '',
         telefono: '',
         rol: 'Usuario',
-        estado: true
+        estado: false
       });
       setFormData({
         Nombre: '',
