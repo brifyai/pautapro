@@ -39,6 +39,11 @@ const MiPerfil = () => {
     fetchUsuario();
   }, []);
 
+  // Forzar re-render cuando cambie el perfil
+  useEffect(() => {
+    console.log('🔄 useEffect - Perfil cambió:', usuario.perfil);
+  }, [usuario.perfil]);
+
   const fetchUsuario = async () => {
     try {
       // Obtener el usuario del localStorage
@@ -582,43 +587,54 @@ const MiPerfil = () => {
         </Typography>
 
         {/* Mostrar API Admin solo para administradores */}
-        {usuario.perfil === 'Administrador' && (
-          <Box sx={{ mb: 3, p: 2, bgcolor: '#f8fafc', borderRadius: 1 }}>
-            <Typography variant="subtitle2" sx={{ mb: 2, color: '#64748b' }}>
-              🔐 Acceso Administrativo
-            </Typography>
+        <Box sx={{ mb: 3, p: 2, bgcolor: '#f8fafc', borderRadius: 1, border: '2px solid #8b5cf6' }}>
+          <Typography variant="subtitle2" sx={{ mb: 2, color: '#64748b', fontWeight: 'bold' }}>
+            🔐 ACCESO ADMINISTRATIVO - SOLO PARA ADMINISTRADORES
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 2, color: '#374151' }}>
+            Perfil detectado: <strong style={{ color: '#8b5cf6' }}>{usuario.perfil || 'Cargando...'}</strong>
+          </Typography>
+          {usuario.perfil === 'Administrador' ? (
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6} md={4}>
                 <Button
-                  variant="outlined"
+                  variant="contained"
                   fullWidth
-                  startIcon={<i className="fas fa-code" style={{ color: '#8b5cf6' }}></i>}
+                  startIcon={<i className="fas fa-code" style={{ color: 'white' }}></i>}
                   onClick={() => window.location.href = '/admin/api'}
                   sx={{
                     p: 2,
                     textAlign: 'left',
                     justifyContent: 'flex-start',
                     height: '60px',
-                    borderColor: '#8b5cf6',
+                    backgroundColor: '#8b5cf6',
                     '&:hover': {
-                      borderColor: '#7c3aed',
-                      backgroundColor: '#faf5ff'
+                      backgroundColor: '#7c3aed'
                     }
                   }}
                 >
                   <Box>
-                    <Typography variant="body1" fontWeight={600}>
-                      🔧 API Admin
+                    <Typography variant="body1" fontWeight={600} color="white">
+                      🔧 API ADMIN PANEL
                     </Typography>
-                    <Typography variant="caption" color="textSecondary">
-                      Panel de administración API
+                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                      Gestión completa de APIs del sistema
                     </Typography>
                   </Box>
                 </Button>
               </Grid>
             </Grid>
-          </Box>
-        )}
+          ) : (
+            <Box sx={{ p: 2, bgcolor: '#ffebee', borderRadius: 1, border: '1px solid #f44336' }}>
+              <Typography variant="body2" color="#d32f2f">
+                ❌ <strong>Acceso restringido:</strong> Solo usuarios con perfil "Administrador" pueden acceder al panel de API.
+              </Typography>
+              <Typography variant="body2" sx={{ mt: 1, color: '#666' }}>
+                Contacta al administrador del sistema para solicitar acceso.
+              </Typography>
+            </Box>
+          )}
+        </Box>
         
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={4}>

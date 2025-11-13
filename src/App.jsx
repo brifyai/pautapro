@@ -32,6 +32,7 @@ import ListadoUsuarios from './pages/usuarios/ListadoUsuarios';
 import MiPerfil from './pages/perfil/MiPerfil';
 import ConfiguracionIA from './pages/configuracion/ConfiguracionIA';
 import ApiAdmin from './pages/admin/ApiAdmin';
+import MainLayout from './components/layout/MainLayout';
 // Páginas legales
 import Privacy from './pages/legal/Privacy';
 import Terms from './pages/legal/Terms';
@@ -427,7 +428,9 @@ function App() {
                     path="/admin/api"
                     element={
                       <ProtectedRoute requiredRole="director">
-                        <ApiAdmin />
+                        <MainLayout>
+                          <ApiAdmin />
+                        </MainLayout>
                       </ProtectedRoute>
                     }
                   />

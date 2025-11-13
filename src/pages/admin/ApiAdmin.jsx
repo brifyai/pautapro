@@ -48,11 +48,13 @@ import {
   Analytics as AnalyticsIcon,
   Settings as SettingsIcon
 } from '@mui/icons-material';
-import MainLayout from '../../components/layout/MainLayout';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../config/supabase';
 import Swal from 'sweetalert2';
 
 const ApiAdmin = () => {
+  const navigate = useNavigate();
+
   // Estados principales
   const [loading, setLoading] = useState(true);
   const [apiTokens, setApiTokens] = useState([]);
@@ -338,16 +340,13 @@ const ApiAdmin = () => {
 
   if (loading) {
     return (
-      <MainLayout>
-        <Container maxWidth="xl" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-          <CircularProgress />
-        </Container>
-      </MainLayout>
+      <Container maxWidth="xl" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <CircularProgress />
+      </Container>
     );
   }
 
   return (
-    <MainLayout>
       <Container maxWidth="xl" sx={{ py: 3 }}>
         {/* Header */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
@@ -740,8 +739,8 @@ const ApiAdmin = () => {
           onClose={cerrarSnackbar}
           anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         >
-          <Alert 
-            onClose={cerrarSnackbar} 
+          <Alert
+            onClose={cerrarSnackbar}
             severity={snackbar.severity}
             sx={{ width: '100%' }}
           >
@@ -749,7 +748,6 @@ const ApiAdmin = () => {
           </Alert>
         </Snackbar>
       </Container>
-    </MainLayout>
   );
 };
 
