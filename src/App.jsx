@@ -31,6 +31,7 @@ import RentabilidadDashboard from './pages/rentabilidad/RentabilidadDashboard';
 import ListadoUsuarios from './pages/usuarios/ListadoUsuarios';
 import MiPerfil from './pages/perfil/MiPerfil';
 import ConfiguracionIA from './pages/configuracion/ConfiguracionIA';
+import ApiAdmin from './pages/admin/ApiAdmin';
 // Páginas legales
 import Privacy from './pages/legal/Privacy';
 import Terms from './pages/legal/Terms';
@@ -417,6 +418,16 @@ function App() {
                     element={
                       <ProtectedRoute requiredModule="usuarios" requiredPermission="ver_usuarios">
                         <ListadoUsuarios />
+                      </ProtectedRoute>
+                    }
+                  />
+                  
+                  {/* Panel de Administración de API - Solo para administradores */}
+                  <Route
+                    path="/admin/api"
+                    element={
+                      <ProtectedRoute requiredRole="admin">
+                        <ApiAdmin />
                       </ProtectedRoute>
                     }
                   />

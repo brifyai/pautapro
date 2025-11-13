@@ -48,6 +48,15 @@ const UserProfileMenu = ({ user, onLogout, onProfileClick }) => {
               <i className="icon-user"></i>
               <span>Mi Perfil</span>
             </button>
+            
+            {/* Botón de API solo para administradores */}
+            {(user?.perfil === 'admin' || user?.id_perfil === 1) && (
+              <button className="menu-item" onClick={() => { setIsOpen(false); window.location.href = '/admin/api'; }}>
+                <i className="icon-code"></i>
+                <span>API</span>
+              </button>
+            )}
+            
             <button className="menu-item">
               <i className="icon-settings"></i>
               <span>Configuración</span>
