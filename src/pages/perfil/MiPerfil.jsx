@@ -580,6 +580,45 @@ const MiPerfil = () => {
         <Typography variant="h6" sx={{ mb: 3 }}>
           ⚙️ Configuración y Sistema
         </Typography>
+
+        {/* Mostrar API Admin solo para administradores */}
+        {usuario.perfil === 'Administrador' && (
+          <Box sx={{ mb: 3, p: 2, bgcolor: '#f8fafc', borderRadius: 1 }}>
+            <Typography variant="subtitle2" sx={{ mb: 2, color: '#64748b' }}>
+              🔐 Acceso Administrativo
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6} md={4}>
+                <Button
+                  variant="outlined"
+                  fullWidth
+                  startIcon={<i className="fas fa-code" style={{ color: '#8b5cf6' }}></i>}
+                  onClick={() => window.location.href = '/admin/api'}
+                  sx={{
+                    p: 2,
+                    textAlign: 'left',
+                    justifyContent: 'flex-start',
+                    height: '60px',
+                    borderColor: '#8b5cf6',
+                    '&:hover': {
+                      borderColor: '#7c3aed',
+                      backgroundColor: '#faf5ff'
+                    }
+                  }}
+                >
+                  <Box>
+                    <Typography variant="body1" fontWeight={600}>
+                      🔧 API Admin
+                    </Typography>
+                    <Typography variant="caption" color="textSecondary">
+                      Panel de administración API
+                    </Typography>
+                  </Box>
+                </Button>
+              </Grid>
+            </Grid>
+          </Box>
+        )}
         
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={4}>
