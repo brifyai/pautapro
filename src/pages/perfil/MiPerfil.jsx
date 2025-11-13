@@ -41,8 +41,8 @@ const MiPerfil = () => {
 
   // Forzar re-render cuando cambie el perfil
   useEffect(() => {
-    console.log('🔄 useEffect - Perfil cambió:', usuario.perfil);
-  }, [usuario.perfil]);
+    console.log('🔄 useEffect - Perfil cambió:', usuario?.perfil);
+  }, [usuario?.perfil]);
 
   const fetchUsuario = async () => {
     try {
@@ -592,9 +592,9 @@ const MiPerfil = () => {
             🔐 ACCESO ADMINISTRATIVO - SOLO PARA ADMINISTRADORES
           </Typography>
           <Typography variant="body2" sx={{ mb: 2, color: '#374151' }}>
-            Perfil detectado: <strong style={{ color: '#8b5cf6' }}>{usuario.perfil || 'Cargando...'}</strong>
+            Perfil detectado: <strong style={{ color: '#8b5cf6' }}>{usuario?.perfil || 'Cargando...'}</strong>
           </Typography>
-          {usuario.perfil === 'Administrador' ? (
+          {usuario?.perfil === 'Administrador' ? (
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6} md={4}>
                 <Button
