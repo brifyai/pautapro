@@ -69,18 +69,52 @@ const UserDataPopup = ({ open, onClose, initialEditing = false }) => {
   const fetchUsuario = async () => {
     try {
       const user = JSON.parse(localStorage.getItem('user'));
-      if (!user?.id) throw new Error('No se encontró el usuario');
+      console.log('🔍 UserDataPopup - Usuario en localStorage:', user);
 
-      const { data, error } = await supabase
-        .from('usuarios')
-        .select('*, Perfiles(nombreperfil), Grupos(nombre_grupo)')
-        .eq('id', user.id)
-        .single();
+      if (!user) {
+        console.warn('❌ UserDataPopup - No hay usuario en localStorage');
+        setUsuario(null);
+        setLoading(false);
+        return;
+      }
 
-      if (error) throw error;
-      setUsuario(data);
+      // Usar datos del localStorage directamente (más confiable)
+      const usuarioData = {
+        id: user.id || user.id_usuario,
+        Nombre: user.nombre || 'Usuario',
+        Email: user.email || 'sin@email.com',
+        Apellido: user.apellido || '',
+        Password: '', // No mostrar contraseña
+        Perfiles: { nombreperfil: user.perfil || user.rol || 'Usuario' },
+        Grupos: { nombre_grupo: 'No asignado' },
+        estado: user.estado !== undefined ? user.estado : true
+      };
+
+      console.log('✅ UserDataPopup - Datos preparados:', usuarioData);
+      setUsuario(usuarioData);
+
+      // Intentar actualizar desde Supabase solo si tenemos ID
+      if (user.id) {
+        try {
+          console.log('🔄 UserDataPopup - Intentando actualizar desde Supabase...');
+          const { data, error } = await supabase
+            .from('usuarios')
+            .select('*, Perfiles(nombreperfil), Grupos(nombre_grupo)')
+            .eq('id', user.id)
+            .single();
+
+          if (!error && data) {
+            console.log('✅ UserDataPopup - Datos actualizados desde BD:', data);
+            setUsuario(data);
+          }
+        } catch (dbError) {
+          console.warn('⚠️ UserDataPopup - No se pudo actualizar desde BD, usando localStorage:', dbError.message);
+        }
+      }
+
     } catch (error) {
-      console.error('Error al obtener datos del usuario:', error);
+      console.error('💥 UserDataPopup - Error general:', error);
+      setUsuario(null);
     } finally {
       setLoading(false);
     }
