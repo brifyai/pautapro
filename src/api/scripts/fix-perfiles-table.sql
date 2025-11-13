@@ -25,8 +25,9 @@ SELECT 'PERFILES DESPUÉS DE INSERCIÓN:' AS info;
 SELECT id, nombreperfil, descripcion FROM perfiles ORDER BY id;
 
 -- 5. Actualizar perfil del usuario administrador (Camilo Alegria)
+-- Nota: La tabla usuarios no tiene campo 'perfil', usa id_perfil para referenciar a la tabla perfiles
 UPDATE usuarios
-SET perfil = 'Administrador'
+SET id_perfil = (SELECT id FROM perfiles WHERE nombreperfil = 'Administrador' LIMIT 1)
 WHERE email = 'camiloalegriabarra@gmail.com';
 
 -- 6. Verificar actualización del usuario
@@ -35,11 +36,11 @@ SELECT
     u.id,
     u.nombre,
     u.email,
-    u.perfil,
+    u.id_perfil,
     p.nombreperfil as perfil_oficial,
     p.descripcion as descripcion_perfil
 FROM usuarios u
-LEFT JOIN perfiles p ON u.perfil = p.nombreperfil
+LEFT JOIN perfiles p ON u.id_perfil = p.id
 WHERE u.email = 'camiloalegriabarra@gmail.com';
 
 -- 7. Mostrar resumen final
@@ -51,4 +52,4 @@ SELECT
 FROM perfiles;
 
 SELECT 'USUARIO ADMINISTRADOR:' AS info;
-SELECT nombre, email, perfil FROM usuarios WHERE email = 'camiloalegriabarra@gmail.com';
+SELECT nombre, email, id_perfil FROM usuarios WHERE email = 'camiloalegriabarra@gmail.com';
