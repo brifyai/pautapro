@@ -101,6 +101,27 @@ const MiPerfil = () => {
               perfil: userData.perfil,
               id_perfil: userData.id_perfil
             }));
+
+            // Si tenemos id_perfil, buscar el nombre del perfil en la tabla perfiles
+            if (userData.id_perfil) {
+              try {
+                const { data: perfilData, error: perfilError } = await supabase
+                  .from('perfiles')
+                  .select('nombreperfil')
+                  .eq('id', userData.id_perfil)
+                  .single();
+
+                if (!perfilError && perfilData) {
+                  console.log('✅ Nombre del perfil encontrado:', perfilData.nombreperfil);
+                  setUsuario(prev => ({
+                    ...prev,
+                    perfil: perfilData.nombreperfil
+                  }));
+                }
+              } catch (perfilError) {
+                console.warn('⚠️ No se pudo obtener nombre del perfil:', perfilError.message);
+              }
+            }
           }
         } catch (dbError) {
           console.warn('⚠️ No se pudo actualizar desde BD, usando localStorage:', dbError.message);
