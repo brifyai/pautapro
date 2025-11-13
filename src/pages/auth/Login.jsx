@@ -136,7 +136,9 @@ const Login = () => {
       if (formData.rememberMe) {
         localStorage.setItem('rememberMe', 'true');
       }
-      navigate(from, { replace: true });
+      // Redirigir usando window.location para asegurar que la sesión se mantenga
+      console.log('✅ Login exitoso, redirigiendo a:', from);
+      window.location.href = from;
     } catch (error) {
       setErrors({
         submit: error.message || 'Login failed. Please try again.'

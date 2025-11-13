@@ -37,6 +37,7 @@ import MainLayout from './components/layout/MainLayout';
 import Privacy from './pages/legal/Privacy';
 import Terms from './pages/legal/Terms';
 import Security from './pages/legal/Security';
+import Compliance from './pages/legal/Compliance';
 import ServiceTerms from './pages/legal/ServiceTerms';
 
 // Páginas de producto
@@ -84,6 +85,8 @@ function App() {
       const user = localStorage.getItem('user');
       const isAuth = !!user;
 
+      console.log('handleStorageChange ejecutado, isAuth:', isAuth, 'user:', !!user);
+
       // Verificar si el usuario existe y tiene datos válidos
       if (user) {
         try {
@@ -103,14 +106,9 @@ function App() {
         }
       }
 
-      // Solo actualizar si realmente cambió el estado de autenticación
-      setIsAuthenticated(prevIsAuth => {
-        if (prevIsAuth !== isAuth) {
-          console.log('🔄 Estado de autenticación cambió:', prevIsAuth, '->', isAuth);
-          return isAuth;
-        }
-        return prevIsAuth;
-      });
+      // Actualizar siempre el estado de autenticación
+      setIsAuthenticated(isAuth);
+      console.log('✅ Estado de autenticación actualizado a:', isAuth);
     };
 
     // Verificar autenticación inicial
@@ -151,385 +149,380 @@ function App() {
                     <HorizontalNav />
                   </>
                 )}
-                <div className="app-container">                  <main className={isMobile ? "app-content mobile-content" : "app-content"}>
-                  <MobileWrapper>
-                    <Routes>
-                  {/* Rutas públicas con protección básica */}
-                  <Route
-                    path="/dashboard"
-                    element={
-                      <ProtectedRoute requiredModule="dashboard">
-                        <Dashboard />
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  {/* Módulo de Planificación */}
-                  <Route
-                    path="/planificacion"
-                    element={
-                      <ProtectedRoute requiredModule="planificacion" requiredPermission="ver_planificacion">
-                        <Planificacion />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/planificacion/new"
-                    element={
-                      <ProtectedRoute requiredModule="planificacion" requiredPermission="crear_planificacion">
-                        <NuevoPlan />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/planificacion/alternativas/:id"
-                    element={
-                      <ProtectedRoute requiredModule="planificacion" requiredPermission="ver_planificacion">
-                        <Alternativas />
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  {/* Módulo de Clientes */}
-                  <Route
-                    path="/clientes"
-                    element={
-                      <ProtectedRoute requiredModule="clientes" requiredPermission="ver_clientes">
-                        <Clientes />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/clientes/view/:id"
-                    element={
-                      <ProtectedRoute requiredModule="clientes" requiredPermission="ver_clientes">
-                        <ViewCliente />
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  {/* Módulo de Medios */}
-                  <Route
-                    path="/medios"
-                    element={
-                      <ProtectedRoute requiredModule="medios" requiredPermission="ver_medios">
-                        <Medios />
-                      </ProtectedRoute>
-                    }
-                  />
-                  {/* <Route
-                    path="/medios/calendario"
-                    element={
-                      <ProtectedRoute requiredModule="medios" requiredPermission="ver_medios">
-                        <CalendarioDisponibilidadMedios />
-                      </ProtectedRoute>
-                    }
-                  /> */}
-                  
-                  {/* Módulo de Grupos */}
-                  <Route
-                    path="/grupos"
-                    element={
-                      <ProtectedRoute requiredRole="director">
-                        <Grupos />
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  {/* Módulo de Agencias */}
-                  <Route
-                    path="/agencias"
-                    element={
-                      <ProtectedRoute requiredModule="agencias" requiredPermission="ver_agencias">
-                        <Agencias />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/agencias/view/:id"
-                    element={
-                      <ProtectedRoute requiredModule="agencias" requiredPermission="ver_agencias">
-                        <ViewAgencia />
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  {/* Módulo de Proveedores */}
-                  <Route
-                    path="/proveedores"
-                    element={
-                      <ProtectedRoute requiredModule="proveedores" requiredPermission="ver_proveedores">
-                        <Proveedores />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/proveedores/view/:id"
-                    element={
-                      <ProtectedRoute requiredModule="proveedores" requiredPermission="ver_proveedores">
-                        <ViewProveedor />
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  {/* Módulo de Soportes */}
-                  <Route
-                    path="/soportes"
-                    element={
-                      <ProtectedRoute requiredModule="soportes" requiredPermission="ver_soportes">
-                        <Soportes />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/soportes/view/:id"
-                    element={
-                      <ProtectedRoute requiredModule="soportes" requiredPermission="ver_soportes">
-                        <ViewSoporte />
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  {/* Módulo de Mensajes */}
-                  <Route
-                    path="/mensajes"
-                    element={
-                      <ProtectedRoute requiredModule="mensajes" requiredPermission="ver_mensajes">
-                        <Mensajes />
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  {/* Módulo de Campañas */}
-                  <Route
-                    path="/campanas"
-                    element={
-                      <ProtectedRoute requiredModule="campanas" requiredPermission="ver_campanas">
-                        <Campanas />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/campanas/:id"
-                    element={
-                      <ProtectedRoute requiredModule="campanas" requiredPermission="ver_campanas">
-                        <ViewCampania />
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  {/* Módulo de Contratos */}
-                  <Route
-                    path="/contratos"
-                    element={
-                      <ProtectedRoute requiredModule="contratos" requiredPermission="ver_contratos">
-                        <Contratos />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/contratos/view/:id"
-                    element={
-                      <ProtectedRoute requiredModule="contratos" requiredPermission="ver_contratos">
-                        <ViewContrato />
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  {/* Módulo de Órdenes */}
-                  <Route
-                    path="/ordenes/crear"
-                    element={
-                      <CrearOrden />
-                    }
-                  />
-                  {/* <Route
-                    path="/ordenes/historial"
-                    element={
-                      <ProtectedRoute requiredModule="ordenes" requiredPermission="ver_ordenes">
-                        <ReporteVersionesOrdenes />
-                      </ProtectedRoute>
-                    }
-                  /> */}
-                  <Route
-                    path="/ordenes/revisar"
-                    element={
-                      <ProtectedRoute requiredModule="ordenes" requiredPermission="ver_ordenes">
-                        <RevisarOrden />
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  {/* Módulo de Reportes - Reportes Consolidados */}
-                  <Route
-                    path="/reportes/inversion"
-                    element={
-                      <ProtectedRoute requiredModule="reportes" requiredPermission="ver_reportes">
-                        <ReporteInversion />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/reportes/ordenes"
-                    element={
-                      <ProtectedRoute requiredModule="reportes" requiredPermission="ver_reportes">
-                        <GestionOrdenes />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/reportes/analitico"
-                    element={
-                      <ProtectedRoute requiredModule="reportes" requiredPermission="ver_reportes">
-                        <DashboardAnalitico />
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  {/* Módulo de Dashboard Analytics */}
-                  <Route
-                    path="/dashboard/analytics"
-                    element={
-                      <ProtectedRoute requiredModule="dashboard" requiredPermission="ver_dashboard">
-                        <DashboardAnalytics />
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  {/* Módulo de Rentabilidad Inteligente */}
-                  {isMobile ? (
-                    <Route
-                      path="/rentabilidad"
-                      element={<RentabilidadDashboard />}
-                    />
-                  ) : (
-                    <Route
-                      path="/rentabilidad"
-                      element={
-                        <ProtectedRoute requiredModule="rentabilidad" requiredPermission="ver_rentabilidad">
-                          <RentabilidadDashboard />
-                        </ProtectedRoute>
-                      }
-                    />
-                  )}
-                  
-                  {/* Módulo de Usuarios - Solo para roles altos */}
-                  <Route
-                    path="/usuarios"
-                    element={
-                      <ProtectedRoute requiredModule="usuarios" requiredPermission="ver_usuarios">
-                        <ListadoUsuarios />
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  {/* Panel de Administración de API - Solo para administradores */}
-                  <Route
-                    path="/admin/api"
-                    element={
-                      <ProtectedRoute>
-                        <MainLayout>
-                          <ApiAdmin />
-                        </MainLayout>
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  {/* Perfil de usuario - accesible para todos */}
-                  <Route
-                    path="/perfil"
-                    element={
-                      <ProtectedRoute>
-                        <MiPerfil />
-                      </ProtectedRoute>
-                    }
-                  />
+                <div className="app-container">
+                  <main className={isMobile ? "app-content mobile-content" : "app-content"}>
+                    <MobileWrapper>
+                      <Routes>
+                        {/* Rutas públicas - Panel de API */}
+                        <Route path="/admin/api" element={<ApiAdmin />} />
+                        <Route path="/admin/api/demo" element={<ApiAdmin />} />
+                        
+                        {/* Rutas públicas - Páginas legales */}
+                        <Route path="/privacidad" element={<Privacy />} />
+                        <Route path="/terminos" element={<Terms />} />
+                        <Route path="/seguridad" element={<Security />} />
+                        <Route path="/cumplimiento" element={<Compliance />} />
+                        <Route path="/condiciones-servicio" element={<ServiceTerms />} />
+                        
+                        {/* Redirecciones de compatibilidad - URLs legales en inglés a español */}
+                        <Route path="/privacy" element={<Navigate to="/privacidad" replace />} />
+                        <Route path="/terms" element={<Navigate to="/terminos" replace />} />
+                        <Route path="/security" element={<Navigate to="/seguridad" replace />} />
+                        <Route path="/compliance" element={<Navigate to="/cumplimiento" replace />} />
+                        
+                        {/* Rutas públicas - Páginas de producto */}
+                        <Route path="/caracteristicas" element={<Features />} />
+                        <Route path="/precios" element={<Pricing />} />
+                        <Route path="/integraciones" element={<Integrations />} />
+                        <Route path="/api-desarrollador" element={<Api />} />
+                        
+                        {/* Redirecciones de compatibilidad - URLs de producto en inglés a español */}
+                        <Route path="/features" element={<Navigate to="/caracteristicas" replace />} />
+                        <Route path="/pricing" element={<Navigate to="/precios" replace />} />
+                        <Route path="/integrations" element={<Navigate to="/integraciones" replace />} />
+                        <Route path="/api" element={<Navigate to="/api-desarrollador" replace />} />
+                        
+                        {/* Módulo de Planificación */}
+                        <Route
+                          path="/planificacion"
+                          element={
+                            <ProtectedRoute requiredModule="planificacion" requiredPermission="ver_planificacion">
+                              <Planificacion />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/planificacion/new"
+                          element={
+                            <ProtectedRoute requiredModule="planificacion" requiredPermission="crear_planificacion">
+                              <NuevoPlan />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/planificacion/alternativas/:id"
+                          element={
+                            <ProtectedRoute requiredModule="planificacion" requiredPermission="ver_planificacion">
+                              <Alternativas />
+                            </ProtectedRoute>
+                          }
+                        />
+                        
+                        {/* Módulo de Clientes */}
+                        <Route
+                          path="/clientes"
+                          element={
+                            <ProtectedRoute requiredModule="clientes" requiredPermission="ver_clientes">
+                              <Clientes />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/clientes/view/:id"
+                          element={
+                            <ProtectedRoute requiredModule="clientes" requiredPermission="ver_clientes">
+                              <ViewCliente />
+                            </ProtectedRoute>
+                          }
+                        />
+                        
+                        {/* Módulo de Medios */}
+                        <Route
+                          path="/medios"
+                          element={
+                            <ProtectedRoute requiredModule="medios" requiredPermission="ver_medios">
+                              <Medios />
+                            </ProtectedRoute>
+                          }
+                        />
+                        
+                        {/* Módulo de Grupos */}
+                        <Route
+                          path="/grupos"
+                          element={
+                            <ProtectedRoute requiredRole="director">
+                              <Grupos />
+                            </ProtectedRoute>
+                          }
+                        />
+                        
+                        {/* Módulo de Agencias */}
+                        <Route
+                          path="/agencias"
+                          element={
+                            <ProtectedRoute requiredModule="agencias" requiredPermission="ver_agencias">
+                              <Agencias />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/agencias/view/:id"
+                          element={
+                            <ProtectedRoute requiredModule="agencias" requiredPermission="ver_agencias">
+                              <ViewAgencia />
+                            </ProtectedRoute>
+                          }
+                        />
+                        
+                        {/* Módulo de Proveedores */}
+                        <Route
+                          path="/proveedores"
+                          element={
+                            <ProtectedRoute requiredModule="proveedores" requiredPermission="ver_proveedores">
+                              <Proveedores />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/proveedores/view/:id"
+                          element={
+                            <ProtectedRoute requiredModule="proveedores" requiredPermission="ver_proveedores">
+                              <ViewProveedor />
+                            </ProtectedRoute>
+                          }
+                        />
+                        
+                        {/* Módulo de Soportes */}
+                        <Route
+                          path="/soportes"
+                          element={
+                            <ProtectedRoute requiredModule="soportes" requiredPermission="ver_soportes">
+                              <Soportes />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/soportes/view/:id"
+                          element={
+                            <ProtectedRoute requiredModule="soportes" requiredPermission="ver_soportes">
+                              <ViewSoporte />
+                            </ProtectedRoute>
+                          }
+                        />
+                        
+                        {/* Módulo de Mensajes */}
+                        <Route
+                          path="/mensajes"
+                          element={
+                            <ProtectedRoute requiredModule="mensajes" requiredPermission="ver_mensajes">
+                              <Mensajes />
+                            </ProtectedRoute>
+                          }
+                        />
+                        
+                        {/* Módulo de Campañas */}
+                        <Route
+                          path="/campanas"
+                          element={
+                            <ProtectedRoute requiredModule="campanas" requiredPermission="ver_campanas">
+                              <Campanas />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/campanas/:id"
+                          element={
+                            <ProtectedRoute requiredModule="campanas" requiredPermission="ver_campanas">
+                              <ViewCampania />
+                            </ProtectedRoute>
+                          }
+                        />
+                        
+                        {/* Módulo de Contratos */}
+                        <Route
+                          path="/contratos"
+                          element={
+                            <ProtectedRoute requiredModule="contratos" requiredPermission="ver_contratos">
+                              <Contratos />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/contratos/view/:id"
+                          element={
+                            <ProtectedRoute requiredModule="contratos" requiredPermission="ver_contratos">
+                              <ViewContrato />
+                            </ProtectedRoute>
+                          }
+                        />
+                        
+                        {/* Módulo de Órdenes */}
+                        <Route
+                          path="/ordenes/crear"
+                          element={
+                            <CrearOrden />
+                          }
+                        />
+                        <Route
+                          path="/ordenes/revisar"
+                          element={
+                            <ProtectedRoute requiredModule="ordenes" requiredPermission="ver_ordenes">
+                              <RevisarOrden />
+                            </ProtectedRoute>
+                          }
+                        />
+                        
+                        {/* Módulo de Reportes - Reportes Consolidados */}
+                        <Route
+                          path="/reportes/inversion"
+                          element={
+                            <ProtectedRoute requiredModule="reportes" requiredPermission="ver_reportes">
+                              <ReporteInversion />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/reportes/ordenes"
+                          element={
+                            <ProtectedRoute requiredModule="reportes" requiredPermission="ver_reportes">
+                              <GestionOrdenes />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/reportes/analitico"
+                          element={
+                            <ProtectedRoute requiredModule="reportes" requiredPermission="ver_reportes">
+                              <DashboardAnalitico />
+                            </ProtectedRoute>
+                          }
+                        />
+                        
+                        {/* Módulo de Dashboard Analytics */}
+                        <Route
+                          path="/dashboard/analytics"
+                          element={
+                            <ProtectedRoute requiredModule="dashboard" requiredPermission="ver_dashboard">
+                              <DashboardAnalytics />
+                            </ProtectedRoute>
+                          }
+                        />
+                        
+                        {/* Módulo de Rentabilidad Inteligente */}
+                        <Route
+                          path="/rentabilidad"
+                          element={
+                            isMobile ? (
+                              <RentabilidadDashboard />
+                            ) : (
+                              <ProtectedRoute requiredModule="rentabilidad" requiredPermission="ver_rentabilidad">
+                                <RentabilidadDashboard />
+                              </ProtectedRoute>
+                            )
+                          }
+                        />
+                        
+                        {/* Módulo de Usuarios - Solo para roles altos */}
+                        <Route
+                          path="/usuarios"
+                          element={
+                            <ProtectedRoute requiredModule="usuarios" requiredPermission="ver_usuarios">
+                              <ListadoUsuarios />
+                            </ProtectedRoute>
+                          }
+                        />
+                        
+                        {/* Perfil de usuario - accesible para todos */}
+                        <Route
+                          path="/perfil"
+                          element={
+                            <ProtectedRoute>
+                              <MiPerfil />
+                            </ProtectedRoute>
+                          }
+                        />
 
-                  {/* Configuración IA - accesible para todos */}
-                  <Route
-                    path="/configuracion"
-                    element={
-                      <ProtectedRoute>
-                        <ConfiguracionIA />
-                      </ProtectedRoute>
-                    }
-                  />
+                        {/* Configuración IA - accesible para todos */}
+                        <Route
+                          path="/configuracion"
+                          element={
+                            <ProtectedRoute>
+                              <ConfiguracionIA />
+                            </ProtectedRoute>
+                          }
+                        />
 
-                  {/* Asistente de Flujo de Trabajo */}
-                  <Route
-                    path="/asistente"
-                    element={
-                      <ProtectedRoute>
-                        <WorkflowWizard />
-                      </ProtectedRoute>
-                    }
-                  />
+                        {/* Asistente de Flujo de Trabajo */}
+                        <Route
+                          path="/asistente"
+                          element={
+                            <ProtectedRoute>
+                              <WorkflowWizard />
+                            </ProtectedRoute>
+                          }
+                        />
 
-                  {/* Ruta de creación de órdenes (asistente mejorado) */}
-                  <Route
-                    path="/ordenes/crear"
-                    element={
-                      <ProtectedRoute>
-                        <WorkflowWizard />
-                      </ProtectedRoute>
-                    }
-                  />
+                        {/* Ruta temporal para insertar proveedores */}
+                        <Route
+                          path="/seed-proveedores"
+                          element={
+                            <ProtectedRoute>
+                              <SeedProveedores />
+                            </ProtectedRoute>
+                          }
+                        />
 
-                  {/* Ruta temporal para insertar proveedores */}
-                  <Route
-                    path="/seed-proveedores"
-                    element={
-                      <ProtectedRoute>
-                        <SeedProveedores />
-                      </ProtectedRoute>
-                    }
-                  />
+                        {/* Dashboard - ruta por defecto para autenticados */}
+                        <Route
+                          path="/dashboard"
+                          element={
+                            <ProtectedRoute requiredModule="dashboard">
+                              <Dashboard />
+                            </ProtectedRoute>
+                          }
+                        />
 
-                  {/* Rutas por defecto - REDIRIGIR AL DASHBOARD */}
-                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                  {/* Ruta catch-all para SPA - IMPORTANTE para evitar 404 en refresh */}
-                  <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                    </Routes>
-                  </MobileWrapper>
-                </main>
-              </div>
-            </>
-          ) : (
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/home" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              {/* Redirecciones de compatibilidad - URLs legales en inglés a español (DEBEN IR ANTES) */}
-              <Route path="/privacy" element={<Navigate to="/privacidad" replace />} />
-              <Route path="/terms" element={<Navigate to="/terminos" replace />} />
-              <Route path="/security" element={<Navigate to="/seguridad" replace />} />
-              
-              {/* Redirecciones de compatibilidad - URLs de producto en inglés a español (DEBEN IR ANTES) */}
-              <Route path="/features" element={<Navigate to="/caracteristicas" replace />} />
-              <Route path="/pricing" element={<Navigate to="/precios" replace />} />
-              <Route path="/integrations" element={<Navigate to="/integraciones" replace />} />
-              <Route path="/api" element={<Navigate to="/api-desarrollador" replace />} />
-              
-              {/* Páginas legales - acceso público */}
-              <Route path="/privacidad" element={<Privacy />} />
-              <Route path="/terminos" element={<Terms />} />
-              <Route path="/seguridad" element={<Security />} />
-              <Route path="/condiciones-servicio" element={<ServiceTerms />} />
-              
-              {/* Páginas de producto - acceso público */}
-              <Route path="/caracteristicas" element={<Features />} />
-              <Route path="/precios" element={<Pricing />} />
-              <Route path="/integraciones" element={<Integrations />} />
-              <Route path="/api-desarrollador" element={<Api />} />
-              
-              {/* Redirección de compatibilidad - URL antigua a nueva */}
-              <Route path="/compliance" element={<Navigate to="/condiciones-servicio" replace />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          )}
-        </div>
+                        {/* Ruta catch-all para autenticados */}
+                        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                      </Routes>
+                    </MobileWrapper>
+                  </main>
+                </div>
+              </>
+            ) : (
+              <Routes>
+                {/* Rutas públicas - Panel de API */}
+                <Route path="/admin/api" element={<ApiAdmin />} />
+                <Route path="/admin/api/demo" element={<ApiAdmin />} />
+                
+                {/* Rutas públicas - Páginas legales */}
+                <Route path="/privacidad" element={<Privacy />} />
+                <Route path="/terminos" element={<Terms />} />
+                <Route path="/seguridad" element={<Security />} />
+                <Route path="/cumplimiento" element={<Compliance />} />
+                <Route path="/condiciones-servicio" element={<ServiceTerms />} />
+                
+                {/* Redirecciones de compatibilidad - URLs legales en inglés a español */}
+                <Route path="/privacy" element={<Navigate to="/privacidad" replace />} />
+                <Route path="/terms" element={<Navigate to="/terminos" replace />} />
+                <Route path="/security" element={<Navigate to="/seguridad" replace />} />
+                <Route path="/compliance" element={<Navigate to="/cumplimiento" replace />} />
+                
+                {/* Rutas públicas - Páginas de producto */}
+                <Route path="/caracteristicas" element={<Features />} />
+                <Route path="/precios" element={<Pricing />} />
+                <Route path="/integraciones" element={<Integrations />} />
+                <Route path="/api-desarrollador" element={<Api />} />
+                
+                {/* Redirecciones de compatibilidad - URLs de producto en inglés a español */}
+                <Route path="/features" element={<Navigate to="/caracteristicas" replace />} />
+                <Route path="/pricing" element={<Navigate to="/precios" replace />} />
+                <Route path="/integrations" element={<Navigate to="/integraciones" replace />} />
+                <Route path="/api" element={<Navigate to="/api-desarrollador" replace />} />
+                
+                {/* Rutas de autenticación */}
+                <Route path="/" element={<Home />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                
+                {/* Ruta catch-all para no autenticados */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            )}
+          </div>
         </ErrorBoundary>
       </NotificationProvider>
     </Router>

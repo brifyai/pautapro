@@ -49,8 +49,8 @@ import {
   Settings as SettingsIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../config/supabase';
 import Swal from 'sweetalert2';
+import { supabase } from '../../config/supabase';
 
 const ApiAdmin = () => {
   const navigate = useNavigate();
@@ -102,10 +102,22 @@ const ApiAdmin = () => {
   const cargarDatos = async () => {
     try {
       setLoading(true);
-      await Promise.all([
-        cargarApiTokens(),
-        cargarApiMetrics()
-      ]);
+      
+      // Cargar tokens de Supabase
+      const { data: tokens, error: tokensError } = await supabase
+        .from('api_tokens')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (tokensError) {
+        console.error('Error cargando tokens:', tokensError);
+        mostrarSnackbar('Error cargando tokens de la base de datos', 'error');
+      } else {
+        setApiTokens(tokens || []);
+      }
+      
+      // Cargar métricas
+      await cargarApiMetrics();
     } catch (error) {
       console.error('Error cargando datos:', error);
       mostrarSnackbar('Error cargando datos de la API', 'error');
@@ -114,42 +126,57 @@ const ApiAdmin = () => {
     }
   };
 
-  const cargarApiTokens = async () => {
+  const cargarApiMetrics = async () => {
     try {
-      const { data, error } = await supabase
+      // Obtener estadísticas de la base de datos
+      const { data: tokens, error: tokensError } = await supabase
         .from('api_tokens')
-        .select('*')
-        .order('fecha_creacion', { ascending: false });
+        .select('*');
 
-      if (error) throw error;
-      setApiTokens(data || []);
+      const { data: logs, error: logsError } = await supabase
+        .from('api_logs')
+        .select('*')
+        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+
+      if (tokensError || logsError) {
+        console.error('Error cargando métricas:', tokensError || logsError);
+      }
+
+      const tokensActivos = (tokens || []).filter(t => t.activo).length;
+      const tokensInactivos = (tokens || []).filter(t => !t.activo).length;
+      const totalRequests = (logs || []).length;
+      const requestsExitosos = (logs || []).filter(l => l.status_code >= 200 && l.status_code < 300).length;
+      const requestsError = totalRequests - requestsExitosos;
+
+      const metricasCalculadas = {
+        total_requests_24h: totalRequests,
+        requests_exitosos: requestsExitosos,
+        requests_error: requestsError,
+        tokens_activos: tokensActivos,
+        tokens_inactivos: tokensInactivos,
+        bandwidth_usado: (logs || []).reduce((sum, log) => sum + (log.response_size || 0), 0) / (1024 * 1024), // MB
+        bandwidth_limite: 1000, // MB
+        uptime: totalRequests > 0 ? ((requestsExitosos / totalRequests) * 100).toFixed(1) : 100,
+        endpoints_mas_usados: getEndpointsMasUsados(logs || [])
+      };
+      
+      setApiMetrics(metricasCalculadas);
     } catch (error) {
-      console.error('Error cargando tokens:', error);
+      console.error('Error calculando métricas:', error);
     }
   };
 
-  const cargarApiMetrics = async () => {
-    try {
-      // Simular métricas (en producción vendría de la API real)
-      const metricasSimuladas = {
-        total_requests_24h: 12456,
-        requests_exitosos: 11890,
-        requests_error: 566,
-        tokens_activos: 8,
-        tokens_inactivos: 3,
-        bandwidth_usado: 245.7, // MB
-        bandwidth_limite: 1000, // MB
-        uptime: 99.9,
-        endpoints_mas_usados: [
-          { endpoint: 'GET /clientes', requests: 5432 },
-          { endpoint: 'POST /ordenes', requests: 3210 },
-          { endpoint: 'GET /reportes', requests: 2890 }
-        ]
-      };
-      setApiMetrics(metricasSimuladas);
-    } catch (error) {
-      console.error('Error cargando métricas:', error);
-    }
+  const getEndpointsMasUsados = (logs) => {
+    const endpoints = {};
+    logs.forEach(log => {
+      const endpoint = `${log.method} ${log.endpoint}`;
+      endpoints[endpoint] = (endpoints[endpoint] || 0) + 1;
+    });
+    
+    return Object.entries(endpoints)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([endpoint, requests]) => ({ endpoint, requests }));
   };
 
   const generarToken = async () => {
@@ -169,30 +196,34 @@ const ApiAdmin = () => {
       
       // Preparar datos del token
       const tokenData = {
-        ...tokenForm,
+        nombre: tokenForm.nombre,
+        descripcion: tokenForm.descripcion,
         token: token,
-        fecha_creacion: new Date().toISOString(),
+        permisos: tokenForm.permisos,
+        plan: tokenForm.plan,
+        activo: tokenForm.activo,
         fecha_expiracion: new Date(Date.now() + tokenForm.expiracion_dias * 24 * 60 * 60 * 1000).toISOString(),
         limite_requests_hora: getLimiteRequestsPorPlan(tokenForm.plan),
         requests_realizadas: 0,
         requests_restantes: getLimiteRequestsPorPlan(tokenForm.plan)
       };
 
-      // Guardar en base de datos
+      // Guardar en Supabase
       const { data, error } = await supabase
         .from('api_tokens')
         .insert([tokenData])
-        .select()
-        .single();
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error guardando token:', error);
+        mostrarSnackbar('Error guardando token en la base de datos', 'error');
+        return;
+      }
 
-      // Actualizar lista
-      await cargarApiTokens();
-      
       mostrarSnackbar('Token generado exitosamente', 'success');
       setOpenTokenModal(false);
       resetForm();
+      await cargarDatos();
 
     } catch (error) {
       console.error('Error generando token:', error);
@@ -218,10 +249,14 @@ const ApiAdmin = () => {
           .delete()
           .eq('id', tokenId);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error eliminando token:', error);
+          mostrarSnackbar('Error eliminando token', 'error');
+          return;
+        }
         
-        await cargarApiTokens();
         mostrarSnackbar('Token eliminado exitosamente', 'success');
+        await cargarDatos();
       }
 
     } catch (error) {
@@ -247,18 +282,21 @@ const ApiAdmin = () => {
         
         const { error } = await supabase
           .from('api_tokens')
-          .update({ 
+          .update({
             token: nuevoToken,
             fecha_regeneracion: new Date().toISOString(),
-            requests_realizadas: 0,
-            requests_restantes: getLimiteRequestsPorPlan(editingToken.plan)
+            requests_realizadas: 0
           })
           .eq('id', tokenId);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error regenerando token:', error);
+          mostrarSnackbar('Error regenerando token', 'error');
+          return;
+        }
         
-        await cargarApiTokens();
         mostrarSnackbar('Token regenerado exitosamente', 'success');
+        await cargarDatos();
       }
 
     } catch (error) {
@@ -276,7 +314,7 @@ const ApiAdmin = () => {
     const csvContent = "data:text/csv;charset=utf-8," 
       + "Nombre,Descripción,Permisos,Plan,Estado,Creación,Expiración,Requests\n"
       + apiTokens.map(token => 
-          `"${token.nombre}","${token.descripcion}","${token.permisos.join(', ')}","${token.plan}","${token.activo ? 'Activo' : 'Inactivo'}","${new Date(token.fecha_creacion).toLocaleDateString()}","${new Date(token.fecha_expiracion).toLocaleDateString()}","${token.requests_realizadas}"`
+          `"${token.nombre}","${token.descripcion}","${(token.permisos || []).join(', ')}","${token.plan}","${token.activo ? 'Activo' : 'Inactivo'}","${new Date(token.created_at).toLocaleDateString()}","${new Date(token.fecha_expiracion).toLocaleDateString()}","${token.requests_realizadas}"`
         ).join("\n");
 
     const encodedUri = encodeURI(csvContent);
@@ -502,7 +540,7 @@ const ApiAdmin = () => {
                         </TableCell>
                         <TableCell>
                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                            {token.permisos.slice(0, 2).map((permiso) => (
+                            {(token.permisos || []).slice(0, 2).map((permiso) => (
                               <Chip 
                                 key={permiso} 
                                 label={permiso} 
@@ -511,9 +549,9 @@ const ApiAdmin = () => {
                                 sx={{ fontSize: '0.75rem' }}
                               />
                             ))}
-                            {token.permisos.length > 2 && (
+                            {(token.permisos || []).length > 2 && (
                               <Chip 
-                                label={`+${token.permisos.length - 2}`} 
+                                label={`+${(token.permisos || []).length - 2}`} 
                                 size="small" 
                                 variant="outlined"
                                 sx={{ fontSize: '0.75rem' }}
@@ -540,7 +578,7 @@ const ApiAdmin = () => {
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2">
-                            {formatDate(token.fecha_creacion)}
+                            {formatDate(token.created_at)}
                           </Typography>
                         </TableCell>
                         <TableCell>
