@@ -640,6 +640,33 @@ const MiPerfil = () => {
             <Button
               variant="text"
               fullWidth
+              startIcon={<i className="fas fa-code" style={{ color: '#8b5cf6' }}></i>}
+              onClick={() => window.location.href = '/admin/api'}
+              sx={{
+                p: 2,
+                textAlign: 'left',
+                justifyContent: 'flex-start',
+                height: '50px',
+                '&:hover': {
+                  backgroundColor: '#faf5ff'
+                }
+              }}
+            >
+              <Box>
+                <Typography variant="body2" fontWeight={600}>
+                  🔧 API Admin
+                </Typography>
+                <Typography variant="caption" color="textSecondary">
+                  Panel de administración API
+                </Typography>
+              </Box>
+            </Button>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={4}>
+            <Button
+              variant="text"
+              fullWidth
               startIcon={<i className="fas fa-sign-out-alt" style={{ color: '#dc2626' }}></i>}
               onClick={() => {
                 localStorage.clear();

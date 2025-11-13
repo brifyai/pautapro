@@ -426,7 +426,7 @@ function App() {
                   <Route
                     path="/admin/api"
                     element={
-                      <ProtectedRoute requiredRole="admin">
+                      <ProtectedRoute requiredRole="director">
                         <ApiAdmin />
                       </ProtectedRoute>
                     }
