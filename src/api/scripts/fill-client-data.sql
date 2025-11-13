@@ -2,7 +2,7 @@
 -- Agrega direcciones y fechas de ingreso a clientes que no las tienen
 
 -- Primero, veamos qué clientes existen actualmente
-SELECT id_cliente, nombrecliente, direccion, created_at, fechadeultimamodificacion
+SELECT id_cliente, nombrecliente, direccion, created_at
 FROM clientes
 ORDER BY id_cliente;
 
@@ -62,7 +62,6 @@ SET
     WHEN id_cliente = 50 THEN 'Calle Príncipe de Gales 10203, La Reina, Santiago'
     ELSE 'Dirección por confirmar, Santiago, Chile'
   END,
-  fechadeultimamodificacion = NOW()
 WHERE direccion IS NULL OR direccion = '' OR LENGTH(TRIM(direccion)) = 0;
 
 -- Para clientes que no tienen fecha de creación, asignar fechas aleatorias en los últimos 2 años
@@ -128,8 +127,7 @@ SELECT
   id_cliente,
   nombrecliente,
   direccion,
-  created_at,
-  fechadeultimamodificacion
+  created_at
 FROM clientes
 WHERE direccion IS NULL OR direccion = '' OR created_at IS NULL
 ORDER BY id_cliente;
