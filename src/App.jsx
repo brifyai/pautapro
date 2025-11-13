@@ -428,9 +428,7 @@ function App() {
                     path="/admin/api"
                     element={
                       <ProtectedRoute requiredRole="director">
-                        <MainLayout>
-                          <ApiAdmin />
-                        </MainLayout>
+                        <ApiAdmin />
                       </ProtectedRoute>
                     }
                   />
