@@ -49,7 +49,6 @@ import {
   Settings as SettingsIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import MainLayout from '../../components/layout/MainLayout';
 import { supabase } from '../../config/supabase';
 import Swal from 'sweetalert2';
 
@@ -341,16 +340,13 @@ const ApiAdmin = () => {
 
   if (loading) {
     return (
-      <MainLayout>
-        <Container maxWidth="xl" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-          <CircularProgress />
-        </Container>
-      </MainLayout>
+      <Container maxWidth="xl" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <CircularProgress />
+      </Container>
     );
   }
 
   return (
-    <MainLayout>
       <Container maxWidth="xl" sx={{ py: 3 }}>
         {/* Header */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
@@ -752,7 +748,6 @@ const ApiAdmin = () => {
           </Alert>
         </Snackbar>
       </Container>
-    </MainLayout>
   );
 };
 
