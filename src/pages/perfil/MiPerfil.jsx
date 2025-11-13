@@ -601,7 +601,10 @@ const MiPerfil = () => {
                   variant="contained"
                   fullWidth
                   startIcon={<i className="fas fa-code" style={{ color: 'white' }}></i>}
-                  onClick={() => window.location.href = '/admin/api'}
+                  onClick={() => {
+                    console.log('🔧 Navegando a API Admin...');
+                    window.location.href = '/admin/api';
+                  }}
                   sx={{
                     p: 2,
                     textAlign: 'left',
@@ -696,7 +699,10 @@ const MiPerfil = () => {
               variant="text"
               fullWidth
               startIcon={<i className="fas fa-code" style={{ color: '#8b5cf6' }}></i>}
-              onClick={() => window.location.href = '/admin/api'}
+              onClick={() => {
+                console.log('🔧 Navegando a API Admin desde perfil...');
+                window.location.href = '/admin/api';
+              }}
               sx={{
                 p: 2,
                 textAlign: 'left',
