@@ -1125,6 +1125,13 @@ const ListadoUsuarios = () => {
   // VERSIÓN ESCRITORIO (original)
   return (
     <div className="agencias-container animate-fade-in">
+      {!isMobile && (
+        <div className="modern-header animate-slide-down">
+          <div className="modern-title" style={{ fontSize: '1rem', marginTop: '14px', lineHeight: '1' }}>
+            👥 LISTADO DE USUARIOS
+          </div>
+        </div>
+      )}
 
       {/* Única fila: Campos de filtro y botones */}
       <Box sx={{
