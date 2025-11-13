@@ -115,23 +115,24 @@ export const dashboardService = {
     try {
       const { data: clientes, error } = await supabase
         .from('clientes')
-        .select('razonsocial, direccionempresa, telfijo')
+        .select('razonsocial, direccionempresa, telfijo, created_at')
         .order('created_at', { ascending: false })
         .limit(4);
 
       if (error) {
         console.warn('Tabla clientes no encontrada, usando datos de ejemplo:', error);
         return [
-          { name: 'Cliente Ejemplo A', address: 'Dirección Ejemplo 123', phone: '+56 9 1234 5678' },
-          { name: 'Cliente Ejemplo B', address: 'Dirección Ejemplo 456', phone: '+56 9 8765 4321' },
-          { name: 'Cliente Ejemplo C', address: 'Dirección Ejemplo 789', phone: '+56 9 2468 1357' }
+          { name: 'Cliente Ejemplo A', address: 'Dirección Ejemplo 123', phone: '+56 9 1234 5678', created_at: new Date().toISOString() },
+          { name: 'Cliente Ejemplo B', address: 'Dirección Ejemplo 456', phone: '+56 9 8765 4321', created_at: new Date(Date.now() - 86400000).toISOString() },
+          { name: 'Cliente Ejemplo C', address: 'Dirección Ejemplo 789', phone: '+56 9 2468 1357', created_at: new Date(Date.now() - 172800000).toISOString() }
         ];
       }
 
       return clientes?.map(cliente => ({
         name: cliente.razonsocial || 'Sin nombre',
         address: cliente.direccionempresa || 'Dirección no especificada',
-        phone: cliente.telfijo || 'Teléfono no especificado'
+        phone: cliente.telfijo || 'Teléfono no especificado',
+        created_at: cliente.created_at || new Date().toISOString()
       })) || [];
     } catch (error) {
       console.error('Error obteniendo clientes recientes:', error);
