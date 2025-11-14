@@ -16,8 +16,8 @@ export const entityResolverService = {
       // Buscar por nombre exacto o similar
       const { data, error } = await supabase
         .from('clientes')
-        .select('id, nombrecliente, razonSocial, RUT')
-        .or(`nombrecliente.ilike.%${clienteName}%,razonSocial.ilike.%${clienteName}%`)
+        .select('id, razonsocial, rut')
+        .or(`razonsocial.ilike.%${clienteName}%`)
         .limit(5);
 
       if (error) throw error;
@@ -26,10 +26,10 @@ export const entityResolverService = {
         // Devolver el primer match más relevante
         return {
           id: data[0].id,
-          nombre: data[0].nombrecliente,
-          razonSocial: data[0].razonSocial,
-          rut: data[0].RUT,
-          confidence: this.calculateMatchConfidence(clienteName, data[0].nombrecliente, data[0].razonSocial)
+          nombre: data[0].razonsocial,
+          razonSocial: data[0].razonsocial,
+          rut: data[0].rut,
+          confidence: this.calculateMatchConfidence(clienteName, data[0].razonsocial)
         };
       }
       
@@ -367,13 +367,13 @@ export const entityResolverService = {
         case 'cliente':
           const { data: clientes } = await supabase
             .from('clientes')
-            .select('id, nombrecliente, razonSocial')
-            .ilike('nombrecliente', `%${searchText}%`)
+            .select('id, razonsocial')
+            .ilike('razonsocial', `%${searchText}%`)
             .limit(5);
           
           suggestions = clientes?.map(c => ({
             id: c.id,
-            nombre: c.nombrecliente,
+            nombre: c.razonsocial,
             tipo: 'Cliente'
           })) || [];
           break;
