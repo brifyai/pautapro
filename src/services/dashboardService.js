@@ -115,7 +115,7 @@ export const dashboardService = {
     try {
       const { data: clientes, error } = await supabase
         .from('clientes')
-        .select('razonsocial, direccionempresa, telfijo, created_at')
+        .select('razonsocial, direccion, telfijo, created_at')
         .order('created_at', { ascending: false })
         .limit(4);
 
@@ -130,7 +130,7 @@ export const dashboardService = {
 
       return clientes?.map(cliente => ({
         name: cliente.razonsocial || 'Sin nombre',
-        address: cliente.direccionempresa || 'Dirección no especificada',
+        address: cliente.direccion || 'Dirección no especificada',
         phone: cliente.telfijo || 'Teléfono no especificado',
         created_at: cliente.created_at || new Date().toISOString()
       })) || [];
